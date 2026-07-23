@@ -1,4 +1,4 @@
-# C & DSA Learning Hub
+# AmygdalaAI Learning Hub
 
 Interactive learning modules by **Dr. Rajdeep Chatterjee** ([@cserajdeep](https://github.com/cserajdeep)).
 
