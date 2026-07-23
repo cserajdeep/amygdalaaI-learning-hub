@@ -1158,6 +1158,7 @@
                     <button class="btn primary" onclick="build2DMatrix()">Build</button>
                     <button class="btn" onclick="fill2DRandom()">Random</button>
                     <button class="btn" onclick="fill2DZero()">Zeros</button>
+                    <button class="btn primary" onclick="animateBuild2D()">▶ Animate Build (step-by-step)</button>
                 </div>
                 <div id="m2d-input-area" style="margin:0.6rem 0;"></div>
                 <div class="viz-area">
@@ -1448,18 +1449,25 @@
 
             <div class="card">
                 <div class="card-title">⑤ Matrix Multiplication <span class="badge badge-amber">ANIMATE</span></div>
-                <p>C[i][j] = sum of A[i][k] × B[k][j] for all k. Three nested loops. Time: O(n³).</p>
+                <p>C[i][j] = sum of A[i][k] × B[k][j] for all k. Three nested loops. Time: O(n³). Pick dimensions, randomly populate A &amp; B, then watch C get built step by step.</p>
                 <div class="controls">
-                    <button class="btn primary" onclick="runMatMul()">▶ Animate (2×2)</button>
+                    <label style="font-family:var(--mono);font-size:13px;color:var(--text2)">A rows:</label>
+                    <input type="number" id="mul-ar" value="2" min="2" max="4" style="width:50px">
+                    <label style="font-family:var(--mono);font-size:13px;color:var(--text2)">A cols / B rows:</label>
+                    <input type="number" id="mul-k" value="2" min="2" max="4" style="width:50px">
+                    <label style="font-family:var(--mono);font-size:13px;color:var(--text2)">B cols:</label>
+                    <input type="number" id="mul-bc" value="2" min="2" max="4" style="width:50px">
+                    <button class="btn primary" onclick="randomizeMatMul()">🎲 Randomize A &amp; B</button>
+                    <button class="btn primary" onclick="runMatMul()">▶ Animate Multiply</button>
                     <button class="btn" onclick="resetMatMul()">Reset</button>
                 </div>
                 <div class="viz-area">
                     <div style="display:flex;gap:1.5rem;flex-wrap:wrap;align-items:flex-start;">
-                        <div><div class="viz-label">A (2×2)</div><div id="mul-a"></div></div>
+                        <div><div class="viz-label" id="mul-a-lbl">A (2×2)</div><div id="mul-a"></div></div>
                         <div style="font-size:24px;color:var(--text3);padding-top:20px;">×</div>
-                        <div><div class="viz-label">B (2×2)</div><div id="mul-b"></div></div>
+                        <div><div class="viz-label" id="mul-b-lbl">B (2×2)</div><div id="mul-b"></div></div>
                         <div style="font-size:24px;color:var(--text3);padding-top:20px;">=</div>
-                        <div><div class="viz-label">C (2×2)</div><div id="mul-c"></div></div>
+                        <div><div class="viz-label" id="mul-c-lbl">C (2×2)</div><div id="mul-c"></div></div>
                     </div>
                 </div>
                 <div id="mul-info" class="info-line" style="display:none;"></div>
@@ -1598,7 +1606,8 @@
                     <label style="font-family:var(--mono);font-size:13px;color:var(--text2)">Cols:</label>
                     <input type="number" id="d2d-cols" value="4" min="2" max="5" style="width:55px">
                     <button class="btn primary" onclick="dynAlloc2D()">Allocate</button>
-                    <button class="btn red" onclick="dynFree2D()">Free All</button>
+                    <button class="btn primary" onclick="dynPopulate2D()">🎲 Populate (step-by-step)</button>
+                    <button class="btn red" onclick="dynFree2D()">Free All (step-by-step)</button>
                     <button class="btn" onclick="dynReset2D()">Reset</button>
                 </div>
                 <div class="viz-area">
@@ -2189,6 +2198,44 @@
             applyM2DInput();
         }
 
+        let m2dAnimRunning = false;
+
+        function animateBuild2D() {
+            if (m2dAnimRunning) return;
+            m2dRows = parseInt(document.getElementById('m2d-rows').value) || 3;
+            m2dCols = parseInt(document.getElementById('m2d-cols').value) || 4;
+            if (!m2dData.length || m2dData.length !== m2dRows || (m2dData[0] && m2dData[0].length !== m2dCols)) build2DMatrix();
+            m2dAnimRunning = true;
+
+            // Start from an all-blank matrix, then reveal + print each value in order
+            const target = m2dData.map(row => row.slice());
+            const blank = Array.from({ length: m2dRows }, () => Array(m2dCols).fill(undefined));
+            m2dData = blank;
+            renderM2DViz();
+            const info = document.getElementById('m2d-info');
+            info.style.display = 'block';
+
+            const coords = [];
+            for (let i = 0; i < m2dRows; i++)
+                for (let j = 0; j < m2dCols; j++) coords.push([i, j]);
+            let ci = 0;
+
+            function step() {
+                if (ci >= coords.length) { m2dAnimRunning = false;
+                    info.className = 'info-line green';
+                    info.textContent = `✓ Matrix fully built and printed: ${m2dRows}×${m2dCols} (${m2dRows*m2dCols} elements).`;
+                    return; }
+                const [i, j] = coords[ci];
+                m2dData[i][j] = target[i][j];
+                renderM2DViz(i, j);
+                info.className = 'info-line';
+                info.textContent = `printf("%d ", mat[${i}][${j}]);  →  mat[${i}][${j}] = ${target[i][j]}`;
+                ci++;
+                setTimeout(step, 260);
+            }
+            step();
+        }
+
         function renderM2DViz(hiI = -1, hiJ = -1) {
             const viz = document.getElementById('m2d-viz');
             viz.innerHTML = '';
@@ -2217,7 +2264,7 @@
             m2dData.flat().forEach((val, k) => {
                 const fc = document.createElement('div');
                 fc.className = 'flat-cell';
-                fc.textContent = val;
+                fc.textContent = val === undefined ? '?' : val;
                 const fi = Math.floor(k / m2dCols),
                     fj = k % m2dCols;
                 if (fi === hiI && fj === hiJ) {
@@ -2694,12 +2741,12 @@
         function resetReverse() { initReverse(); }
         setTimeout(initReverse, 50);
 
-        // MATRIX MULTIPLICATION
-        const mulA = [
+        // MATRIX MULTIPLICATION (dynamic dims + randomize + step-by-step)
+        let mulA = [
             [1, 2],
             [3, 4]
         ];
-        const mulB = [
+        let mulB = [
             [5, 6],
             [7, 8]
         ];
@@ -2709,11 +2756,47 @@
         ];
         let mulRunning = false;
 
+        function mulDims() {
+            const ar = Math.max(2, Math.min(4, parseInt(document.getElementById('mul-ar').value) || 2));
+            const k = Math.max(2, Math.min(4, parseInt(document.getElementById('mul-k').value) || 2));
+            const bc = Math.max(2, Math.min(4, parseInt(document.getElementById('mul-bc').value) || 2));
+            return { ar, k, bc };
+        }
+
+        function makeZeroMat(r, c) {
+            return Array.from({ length: r }, () => Array(c).fill(0));
+        }
+
+        function updateMulLabels(ar, k, bc) {
+            document.getElementById('mul-a-lbl').textContent = `A (${ar}×${k})`;
+            document.getElementById('mul-b-lbl').textContent = `B (${k}×${bc})`;
+            document.getElementById('mul-c-lbl').textContent = `C (${ar}×${bc})`;
+        }
+
+        function randomizeMatMul() {
+            if (mulRunning) return;
+            const { ar, k, bc } = mulDims();
+            mulA = Array.from({ length: ar }, () => Array.from({ length: k }, () => Math.floor(Math.random() * 9) + 1));
+            mulB = Array.from({ length: k }, () => Array.from({ length: bc }, () => Math.floor(Math.random() * 9) + 1));
+            mulC = makeZeroMat(ar, bc);
+            updateMulLabels(ar, k, bc);
+            renderSmallMat('mul-a', mulA, -1, -1);
+            renderSmallMat('mul-b', mulB, -1, -1);
+            renderSmallMat('mul-c', mulC, -1, -1);
+            const info = document.getElementById('mul-info');
+            info.style.display = 'block';
+            info.className = 'info-line';
+            info.textContent = `Randomly populated A (${ar}×${k}) and B (${k}×${bc}). Click "Animate Multiply" to build C step by step.`;
+        }
+
         function initMatMul() {
-            mulC = [
-                [0, 0],
-                [0, 0]
-            ];
+            const { ar, k, bc } = mulDims();
+            if (mulA.length !== ar || mulA[0].length !== k || mulB[0].length !== bc) {
+                mulA = makeZeroMat(ar, k);
+                mulB = makeZeroMat(k, bc);
+            }
+            mulC = makeZeroMat(ar, bc);
+            updateMulLabels(ar, k, bc);
             renderSmallMat('mul-a', mulA, -1, -1);
             renderSmallMat('mul-b', mulB, -1, -1);
             renderSmallMat('mul-c', mulC, -1, -1);
@@ -2740,20 +2823,15 @@
         function runMatMul() {
             if (mulRunning) return;
             mulRunning = true;
-            mulC = [
-                [0, 0],
-                [0, 0]
-            ];
+            const ar = mulA.length,
+                k = mulA[0].length,
+                bc = mulB[0].length;
+            mulC = makeZeroMat(ar, bc);
             const steps = [];
-            for (let i = 0; i < 2; i++)
-                for (let j = 0; j < 2; j++) {
-                    mulC[i][j] = 0;
-                    for (let k = 0; k < 2; k++) steps.push({ i, j, k, val: mulA[i][k] * mulB[k][j] });
+            for (let i = 0; i < ar; i++)
+                for (let j = 0; j < bc; j++) {
+                    for (let kk = 0; kk < k; kk++) steps.push({ i, j, k: kk, val: mulA[i][kk] * mulB[kk][j] });
                 }
-            mulC = [
-                [0, 0],
-                [0, 0]
-            ];
             let si = 0;
             const info = document.getElementById('mul-info');
             info.style.display = 'block';
@@ -2762,13 +2840,13 @@
                 if (si >= steps.length) { mulRunning = false;
                     info.textContent = '✓ Multiplication complete!';
                     info.className = 'info-line green'; return; }
-                const { i, j, k, val } = steps[si];
+                const { i, j, k: kk, val } = steps[si];
                 mulC[i][j] += val;
                 renderSmallMat('mul-a', mulA, i, -1);
                 renderSmallMat('mul-b', mulB, -1, j);
                 renderSmallMat('mul-c', mulC, i, j);
                 info.textContent =
-                    `C[${i}][${j}] += A[${i}][${k}] × B[${k}][${j}] = ${mulA[i][k]} × ${mulB[k][j]} = ${val}  |  C[${i}][${j}] = ${mulC[i][j]}`;
+                    `C[${i}][${j}] += A[${i}][${kk}] × B[${kk}][${j}] = ${mulA[i][kk]} × ${mulB[kk][j]} = ${val}  |  C[${i}][${j}] = ${mulC[i][j]}`;
                 si++;
                 setTimeout(step, 700);
             }
@@ -2959,9 +3037,14 @@
         // ════════════════════════════════════
         let d2dR = 3,
             d2dC = 4,
-            d2dAllocated = false;
+            d2dAllocated = false,
+            d2dRunning = false,
+            d2dCells = [], // [i][j] -> box element
+            d2dRowBoxes = [], // pointer-row boxes for free animation
+            d2dPtrBox = null; // the "int** mat" block itself
 
         function dynAlloc2D() {
+            if (d2dRunning) return;
             d2dR = parseInt(document.getElementById('d2d-rows').value) || 3;
             d2dC = parseInt(document.getElementById('d2d-cols').value) || 4;
             d2dAllocated = true;
@@ -2972,6 +3055,8 @@
             const viz = document.getElementById('d2d-viz');
             viz.innerHTML = '';
             const info = document.getElementById('d2d-info');
+            d2dCells = [];
+            d2dRowBoxes = [];
 
             const ptrCol = document.createElement('div');
             ptrCol.style.minWidth = '130px';
@@ -2979,13 +3064,15 @@
             ptrLbl.className = 'viz-label';
             ptrLbl.textContent = `int** mat (${d2dR} ptrs)`;
             ptrCol.appendChild(ptrLbl);
+            d2dPtrBox = ptrCol;
 
             for (let i = 0; i < d2dR; i++) {
                 const b = document.createElement('div');
                 b.style.cssText =
-                    `background:rgba(91,138,255,0.12);border:1.5px solid rgba(91,138,255,0.3);border-radius:6px;padding:5px 10px;font-family:var(--mono);font-size:11px;color:var(--accent);margin:3px 0;cursor:default;`;
+                    `background:rgba(91,138,255,0.12);border:1.5px solid rgba(91,138,255,0.3);border-radius:6px;padding:5px 10px;font-family:var(--mono);font-size:11px;color:var(--accent);margin:3px 0;cursor:default;transition:all 0.3s;`;
                 b.textContent = `mat[${i}] → 0x${(0x6600 + i * d2dC * 4).toString(16).toUpperCase()}`;
                 ptrCol.appendChild(b);
+                d2dRowBoxes.push(b);
             }
             viz.appendChild(ptrCol);
 
@@ -3002,12 +3089,14 @@
                 rowLbl.style.cssText = 'font-family:var(--mono);font-size:10px;color:var(--text3);min-width:60px;';
                 rowLbl.textContent = `row ${i}:`;
                 rowDiv.appendChild(rowLbl);
+                const cellRow = [];
                 for (let j = 0; j < d2dC; j++) {
                     const b = document.createElement('div');
                     b.className = 'arr-box';
                     b.style.width = '40px';
                     b.style.height = '36px';
                     b.style.fontSize = '11px';
+                    b.style.transition = 'all 0.3s';
                     b.textContent = `[${i}][${j}]`;
                     b.style.cursor = 'pointer';
                     b.addEventListener('click', () => {
@@ -3015,8 +3104,10 @@
                         if (v !== null && v !== '') b.textContent = v;
                     });
                     rowDiv.appendChild(b);
+                    cellRow.push(b);
                 }
                 rowsCol.appendChild(rowDiv);
+                d2dCells.push(cellRow);
             }
             viz.appendChild(rowsCol);
 
@@ -3025,16 +3116,80 @@
                 `Allocated: 1 block of ${d2dR} pointers (${d2dR * 8}B) + ${d2dR} row blocks of ${d2dC * 4}B each = ${d2dR * 8 + d2dR * d2dC * 4}B total. Rows may be non-contiguous.`;
         }
 
+        function dynPopulate2D() {
+            if (!d2dAllocated) { alert('Allocate first!'); return; }
+            if (d2dRunning) return;
+            d2dRunning = true;
+            const info = document.getElementById('d2d-info');
+            info.style.display = 'block';
+            const coords = [];
+            for (let i = 0; i < d2dR; i++)
+                for (let j = 0; j < d2dC; j++) coords.push([i, j]);
+            let ci = 0;
+
+            function step() {
+                if (ci >= coords.length) { d2dRunning = false;
+                    info.textContent = `✓ All ${d2dR * d2dC} elements randomly populated across ${d2dR} row blocks.`;
+                    info.className = 'info-line green'; return; }
+                const [i, j] = coords[ci];
+                const val = Math.floor(Math.random() * 90) + 10;
+                const box = d2dCells[i][j];
+                box.textContent = val;
+                box.style.background = 'rgba(61,214,140,0.18)';
+                box.style.borderColor = 'var(--green)';
+                setTimeout(() => { box.style.background = '';
+                    box.style.borderColor = ''; }, 500);
+                info.className = 'info-line';
+                info.textContent = `mat[${i}][${j}] = ${val};  (writing element ${ci + 1} of ${d2dR * d2dC})`;
+                ci++;
+                setTimeout(step, 220);
+            }
+            step();
+        }
+
         function dynFree2D() {
             if (!d2dAllocated) { alert('Not allocated'); return; }
-            document.getElementById('d2d-viz').innerHTML =
-                '<div style="font-family:var(--mono);font-size:12px;color:var(--red)">All memory freed. Set mat = NULL.</div>';
-            document.getElementById('d2d-info').textContent = 'free() called for each row, then for the pointer array. Total: ' + (
-                d2dR + 1) + ' free() calls required!';
-            d2dAllocated = false;
+            if (d2dRunning) return;
+            d2dRunning = true;
+            const info = document.getElementById('d2d-info');
+            info.style.display = 'block';
+            let i = 0;
+
+            function freeRowStep() {
+                if (i >= d2dR) {
+                    // finally free the pointer block itself
+                    if (d2dPtrBox) {
+                        d2dPtrBox.style.transition = 'opacity 0.4s';
+                        d2dPtrBox.style.opacity = '0.15';
+                    }
+                    info.textContent = `free(mat); // freed the ${d2dR}-pointer block itself. Total: ${d2dR + 1} free() calls. mat = NULL.`;
+                    info.className = 'info-line green';
+                    d2dAllocated = false;
+                    d2dRunning = false;
+                    return;
+                }
+                // fade out this row's cells + its pointer entry
+                d2dCells[i].forEach(box => {
+                    box.style.opacity = '0.15';
+                    box.style.background = 'rgba(239,68,68,0.12)';
+                    box.style.borderColor = 'var(--red)';
+                    box.textContent = '×';
+                });
+                d2dRowBoxes[i].style.opacity = '0.35';
+                d2dRowBoxes[i].style.textDecoration = 'line-through';
+                info.className = 'info-line';
+                info.textContent = `free(mat[${i}]);  // row ${i} freed (${d2dC * 4}B released)`;
+                i++;
+                setTimeout(freeRowStep, 500);
+            }
+            freeRowStep();
         }
 
         function dynReset2D() { d2dAllocated = false;
+            d2dRunning = false;
+            d2dCells = [];
+            d2dRowBoxes = [];
+            d2dPtrBox = null;
             document.getElementById('d2d-viz').innerHTML = '';
             document.getElementById('d2d-info').style.display = 'none'; }
 
