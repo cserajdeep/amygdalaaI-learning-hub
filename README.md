@@ -23,7 +23,7 @@ dsa-learning-hub/
    ```bash
    git init
    git add .
-   git commit -m "Initial DSA & AI learning hub"
+   git commit -m "Initial C & DSA learning hub"
    git branch -M main
    git remote add origin https://github.com/cserajdeep/dsa-learning-hub.git
    git push -u origin main
