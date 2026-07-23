@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>DSA & AI Learning Hub | Rajdeep Chatterjee</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+<style>
+  :root {
+    --bg: #f6f8fc;
+    --text: #1a1a2e;
+    --text-secondary: #4a4a68;
+    --border: rgba(0,0,0,0.08);
+    --shadow: 0 20px 40px -12px rgba(0,0,0,0.15);
+    --accent: #4285F4;
+    --accent2: #34A853;
+    --accent3: #EA4335;
+    --accent4: #FBBC05;
+    --radius: 24px;
+  }
+  .dark {
+    --bg: #0b1120;
+    --text: #e8edf5;
+    --text-secondary: #b0c4de;
+    --border: rgba(255,255,255,0.08);
+    --shadow: 0 20px 40px -12px rgba(0,0,0,0.6);
+  }
+  * { box-sizing: border-box; margin:0; padding:0; }
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    transition: background 0.3s, color 0.3s;
+  }
+  a { color: var(--accent); text-decoration: none; }
+  #theme-toggle {
+    position: fixed; top: 20px; right: 24px; z-index: 999;
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: 60px; padding: 10px 16px; cursor: pointer;
+    box-shadow: var(--shadow); color: var(--text); font-size: 0.9rem;
+  }
+  .hero {
+    padding: 90px 24px 70px; text-align: center;
+    background: linear-gradient(135deg, #4285F4, #34A853, #EA4335, #FBBC05);
+    background-size: 300% 300%; animation: gradShift 14s ease-in-out infinite;
+    color: #fff; border-radius: 0 0 48px 48px;
+  }
+  @keyframes gradShift { 0%,100%{background-position:0% 50%;} 50%{background-position:100% 50%;} }
+  .hero h1 { font-size: clamp(2.2rem, 6vw, 3.6rem); font-weight: 800; margin-bottom: 16px; }
+  .hero p { font-size: clamp(1rem, 2vw, 1.3rem); opacity: 0.95; max-width: 620px; margin: 0 auto; }
+  .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+  .modules { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; margin: 56px auto; }
+  .card {
+    background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 28px; box-shadow: var(--shadow); transition: transform 0.25s;
+    display: flex; flex-direction: column; gap: 12px;
+  }
+  .card:hover { transform: translateY(-6px); }
+  .card .num { font-size: 0.85rem; font-weight: 700; color: var(--accent); letter-spacing: 0.05em; }
+  .card h3 { font-size: 1.4rem; font-weight: 700; }
+  .card p { color: var(--text-secondary); font-size: 0.95rem; flex-grow: 1; }
+  .card .go { font-weight: 600; }
+  footer { text-align: center; padding: 40px 24px 60px; color: var(--text-secondary); font-size: 0.9rem; }
+  footer a { font-weight: 600; }
+  .socials { margin-top: 12px; display: flex; justify-content: center; gap: 18px; font-size: 1.3rem; }
+</style>
+</head>
+<body>
+  <button id="theme-toggle"><span id="theme-icon">🌙</span> <span id="theme-label">Dark</span></button>
+
+  <section class="hero">
+    <h1>Data Structures & AI Learning Hub</h1>
+    <p>A curated, interactive course by Dr. Rajdeep Chatterjee — from DSA foundations to applied AI.</p>
+  </section>
+
+  <div class="container">
+    <div class="modules">
+      <div class="card">
+        <div class="num">MODULE 00</div>
+        <h3>Why DSA?</h3>
+        <p>Understand why Data Structures & Algorithms matter for real-world software and AI systems, with context on India's tech ecosystem.</p>
+        <a class="go" href="01-why-dsa/index.html">Start Module →</a>
+      </div>
+      <div class="card">
+        <div class="num">MODULE 01</div>
+        <h3>C Prerequisites for Data Structures</h3>
+        <p>Core C programming concepts — pointers, memory, and structures — needed before diving into data structures.</p>
+        <a class="go" href="02-c-prerequisites/index.html">Start Module →</a>
+      </div>
+      <div class="card">
+        <div class="num">MODULE 02</div>
+        <h3>Arrays in C</h3>
+        <p>Deep dive into arrays: memory layout, operations, and interactive visualizations of sorting algorithms.</p>
+        <a class="go" href="03-arrays-in-c/index.html">Start Module →</a>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <p>Maintained by <a href="https://github.com/cserajdeep" target="_blank" rel="noopener">Rajdeep Chatterjee, Ph.D.</a> ·
+      <a href="https://sites.google.com/kiit.ac.in/rajdeep/home" target="_blank" rel="noopener">Personal Website</a>
+    </p>
+    <div class="socials">
+      <a href="https://github.com/cserajdeep" target="_blank" rel="noopener" aria-label="GitHub"><i class="fab fa-github"></i></a>
+      <a href="https://sites.google.com/kiit.ac.in/rajdeep/home" target="_blank" rel="noopener" aria-label="Website"><i class="fas fa-globe"></i></a>
+    </div>
+    <p style="margin-top:12px;font-size:0.8rem;opacity:0.6;">© 2026 · DSA & AI Learning Hub</p>
+  </footer>
+
+  <script>
+    (function(){
+      const btn = document.getElementById('theme-toggle');
+      const icon = document.getElementById('theme-icon');
+      const label = document.getElementById('theme-label');
+      function setTheme(dark){
+        document.body.classList.toggle('dark', dark);
+        icon.textContent = dark ? '☀️' : '🌙';
+        label.textContent = dark ? 'Light' : 'Dark';
+        localStorage.theme = dark ? 'dark' : 'light';
+      }
+      const saved = localStorage.theme;
+      if (saved === 'dark') setTheme(true);
+      else if (saved === 'light') setTheme(false);
+      else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) setTheme(true);
+      btn.addEventListener('click', () => setTheme(!document.body.classList.contains('dark')));
+    })();
+  </script>
+</body>
+</html>

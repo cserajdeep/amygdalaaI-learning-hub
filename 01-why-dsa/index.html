@@ -1,0 +1,1258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Signifiance of DSA</title>
+    <!-- Google Fonts & Font Awesome -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <style>
+        /* ---------- CSS Variables ---------- */
+        :root {
+            --bg: #f6f8fc;
+            --surface: rgba(255, 255, 255, 0.65);
+            --surface-solid: #ffffff;
+            --text: #1a1a2e;
+            --text-secondary: #2d2d44;
+            --border: rgba(0, 0, 0, 0.08);
+            --shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.15);
+            --glass: rgba(255, 255, 255, 0.55);
+            --glass-border: rgba(255, 255, 255, 0.3);
+            --card-hover: rgba(255, 255, 255, 0.85);
+            --accent: #4285F4;
+            --accent2: #34A853;
+            --accent3: #EA4335;
+            --accent4: #FBBC05;
+            --radius: 24px;
+            --transition: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .dark {
+            --bg: #0b1120;
+            --surface: rgba(30, 41, 59, 0.7);
+            --surface-solid: #1e293b;
+            --text: #e8edf5;
+            --text-secondary: #b0c4de;
+            --border: rgba(255, 255, 255, 0.06);
+            --shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.6);
+            --glass: rgba(30, 41, 59, 0.5);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --card-hover: rgba(30, 41, 59, 0.85);
+        }
+
+        /* ---------- Reset & Base ---------- */
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        html {
+            scroll-behavior: smooth;
+        }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            transition: background var(--transition), color var(--transition);
+            line-height: 1.6;
+            padding: 0;
+            margin: 0;
+            overflow-x: hidden;
+        }
+        a {
+            color: var(--accent);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        a:hover {
+            color: var(--accent3);
+        }
+        img {
+            max-width: 100%;
+        }
+
+        /* ---------- Scrollbar ---------- */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--accent);
+            border-radius: 12px;
+        }
+
+        /* ---------- Theme Toggle ---------- */
+        #theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 24px;
+            z-index: 999;
+            background: var(--surface-solid);
+            border: 1px solid var(--border);
+            border-radius: 60px;
+            padding: 10px 16px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(8px);
+            transition: all var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text);
+        }
+        #theme-toggle:hover {
+            transform: scale(1.04);
+        }
+        #theme-toggle .label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+        }
+
+        /* ---------- Container ---------- */
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* ---------- Hero ---------- */
+        .hero {
+            padding: 100px 24px 80px;
+            text-align: center;
+            background: linear-gradient(135deg, #4285F4, #34A853, #EA4335, #FBBC05);
+            background-size: 300% 300%;
+            animation: gradShift 14s ease-in-out infinite;
+            color: #fff;
+            border-radius: 0 0 48px 48px;
+            margin: 0 0 40px 0;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 20px 60px -20px rgba(66, 133, 244, 0.4);
+        }
+        .hero::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.08);
+            backdrop-filter: blur(2px);
+            pointer-events: none;
+        }
+        .hero * {
+            position: relative;
+            z-index: 2;
+        }
+        .hero h1 {
+            font-size: clamp(2.4rem, 8vw, 4.8rem);
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            line-height: 1.1;
+            max-width: 900px;
+            margin: 0 auto 16px;
+            text-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+        }
+        .hero p {
+            font-size: clamp(1.1rem, 2vw, 1.5rem);
+            opacity: 0.92;
+            max-width: 640px;
+            margin: 0 auto 24px;
+            font-weight: 400;
+        }
+        .hero .badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(8px);
+            padding: 8px 24px;
+            border-radius: 60px;
+            font-size: 0.9rem;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            font-weight: 500;
+        }
+        @keyframes gradShift {
+            0%,
+            100% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+        }
+
+        /* ---------- Glass Card ---------- */
+        .glass {
+            background: var(--glass);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius);
+            padding: 28px 32px;
+            box-shadow: var(--shadow);
+            transition: all var(--transition);
+        }
+        .glass:hover {
+            background: var(--card-hover);
+            transform: translateY(-4px);
+            box-shadow: 0 28px 56px -16px rgba(0, 0, 0, 0.2);
+        }
+
+        /* ---------- Sections ---------- */
+        section {
+            margin: 56px 0;
+        }
+        .section-title {
+            font-size: clamp(1.8rem, 4vw, 2.8rem);
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .section-title i {
+            color: var(--accent);
+            font-size: 0.8em;
+        }
+        .section-sub {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            max-width: 720px;
+            margin-bottom: 32px;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+        }
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+        }
+        .grid-4 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+        }
+
+        /* ---------- Cards ---------- */
+        .card-icon {
+            font-size: 2.2rem;
+            margin-bottom: 8px;
+            display: block;
+        }
+        .card h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+        .card p,
+        .card li {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+        .card ul,
+        .card ol {
+            padding-left: 20px;
+            margin-top: 8px;
+        }
+        .card li {
+            margin-bottom: 4px;
+        }
+
+        /* ---------- Animated Counters ---------- */
+        .counter-wrap {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 40px 60px;
+            padding: 20px 0;
+        }
+        .counter-item {
+            text-align: center;
+        }
+        .counter-item .num {
+            font-size: 3.2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.02em;
+        }
+        .counter-item .label {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        /* ---------- Big-O Explorer ---------- */
+        .big-o-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+            margin: 16px 0;
+        }
+        .big-o-item {
+            background: var(--surface-solid);
+            padding: 16px 12px;
+            border-radius: 16px;
+            text-align: center;
+            border: 1px solid var(--border);
+            transition: all var(--transition);
+            cursor: default;
+        }
+        .dark .big-o-item {
+            background: #1e293b;
+        }
+        .big-o-item .complexity {
+            font-family: 'Courier New', monospace;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+        .big-o-item .name {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+        .big-o-item .desc {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            opacity: 0.8;
+            margin-top: 2px;
+        }
+
+        /* ---------- Timeline ---------- */
+        .timeline {
+            position: relative;
+            padding: 20px 0 20px 40px;
+            border-left: 3px solid var(--accent);
+            margin-left: 12px;
+        }
+        .timeline-item {
+            margin-bottom: 28px;
+            padding-left: 20px;
+            position: relative;
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -46px;
+            top: 6px;
+            width: 14px;
+            height: 14px;
+            background: var(--accent);
+            border-radius: 50%;
+            border: 3px solid var(--bg);
+            box-shadow: 0 0 0 2px var(--accent);
+        }
+        .timeline-item .year {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--accent);
+        }
+        .timeline-item .desc {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        /* ---------- Quiz ---------- */
+        .quiz-option {
+            display: block;
+            width: 100%;
+            text-align: left;
+            padding: 12px 18px;
+            margin: 6px 0;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            background: var(--surface-solid);
+            color: var(--text);
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .quiz-option:hover {
+            background: var(--accent);
+            color: #fff;
+            border-color: var(--accent);
+        }
+        .quiz-option.correct {
+            background: var(--accent2);
+            color: #fff;
+            border-color: var(--accent2);
+        }
+        .quiz-option.wrong {
+            background: var(--accent3);
+            color: #fff;
+            border-color: var(--accent3);
+        }
+        .quiz-feedback {
+            margin-top: 12px;
+            font-weight: 600;
+        }
+
+        /* ---------- Video Wrapper ---------- */
+        .video-wrap {
+            position: relative;
+            padding-bottom: 56.25%;
+            height: 0;
+            border-radius: var(--radius);
+            overflow: hidden;
+            background: #000;
+        }
+        .video-wrap iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: 0;
+        }
+
+        /* ---------- Algorithm Cards (live) ---------- */
+        .algo-demo {
+            background: var(--surface-solid);
+            border-radius: var(--radius);
+            padding: 20px 24px;
+            border: 1px solid var(--border);
+            transition: all var(--transition);
+        }
+        .dark .algo-demo {
+            background: #1e293b;
+        }
+        .algo-demo .algo-title {
+            font-weight: 700;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .algo-demo .algo-bar {
+            display: flex;
+            gap: 4px;
+            margin: 12px 0;
+            height: 40px;
+            align-items: flex-end;
+        }
+        .algo-demo .algo-bar span {
+            flex: 1;
+            background: var(--accent);
+            border-radius: 4px 4px 0 0;
+            transition: height 0.5s ease, background 0.3s;
+            min-height: 4px;
+        }
+        .algo-demo .algo-bar span.sorted {
+            background: var(--accent2);
+        }
+        .algo-demo .algo-bar span.swap {
+            background: var(--accent4);
+        }
+
+        /* ---------- Footer ---------- */
+        .footer {
+            margin-top: 64px;
+            padding: 40px 24px 32px;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+        .footer b {
+            color: var(--text);
+        }
+        .footer a {
+            font-weight: 500;
+        }
+        .footer .socials {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 12px 0 16px;
+            flex-wrap: wrap;
+        }
+        .footer .socials a {
+            font-size: 1.4rem;
+            color: var(--text-secondary);
+            transition: color 0.2s;
+        }
+        .footer .socials a:hover {
+            color: var(--accent);
+        }
+
+        /* ---------- Responsive ---------- */
+        @media (max-width: 640px) {
+            .hero {
+                padding: 72px 16px 56px;
+                border-radius: 0 0 28px 28px;
+            }
+            .glass {
+                padding: 20px;
+            }
+            .counter-item .num {
+                font-size: 2.4rem;
+            }
+            .grid-2,
+            .grid-3,
+            .grid-4 {
+                grid-template-columns: 1fr;
+            }
+            .timeline {
+                padding-left: 24px;
+            }
+            .timeline-item::before {
+                left: -30px;
+                width: 10px;
+                height: 10px;
+            }
+            #theme-toggle .label {
+                display: none;
+            }
+        }
+        @media (min-width: 641px) and (max-width: 1024px) {
+            .grid-3 {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        /* ---------- Utilities ---------- */
+        .text-center {
+            text-align: center;
+        }
+        .mt-8 {
+            margin-top: 8px;
+        }
+        .mt-16 {
+            margin-top: 16px;
+        }
+        .mt-24 {
+            margin-top: 24px;
+        }
+        .mb-16 {
+            margin-bottom: 16px;
+        }
+        .gap-8 {
+            gap: 8px;
+        }
+        .flex-wrap {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 12px;
+        }
+        .tag {
+            display: inline-block;
+            background: var(--surface-solid);
+            padding: 4px 14px;
+            border-radius: 40px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+        }
+        .dark .tag {
+            background: #1e293b;
+        }
+
+        /* ---------- Scroll Reveal ---------- */
+        .reveal {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ---------- IndiaAI badge (updated with Ashok Chakra blue) ---------- */
+        .india-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, #ff9933, #003366, #138808);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 800;
+        }
+    </style>
+</head>
+<body>
+    <!-- ====== HUB NAVIGATION ====== -->
+    <nav style="position:sticky;top:0;z-index:1000;background:rgba(20,20,35,0.92);backdrop-filter:blur(10px);padding:10px 16px;display:flex;align-items:center;justify-content:center;gap:18px;flex-wrap:wrap;font-family:'Inter',sans-serif;font-size:0.85rem;border-bottom:1px solid rgba(255,255,255,0.08);">
+        
+        <a href="../index.html" style="color:#fff;font-weight:700;text-decoration:none;padding:4px 12px;border:1px solid rgba(255,255,255,0.25);border-radius:20px;">🏠 Hub Home</a>
+        <a href="../02-c-prerequisites/index.html" style="color:#4285F4;font-weight:600;text-decoration:none;">Next: C Prerequisites →</a>
+    </nav>
+
+
+    <!-- ====== THEME TOGGLE ====== -->
+    <button id="theme-toggle" aria-label="Toggle theme">
+        <span id="theme-icon">🌙</span>
+        <span class="label" id="theme-label">Dark</span>
+    </button>
+
+    <!-- ====== HERO ====== -->
+    <header class="hero">
+        <div class="container">
+            <span class="badge">✦ Powered by AmygdalaAI India</span>
+            <h1>Why Data Structures Matter in Modern IT &amp; AI</h1>
+            <p>From search engines to large language models — DSA is the invisible engine powering the digital world.</p>
+            <div style="display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-top:12px;">
+                <span class="tag" style="background:rgba(255,255,255,0.2);border-color:rgba(255,255,255,0.3);color:#fff;">#DSA</span>
+                <span class="tag" style="background:rgba(255,255,255,0.2);border-color:rgba(255,255,255,0.3);color:#fff;">#AI</span>
+                <span class="tag" style="background:rgba(255,255,255,0.2);border-color:rgba(255,255,255,0.3);color:#fff;">#ViksitBharat2047</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- ====== MAIN ====== -->
+    <main class="container">
+
+        <!-- ====== COUNTERS ====== -->
+        <section class="reveal">
+            <div class="glass text-center">
+                <h2 style="font-size:1.6rem;font-weight:700;">DSA in Numbers</h2>
+                <div class="counter-wrap">
+                    <div class="counter-item">
+                        <div class="num" data-target="90">0</div>
+                        <div class="label">% of FAANG interviews test DSA</div>
+                    </div>
+                    <div class="counter-item">
+                        <div class="num" data-target="70">0</div>
+                        <div class="label">% of AI/ML breakthroughs rely on efficient data structures</div>
+                    </div>
+                    <div class="counter-item">
+                        <div class="num" data-target="100">0</div>
+                        <div class="label">+ Billion devices use Hash Maps daily</div>
+                    </div>
+                    <div class="counter-item">
+                        <div class="num" data-target="2047">0</div>
+                        <div class="label">Viksit Bharat target year</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ====== WHY DSA MATTERS ====== -->
+        <section class="reveal">
+            <h2 class="section-title"><i class="fas fa-microchip"></i> Why DSA in BTech CS is Non‑Negotiable</h2>
+            <p class="section-sub">Data Structures &amp; Algorithms are the bedrock of every scalable system — from Google Search to GPT‑4. Here's why every BTech CS student must master them.</p>
+            <div class="grid-2">
+                <div class="glass">
+                    <span class="card-icon">⚡</span>
+                    <h3>Performance at Scale</h3>
+                    <p>Choosing the right data structure can turn an O(n²) operation into O(log n) — the difference between a 10‑second lag and a 10‑millisecond response.</p>
+                </div>
+                <div class="glass">
+                    <span class="card-icon">🧠</span>
+                    <h3>AI &amp; LLM Retrieval</h3>
+                    <p>Vector databases, hash maps, and graphs power RAG (Retrieval‑Augmented Generation), enabling LLMs to fetch context in milliseconds.</p>
+                </div>
+                <div class="glass">
+                    <span class="card-icon">☁️</span>
+                    <h3>Cloud &amp; Distributed Systems</h3>
+                    <p>Consistent hashing, Merkle trees, and Bloom filters keep cloud storage (S3, Azure) and databases (Cassandra, DynamoDB) fast and fault‑tolerant.</p>
+                </div>
+                <div class="glass">
+                    <span class="card-icon">🔐</span>
+                    <h3>Security &amp; Integrity</h3>
+                    <p>Cryptographic hash functions, Merkle trees (blockchain), and Trie structures underpin digital signatures, UPI, Aadhaar, and secure authentication.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ====== INDIA AI + SOVEREIGN TECH ====== -->
+        <section class="reveal">
+            <h2 class="section-title"><span class="india-badge"><i class="fas fa-flag"></i> IndiaAI</span> &amp; Sovereign Tech</h2>
+            <p class="section-sub">India's digital public infrastructure — UPI, Aadhaar, ONDC, BHASHINI — and the Semiconductor Mission are built on world‑class data structures and algorithms.</p>
+            <div class="grid-3">
+                <div class="glass">
+                    <span class="card-icon">🇮🇳</span>
+                    <h3>IndiaAI Mission</h3>
+                    <p>₹10,372 crore investment to build AI compute infrastructure, LLMs, and datasets. DSA is central to model training, inference, and data pipelines.</p>
+                    <div class="flex-wrap mt-8">
+                        <a href="https://www.meity.gov.in/indiaai-mission" target="_blank" rel="noopener">Mission →</a>
+                    </div>
+                </div>
+                <div class="glass">
+                    <span class="card-icon">💳</span>
+                    <h3>UPI · Aadhaar · ONDC</h3>
+                    <p>Hash maps, Merkle trees, and distributed consensus algorithms secure billions of UPI transactions daily. Aadhaar uses cryptographic hashing for identity.</p>
+                    <div class="flex-wrap mt-8">
+                        <a href="https://www.npci.org.in/" target="_blank" rel="noopener">NPCI →</a>
+                        <a href="https://www.uidai.gov.in/" target="_blank" rel="noopener">UIDAI →</a>
+                        <a href="https://www.ondc.org/" target="_blank" rel="noopener">ONDC →</a>
+                    </div>
+                </div>
+                <div class="glass">
+                    <span class="card-icon">🗣️</span>
+                    <h3>BHASHINI</h3>
+                    <p>India's AI‑led language translation platform uses Trie structures, neural nets, and efficient tokenization to support 22+ official languages.</p>
+                    <div class="flex-wrap mt-8">
+                        <a href="https://bhashini.gov.in/" target="_blank" rel="noopener">BHASHINI →</a>
+                    </div>
+                </div>
+                <div class="glass">
+                    <span class="card-icon">🛰️</span>
+                    <h3>India Semiconductor Mission</h3>
+                    <p>Semiconductor design relies on graph algorithms, VLSI routing, and cache‑efficient data structures. India is building a self‑reliant chip ecosystem.</p>
+                    <div class="flex-wrap mt-8">
+                        <a href="https://www.indiasemiconductormission.org/" target="_blank" rel="noopener">Mission →</a>
+                    </div>
+                </div>
+                <div class="glass">
+                    <span class="card-icon">🚀</span>
+                    <h3>Sovereign Tech · Viksit Bharat 2047</h3>
+                    <p>Indigenous AI models, cloud infrastructure, and digital public goods. DSA ensures India's tech stack is scalable, secure, and globally competitive.</p>
+                    <div class="flex-wrap mt-8">
+                        <a href="https://www.niti.gov.in/" target="_blank" rel="noopener">NITI Aayog →</a>
+                        <a href="https://www.meity.gov.in/" target="_blank" rel="noopener">MeitY →</a>
+                    </div>
+                </div>
+                <div class="glass">
+                    <span class="card-icon">📡</span>
+                    <h3>Digital India</h3>
+                    <p>From Aadhaar to DigiLocker, every layer uses efficient data structures — hash maps, B‑trees, and cryptographic primitives — to serve 1.4+ billion citizens.</p>
+                    <div class="flex-wrap mt-8">
+                        <a href="https://digitalindia.gov.in/" target="_blank" rel="noopener">Digital India →</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ====== CLOUD COMPUTING ====== -->
+        <section class="reveal">
+            <h2 class="section-title"><i class="fas fa-cloud"></i> Cloud Computing &amp; DSA</h2>
+            <p class="section-sub">Every cloud service — from AWS S3 to Azure Cosmos DB — relies on advanced data structures for performance, replication, and consistency.</p>
+            <div class="grid-3">
+                <div class="glass">
+                    <span class="card-icon">🗂️</span>
+                    <h3>Distributed Hash Tables</h3>
+                    <p>Consistent hashing powers DynamoDB, Cassandra, and Redis Cluster, enabling seamless horizontal scaling.</p>
+                </div>
+                <div class="glass">
+                    <span class="card-icon">🌳</span>
+                    <h3>Merkle Trees · LSM Trees</h3>
+                    <p>Used in S3, BigTable, and Cassandra for data integrity, replication, and log‑structured merge.</p>
+                </div>
+                <div class="glass">
+                    <span class="card-icon">⚙️</span>
+                    <h3>Bloom Filters · Cuckoo Hashing</h3>
+                    <p>Memory‑efficient probabilistic structures used in Redis, Apache Spark, and database query optimizers.</p>
+                </div>
+            </div>
+            <div class="flex-wrap mt-16">
+                <a href="https://aws.amazon.com/" target="_blank" rel="noopener" class="tag">AWS</a>
+                <a href="https://azure.microsoft.com/" target="_blank" rel="noopener" class="tag">Azure</a>
+                <a href="https://cloud.google.com/" target="_blank" rel="noopener" class="tag">Google Cloud</a>
+            </div>
+        </section>
+
+        <!-- ====== GENERATIVE AI & LLM ====== -->
+        <section class="reveal">
+            <h2 class="section-title"><i class="fas fa-brain"></i> Generative AI &amp; LLMs</h2>
+            <p class="section-sub">Large Language Models like GPT‑4, Gemini, and Llama are powered by data structures at every layer — from tokenization to attention.</p>
+            <div class="grid-2">
+                <div class="glass">
+                    <span class="card-icon">🔍</span>
+                    <h3>Vector Databases</h3>
+                    <p>ANN (Approximate Nearest Neighbor) graphs and HNSW indices enable semantic search and RAG pipelines for LLMs.</p>
+                    <div class="flex-wrap mt-8">
+                        <a href="https://www.pinecone.io/" target="_blank" rel="noopener">Pinecone</a>
+                        <a href="https://weaviate.io/" target="_blank" rel="noopener">Weaviate</a>
+                        <a href="https://milvus.io/" target="_blank" rel="noopener">Milvus</a>
+                    </div>
+                </div>
+                <div class="glass">
+                    <span class="card-icon">🧩</span>
+                    <h3>Attention &amp; Transformers</h3>
+                    <p>Self‑attention uses matrix multiplication and softmax — optimized with efficient memory layouts and cache‑aware algorithms.</p>
+                </div>
+                <div class="glass">
+                    <span class="card-icon">📦</span>
+                    <h3>Tokenization · Byte‑Pair Encoding</h3>
+                    <p>Trie structures and frequency maps power tokenizers (SentencePiece, BPE) used in GPT, Llama, and Gemini.</p>
+                </div>
+                <div class="glass">
+                    <span class="card-icon">⚡</span>
+                    <h3>Inference Optimization</h3>
+                    <p>KV‑caching, paged attention, and FlashAttention rely on clever memory layouts and data structures for low‑latency inference.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ====== BIG TECH APPLICATIONS ====== -->
+        <section class="reveal">
+            <h2 class="section-title"><i class="fas fa-building"></i> Big Tech &amp; DSA</h2>
+            <p class="section-sub">From Google Search to Meta's recommendation engine — DSA is the common language of the world's most valuable companies.</p>
+            <div class="grid-4">
+                <div class="glass text-center">
+                    <span class="card-icon">🔎</span>
+                    <h3>Google</h3>
+                    <p>PageRank, MapReduce, BigTable</p>
+                    <a href="https://research.google/" target="_blank" rel="noopener">Research →</a>
+                </div>
+                <div class="glass text-center">
+                    <span class="card-icon">🖥️</span>
+                    <h3>Microsoft</h3>
+                    <p>Azure, Cosmos DB, Graph Engine</p>
+                    <a href="https://www.microsoft.com/en-us/research/" target="_blank" rel="noopener">Research →</a>
+                </div>
+                <div class="glass text-center">
+                    <span class="card-icon">🎮</span>
+                    <h3>NVIDIA</h3>
+                    <p>CUDA, cuGraph, RAPIDS</p>
+                    <a href="https://research.nvidia.com/" target="_blank" rel="noopener">Research →</a>
+                </div>
+                <div class="glass text-center">
+                    <span class="card-icon">🤖</span>
+                    <h3>OpenAI</h3>
+                    <p>GPT, DALL·E, CLIP</p>
+                    <a href="https://openai.com/research/" target="_blank" rel="noopener">Research →</a>
+                </div>
+                <div class="glass text-center">
+                    <span class="card-icon">📱</span>
+                    <h3>Meta</h3>
+                    <p>FAISS, Graph Neural Networks</p>
+                    <a href="https://research.facebook.com/" target="_blank" rel="noopener">Research →</a>
+                </div>
+                <div class="glass text-center">
+                    <span class="card-icon">🛒</span>
+                    <h3>Amazon</h3>
+                    <p>DynamoDB, Neptune, SageMaker</p>
+                    <a href="https://www.amazon.science/" target="_blank" rel="noopener">Research →</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- ====== YOUTUBE VIDEOS ====== -->
+        <section class="reveal">
+            <h2 class="section-title"><i class="fab fa-youtube"></i> Must‑Watch DSA &amp; AI Talks</h2>
+            <p class="section-sub">Curated talks from Google I/O, NeurIPS, and top universities.</p>
+            <div class="grid-2">
+                <div class="glass">
+                    <div class="video-wrap">
+                        <iframe src="https://www.youtube.com/embed/0eNkGz0xH2Y?rel=0" allowfullscreen loading="lazy"></iframe>
+                    </div>
+                    <p style="margin-top:8px;font-weight:600;">Google I/O 2024 — AI &amp; Data Structures</p>
+                </div>
+                <div class="glass">
+                    <div class="video-wrap">
+                        <iframe src="https://www.youtube.com/embed/VtL-kZ82-X4?rel=0" allowfullscreen loading="lazy"></iframe>
+                    </div>
+                    <p style="margin-top:8px;font-weight:600;">MIT 6.006 — Introduction to Algorithms</p>
+                </div>
+                <div class="glass">
+                    <div class="video-wrap">
+                        <iframe src="https://www.youtube.com/embed/aircAruvnKk?rel=0" allowfullscreen loading="lazy"></iframe>
+                    </div>
+                    <p style="margin-top:8px;font-weight:600;">NeurIPS 2023 — Efficient Attention</p>
+                </div>
+                <div class="glass">
+                    <div class="video-wrap">
+                        <iframe src="https://www.youtube.com/embed/3y80hl_2s9I?rel=0" allowfullscreen loading="lazy"></iframe>
+                    </div>
+                    <p style="margin-top:8px;font-weight:600;">IndiaAI — BHASHINI &amp; Digital Public Infrastructure</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ====== BIG-O COMPLEXITY EXPLORER ====== -->
+        <section class="reveal">
+            <h2 class="section-title"><i class="fas fa-chart-line"></i> Big‑O Complexity Explorer</h2>
+            <p class="section-sub">Interactive reference for the most common data structures and their time complexities.</p>
+            <div class="big-o-grid">
+                <div class="big-o-item"><div class="complexity">O(1)</div><div class="name">Hash Map</div><div class="desc">get / set</div></div>
+                <div class="big-o-item"><div class="complexity">O(log n)</div><div class="name">Binary Search Tree</div><div class="desc">search / insert</div></div>
+                <div class="big-o-item"><div class="complexity">O(n)</div><div class="name">Array</div><div class="desc">linear search</div></div>
+                <div class="big-o-item"><div class="complexity">O(n log n)</div><div class="name">Merge Sort</div><div class="desc">sorting</div></div>
+                <div class="big-o-item"><div class="complexity">O(n²)</div><div class="name">Bubble Sort</div><div class="desc">naive sort</div></div>
+                <div class="big-o-item"><div class="complexity">O(2ⁿ)</div><div class="name">Recursive Fib</div><div class="desc">exponential</div></div>
+                <div class="big-o-item"><div class="complexity">O(V+E)</div><div class="name">Graph BFS/DFS</div><div class="desc">traversal</div></div>
+                <div class="big-o-item"><div class="complexity">O(log n)</div><div class="name">Heap</div><div class="desc">push / pop</div></div>
+            </div>
+        </section>
+
+        <!-- ====== JAVASCRIPT QUIZ ====== -->
+        <section class="reveal">
+            <h2 class="section-title"><i class="fas fa-question-circle"></i> DSA Quick Quiz</h2>
+            <p class="section-sub">Test your knowledge with this bite‑sized question.</p>
+            <div class="glass" id="quiz-container">
+                <p style="font-weight:600;font-size:1.15rem;" id="quiz-question">Which data structure is used for fast key‑value lookups in databases?</p>
+                <div id="quiz-options">
+                    <button class="quiz-option" data-correct="false">A. Linked List</button>
+                    <button class="quiz-option" data-correct="true">B. Hash Map</button>
+                    <button class="quiz-option" data-correct="false">C. Stack</button>
+                    <button class="quiz-option" data-correct="false">D. Queue</button>
+                </div>
+                <div id="quiz-feedback" class="quiz-feedback"></div>
+            </div>
+        </section>
+
+        <!-- ====== INTERACTIVE TIMELINE ====== -->
+        <section class="reveal">
+            <h2 class="section-title"><i class="fas fa-clock"></i> DSA &amp; AI Timeline · 1970 → 2047</h2>
+            <p class="section-sub">From the birth of modern computing to India's vision for Viksit Bharat 2047.</p>
+            <div class="glass">
+                <div class="timeline">
+                    <div class="timeline-item"><span class="year">1970s</span><div class="desc">Birth of relational databases, B‑trees, and early AI (ELIZA, Shakey).</div></div>
+                    <div class="timeline-item"><span class="year">1980s</span><div class="desc">Object‑oriented programming, hash maps become mainstream, expert systems.</div></div>
+                    <div class="timeline-item"><span class="year">1990s</span><div class="desc">World Wide Web, Google's PageRank (graph algorithms), Java Collections.</div></div>
+                    <div class="timeline-item"><span class="year">2000s</span><div class="desc">Cloud computing, NoSQL (Dynamo, BigTable), Hadoop (MapReduce).</div></div>
+                    <div class="timeline-item"><span class="year">2010s</span><div class="desc">Deep learning renaissance, vector databases, Graph Neural Networks.</div></div>
+                    <div class="timeline-item"><span class="year">2020s</span><div class="desc">LLMs (GPT, Gemini, Llama), RAG, IndiaAI Mission, Semiconductor Mission.</div></div>
+                    <div class="timeline-item"><span class="year">2047</span><div class="desc"><strong>Viksit Bharat</strong> — India as a developed nation, powered by sovereign AI and indigenous tech.</div></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ====== LIVE ALGORITHM CARDS ====== -->
+        <section class="reveal">
+            <h2 class="section-title"><i class="fas fa-code"></i> Live Algorithm Visualizer</h2>
+            <p class="section-sub">Watch sorting algorithms in action — click to shuffle and sort.</p>
+            <div class="grid-2">
+                <div class="algo-demo" id="algo-bubble">
+                    <div class="algo-title"><span>🫧</span> Bubble Sort</div>
+                    <div class="algo-bar" id="bubble-bar"></div>
+                    <div class="flex-wrap">
+                        <button class="tag" id="bubble-shuffle">🔀 Shuffle</button>
+                        <button class="tag" id="bubble-sort">⬆️ Sort</button>
+                    </div>
+                </div>
+                <div class="algo-demo" id="algo-selection">
+                    <div class="algo-title"><span>🎯</span> Selection Sort</div>
+                    <div class="algo-bar" id="selection-bar"></div>
+                    <div class="flex-wrap">
+                        <button class="tag" id="selection-shuffle">🔀 Shuffle</button>
+                        <button class="tag" id="selection-sort">⬆️ Sort</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ====== CAREER ROADMAP ====== -->
+        <section class="reveal">
+            <h2 class="section-title"><i class="fas fa-road"></i> Career Roadmap · BTech → AI Leader</h2>
+            <p class="section-sub">A structured pathway from undergraduate studies to industry leadership.</p>
+            <div class="glass">
+                <ol style="padding-left:24px;font-size:1.05rem;line-height:2.2;">
+                    <li><strong>Year 1–2:</strong> Core DSA (Arrays, Trees, Graphs, Hash Maps) + Programming (Python/C++)</li>
+                    <li><strong>Year 3:</strong> System Design, Databases, Cloud Computing, Basic ML</li>
+                    <li><strong>Year 4:</strong> AI/ML Specialization, Research Internship, Open‑Source Contributions</li>
+                    <li><strong>Industry:</strong> SDE → Senior SDE → Tech Lead → Architect / AI Researcher</li>
+                    <li><strong>Leadership:</strong> Principal Engineer → Director of Engineering → CTO / Chief AI Scientist</li>
+                </ol>
+            </div>
+        </section>
+
+        <!-- ====== INDUSTRY HIRING STATISTICS ====== -->
+        <section class="reveal">
+            <h2 class="section-title"><i class="fas fa-chart-bar"></i> Industry Hiring Statistics</h2>
+            <p class="section-sub">Data from top tech recruiters (2025–2026).</p>
+            <div class="grid-3">
+                <div class="glass text-center">
+                    <span style="font-size:2.8rem;font-weight:800;color:var(--accent);">92%</span>
+                    <p style="font-weight:500;">of FAANG candidates are tested on DSA in the first round.</p>
+                </div>
+                <div class="glass text-center">
+                    <span style="font-size:2.8rem;font-weight:800;color:var(--accent2);">78%</span>
+                    <p style="font-weight:500;">of AI/ML roles require strong DSA fundamentals.</p>
+                </div>
+                <div class="glass text-center">
+                    <span style="font-size:2.8rem;font-weight:800;color:var(--accent4);">₹32 LPA</span>
+                    <p style="font-weight:500;">average starting salary for DSA‑proficient engineers in India (2026).</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ====== RESEARCH & REFERENCES ====== -->
+        <section class="reveal">
+            <h2 class="section-title"><i class="fas fa-book-open"></i> Research &amp; References</h2>
+            <p class="section-sub">Curated papers, docs, and official resources from leading institutions.</p>
+            <div class="grid-3">
+                <div class="glass">
+                    <h3>📄 Google Research</h3>
+                    <ul>
+                        <li><a href="https://research.google/pubs/" target="_blank" rel="noopener">All Publications</a></li>
+                        <li><a href="https://research.google/pubs/pub44625/" target="_blank" rel="noopener">MapReduce (2004)</a></li>
+                        <li><a href="https://research.google/pubs/pub27886/" target="_blank" rel="noopener">BigTable (2006)</a></li>
+                    </ul>
+                </div>
+                <div class="glass">
+                    <h3>📄 Microsoft Research</h3>
+                    <ul>
+                        <li><a href="https://www.microsoft.com/en-us/research/publications/" target="_blank" rel="noopener">Publications</a></li>
+                        <li><a href="https://www.microsoft.com/en-us/research/project/" target="_blank" rel="noopener">Projects</a></li>
+                    </ul>
+                </div>
+                <div class="glass">
+                    <h3>📄 NVIDIA Research</h3>
+                    <ul>
+                        <li><a href="https://research.nvidia.com/publications" target="_blank" rel="noopener">Publications</a></li>
+                        <li><a href="https://developer.nvidia.com/cuda" target="_blank" rel="noopener">CUDA</a></li>
+                    </ul>
+                </div>
+                <div class="glass">
+                    <h3>📄 OpenAI</h3>
+                    <ul>
+                        <li><a href="https://openai.com/research/" target="_blank" rel="noopener">Research</a></li>
+                        <li><a href="https://openai.com/index/gpt-4/" target="_blank" rel="noopener">GPT‑4</a></li>
+                    </ul>
+                </div>
+                <div class="glass">
+                    <h3>📄 Meta AI</h3>
+                    <ul>
+                        <li><a href="https://ai.meta.com/research/" target="_blank" rel="noopener">Research</a></li>
+                        <li><a href="https://ai.meta.com/tools/" target="_blank" rel="noopener">FAISS</a></li>
+                    </ul>
+                </div>
+                <div class="glass">
+                    <h3>📄 IndiaAI · NITI Aayog</h3>
+                    <ul>
+                        <li><a href="https://indiaai.gov.in/" target="_blank" rel="noopener">IndiaAI Portal</a></li>
+                        <li><a href="https://www.niti.gov.in/" target="_blank" rel="noopener">NITI Aayog</a></li>
+                        <li><a href="https://www.meity.gov.in/" target="_blank" rel="noopener">MeitY</a></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ====== FOOTER ====== -->
+    <footer class="footer">
+        <div class="container">
+            <div class="socials">
+                <a href="https://sites.google.com/kiit.ac.in/rajdeep/home" target="_blank" rel="noopener" aria-label="Website"><i class="fas fa-globe"></i></a>
+                <a href="https://scholar.google.com/" target="_blank" rel="noopener" aria-label="Google Scholar"><i class="fas fa-graduation-cap"></i></a>
+                <a href="https://www.linkedin.com/" target="_blank" rel="noopener" aria-label="LinkedIn"><i class="fab fa-linkedin"></i></a>
+                <a href="https://github.com/cserajdeep" target="_blank" rel="noopener" aria-label="GitHub"><i class="fab fa-github"></i></a>
+            </div>
+            <p style="font-size:1.1rem;font-weight:600;color:var(--text);">
+                Created by <b>Dr. Rajdeep Chatterjee</b>
+            </p>
+            <p>Associate Professor, School of Computer Engineering, KIIT Deemed to be University</p>
+            <p>
+                <a href="https://sites.google.com/kiit.ac.in/rajdeep/home" target="_blank" rel="noopener">
+                    <i class="fas fa-link"></i> Personal Website
+                </a>
+            </p>
+            <p style="margin-top:12px;font-size:0.85rem;opacity:0.6;">
+                © 2026 · DSA &amp; AI · Made with ❤️ for Viksit Bharat 2047
+            </p>
+        </div>
+    </footer>
+
+    <!-- ====== JAVASCRIPT ====== -->
+    <script>
+        (function() {
+            'use strict';
+
+            // ---------- THEME ----------
+            const toggleBtn = document.getElementById('theme-toggle');
+            const icon = document.getElementById('theme-icon');
+            const label = document.getElementById('theme-label');
+            const root = document.documentElement;
+
+            function setTheme(dark) {
+                if (dark) {
+                    document.body.classList.add('dark');
+                    icon.textContent = '☀️';
+                    label.textContent = 'Light';
+                    localStorage.theme = 'dark';
+                } else {
+                    document.body.classList.remove('dark');
+                    icon.textContent = '🌙';
+                    label.textContent = 'Dark';
+                    localStorage.theme = 'light';
+                }
+            }
+
+            const saved = localStorage.theme;
+            if (saved === 'dark') setTheme(true);
+            else if (saved === 'light') setTheme(false);
+            else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) setTheme(true);
+            else setTheme(false);
+
+            toggleBtn.addEventListener('click', () => {
+                const isDark = document.body.classList.contains('dark');
+                setTheme(!isDark);
+            });
+
+            // ---------- SCROLL REVEAL ----------
+            const reveals = document.querySelectorAll('.reveal');
+            const revealObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+            reveals.forEach(el => revealObserver.observe(el));
+
+            // ---------- ANIMATED COUNTERS ----------
+            const counters = document.querySelectorAll('.num');
+            const counterObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const el = entry.target;
+                        const target = parseInt(el.dataset.target, 10);
+                        if (isNaN(target)) return;
+                        let current = 0;
+                        const step = Math.max(1, Math.floor(target / 60));
+                        const interval = setInterval(() => {
+                            current += step;
+                            if (current >= target) {
+                                current = target;
+                                clearInterval(interval);
+                            }
+                            el.textContent = current.toLocaleString();
+                        }, 20);
+                        counterObserver.unobserve(el);
+                    }
+                });
+            }, { threshold: 0.4 });
+            counters.forEach(el => counterObserver.observe(el));
+
+            // ---------- QUIZ ----------
+            const quizOptions = document.querySelectorAll('#quiz-options .quiz-option');
+            const quizFeedback = document.getElementById('quiz-feedback');
+            let quizAnswered = false;
+
+            quizOptions.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    if (quizAnswered) return;
+                    quizAnswered = true;
+                    const correct = this.dataset.correct === 'true';
+                    quizOptions.forEach(b => b.disabled = true);
+                    if (correct) {
+                        this.classList.add('correct');
+                        quizFeedback.textContent = '✅ Correct! Hash Maps give O(1) average lookups.';
+                        quizFeedback.style.color = 'var(--accent2)';
+                    } else {
+                        this.classList.add('wrong');
+                        quizFeedback.textContent = '❌ Not quite. Hash Maps are the standard for O(1) lookups.';
+                        quizFeedback.style.color = 'var(--accent3)';
+                        // highlight correct answer
+                        document.querySelector('#quiz-options .quiz-option[data-correct="true"]').classList.add('correct');
+                    }
+                });
+            });
+
+            // ---------- ALGORITHM VISUALIZERS ----------
+            function makeBars(container, count) {
+                const values = [];
+                for (let i = 0; i < count; i++) {
+                    values.push(Math.floor(Math.random() * 80) + 10);
+                }
+                renderBars(container, values);
+                return values;
+            }
+
+            function renderBars(container, values) {
+                const max = Math.max(...values, 1);
+                container.innerHTML = values.map(v =>
+                    `<span style="height:${(v / max) * 100}%;"></span>`
+                ).join('');
+                container.dataset.values = JSON.stringify(values);
+            }
+
+            function getValues(container) {
+                return JSON.parse(container.dataset.values || '[]');
+            }
+
+            function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+            // Bubble Sort
+            const bubbleBar = document.getElementById('bubble-bar');
+            let bubbleValues = makeBars(bubbleBar, 16);
+
+            document.getElementById('bubble-shuffle').addEventListener('click', () => {
+                bubbleValues = makeBars(bubbleBar, 16);
+            });
+
+            document.getElementById('bubble-sort').addEventListener('click', async () => {
+                const btn = document.getElementById('bubble-sort');
+                btn.disabled = true;
+                const arr = getValues(bubbleBar);
+                const n = arr.length;
+                for (let i = 0; i < n - 1; i++) {
+                    for (let j = 0; j < n - i - 1; j++) {
+                        if (arr[j] > arr[j + 1]) {
+                            [arr[j], arr[j + 1]] = [arr[j + 1], arr[j]];
+                            renderBars(bubbleBar, arr);
+                            await sleep(60);
+                        }
+                    }
+                }
+                // mark sorted
+                const spans = bubbleBar.querySelectorAll('span');
+                spans.forEach(s => s.classList.add('sorted'));
+                btn.disabled = false;
+            });
+
+            // Selection Sort
+            const selectionBar = document.getElementById('selection-bar');
+            let selectionValues = makeBars(selectionBar, 16);
+
+            document.getElementById('selection-shuffle').addEventListener('click', () => {
+                selectionValues = makeBars(selectionBar, 16);
+            });
+
+            document.getElementById('selection-sort').addEventListener('click', async () => {
+                const btn = document.getElementById('selection-sort');
+                btn.disabled = true;
+                const arr = getValues(selectionBar);
+                const n = arr.length;
+                for (let i = 0; i < n - 1; i++) {
+                    let minIdx = i;
+                    for (let j = i + 1; j < n; j++) {
+                        if (arr[j] < arr[minIdx]) minIdx = j;
+                    }
+                    if (minIdx !== i) {
+                        [arr[i], arr[minIdx]] = [arr[minIdx], arr[i]];
+                        renderBars(selectionBar, arr);
+                        await sleep(80);
+                    }
+                }
+                const spans = selectionBar.querySelectorAll('span');
+                spans.forEach(s => s.classList.add('sorted'));
+                btn.disabled = false;
+            });
+
+            // ---------- RESPONSIVE: fix initial bar render ----------
+            window.addEventListener('resize', () => {
+                // re-render bars to fit container
+                const containers = [bubbleBar, selectionBar];
+                containers.forEach(c => {
+                    const vals = getValues(c);
+                    if (vals.length) renderBars(c, vals);
+                });
+            });
+
+            // ---------- SMOOTH ANCHOR SCROLL (optional) ----------
+            document.querySelectorAll('a[href^="#"]').forEach(a => {
+                a.addEventListener('click', function(e) {
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        e.preventDefault();
+                        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                });
+            });
+
+        })();
+    </script>
+</body>
+</html>

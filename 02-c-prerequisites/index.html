@@ -1,0 +1,2498 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>C Prerequisites for Data Structures</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700;9..144,900&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ─── THEME TOKENS ─── */
+:root[data-theme="dark"] {
+  --bg:        #0c0e14;
+  --bg2:       #13161f;
+  --bg3:       #1a1e2b;
+  --bg4:       #222637;
+  --surface:   #1c2030;
+  --border:    rgba(255,255,255,0.07);
+  --border2:   rgba(255,255,255,0.13);
+  --text:      #e8eaf2;
+  --text2:     #9ba5c0;
+  --text3:     #5a6280;
+  --accent:    #4f8ef7;
+  --accent2:   #7c5ff5;
+  --green:     #34d399;
+  --amber:     #fbbf24;
+  --red:       #f87171;
+  --teal:      #22d3ee;
+  --pink:      #f472b6;
+  --orange:    #fb923c;
+  --shadow:    0 4px 24px rgba(0,0,0,0.5);
+  --card-bg:   #1c2030;
+}
+:root[data-theme="light"] {
+  --bg:        #f6f7fb;
+  --bg2:       #ffffff;
+  --bg3:       #eef0f7;
+  --bg4:       #e2e5f0;
+  --surface:   #ffffff;
+  --border:    rgba(0,0,0,0.08);
+  --border2:   rgba(0,0,0,0.14);
+  --text:      #1a1d2e;
+  --text2:     #4a5170;
+  --text3:     #8b93b0;
+  --accent:    #2563eb;
+  --accent2:   #7c3aed;
+  --green:     #059669;
+  --amber:     #d97706;
+  --red:       #dc2626;
+  --teal:      #0891b2;
+  --pink:      #db2777;
+  --orange:    #ea580c;
+  --shadow:    0 4px 24px rgba(0,0,0,0.10);
+  --card-bg:   #ffffff;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+  transition: background 0.3s, color 0.3s;
+}
+
+/* ─── HERO ─── */
+.hero {
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  padding: 2.2rem 2.4rem 1.8rem;
+  position: relative;
+  overflow: hidden;
+}
+[data-theme="dark"] .hero::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 60% 80% at 80% 50%, rgba(79,142,247,0.07) 0%, transparent 70%),
+              radial-gradient(ellipse 40% 60% at 10% 20%, rgba(124,95,245,0.05) 0%, transparent 60%);
+  pointer-events: none;
+}
+.hero-inner { max-width: 1100px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+.hero-tag {
+  display: inline-block;
+  background: rgba(79,142,247,0.12);
+  border: 1px solid rgba(79,142,247,0.3);
+  color: var(--accent);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  padding: 4px 12px;
+  border-radius: 100px;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.8rem;
+}
+.hero h1 {
+  font-family: 'Fraunces', serif;
+  font-size: clamp(1.7rem, 4vw, 2.8rem);
+  font-weight: 900;
+  line-height: 1.1;
+  margin-bottom: 0.5rem;
+  color: var(--text);
+}
+.hero h1 span { color: var(--accent); }
+.hero p { color: var(--text2); font-size: 0.92rem; max-width: 520px; line-height: 1.6; }
+.hero-controls { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+.hero .badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(8px);
+            padding: 8px 24px;
+            border-radius: 60px;
+            font-size: 0.9rem;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            font-weight: 500;
+}
+/* Theme toggle */
+.theme-toggle {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--bg3); border: 1px solid var(--border2);
+  border-radius: 100px; padding: 6px 14px;
+  cursor: pointer; font-size: 13px; color: var(--text2);
+  font-family: 'DM Sans', sans-serif;
+  transition: all 0.2s;
+}
+.theme-toggle:hover { border-color: var(--accent); color: var(--text); }
+.toggle-icon { font-size: 16px; }
+
+/* ─── NAV ─── */
+.nav-bar {
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; z-index: 100;
+  overflow-x: auto; scrollbar-width: none;
+}
+.nav-bar::-webkit-scrollbar { display: none; }
+.nav-inner { max-width: 1100px; margin: 0 auto; display: flex; padding: 0 1.6rem; }
+.nav-btn {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px; font-weight: 500;
+  color: var(--text3);
+  background: none; border: none;
+  border-bottom: 2px solid transparent;
+  padding: 13px 15px;
+  cursor: pointer; white-space: nowrap;
+  transition: color 0.2s, border-color 0.2s;
+  display: flex; align-items: center; gap: 6px;
+}
+.nav-btn:hover { color: var(--text); }
+.nav-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+/* ─── LAYOUT ─── */
+.main { max-width: 1100px; margin: 0 auto; padding: 2rem 1.6rem; }
+.section { display: none; }
+.section.active { display: block; animation: fadeUp 0.3s ease; }
+@keyframes fadeUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+
+.section-head { margin-bottom: 2rem; }
+.section-title {
+  font-family: 'Fraunces', serif;
+  font-size: 1.5rem; font-weight: 700;
+  margin-bottom: 0.3rem; color: var(--text);
+}
+.section-sub { color: var(--text2); font-size: 0.9rem; line-height: 1.65; }
+
+/* ─── CARDS ─── */
+.card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 1.4rem 1.5rem;
+  margin-bottom: 1.2rem;
+  box-shadow: var(--shadow);
+}
+.card-title {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.97rem; font-weight: 600;
+  color: var(--text);
+  margin-bottom: 0.5rem;
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+}
+.badge {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px; padding: 2px 8px;
+  border-radius: 100px; font-weight: 600;
+  letter-spacing: 0.05em;
+}
+.badge-blue   { background:rgba(79,142,247,0.15);  color:var(--accent);  border:1px solid rgba(79,142,247,0.25); }
+.badge-green  { background:rgba(52,211,153,0.12);  color:var(--green);   border:1px solid rgba(52,211,153,0.2); }
+.badge-amber  { background:rgba(251,191,36,0.12);  color:var(--amber);   border:1px solid rgba(251,191,36,0.2); }
+.badge-red    { background:rgba(248,113,113,0.12); color:var(--red);     border:1px solid rgba(248,113,113,0.2); }
+.badge-teal   { background:rgba(34,211,238,0.12);  color:var(--teal);    border:1px solid rgba(34,211,238,0.2); }
+.badge-purple { background:rgba(124,95,245,0.12);  color:var(--accent2); border:1px solid rgba(124,95,245,0.2); }
+.badge-orange { background:rgba(251,146,60,0.12);  color:var(--orange);  border:1px solid rgba(251,146,60,0.2); }
+
+.card p { color: var(--text2); font-size: 0.875rem; line-height: 1.7; margin-bottom: 0.75rem; }
+.card p:last-child { margin-bottom: 0; }
+
+/* ─── CODE BLOCKS ─── */
+.code-block {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1rem 1.2rem;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12.5px; line-height: 1.75;
+  color: var(--text);
+  overflow-x: auto; margin: 0.8rem 0;
+  position: relative;
+}
+[data-theme="light"] .code-block { background: #f0f2fa; }
+.kw { color: #c084fc; }
+.fn { color: #60a5fa; }
+.str { color: #86efac; }
+.num { color: #fb923c; }
+.cmt { color: var(--text3); font-style: italic; }
+.ty { color: #67e8f9; }
+.op { color: #fcd34d; }
+.pp { color: #f9a8d4; }
+[data-theme="light"] .kw { color: #7c3aed; }
+[data-theme="light"] .fn { color: #1d4ed8; }
+[data-theme="light"] .str { color: #15803d; }
+[data-theme="light"] .num { color: #c2410c; }
+[data-theme="light"] .ty { color: #0891b2; }
+[data-theme="light"] .op { color: #92400e; }
+[data-theme="light"] .pp { color: #db2777; }
+
+/* ─── VIZ AREA ─── */
+.viz-area {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1.2rem;
+  margin: 0.8rem 0;
+  min-height: 80px;
+}
+[data-theme="light"] .viz-area { background: #f0f2fa; }
+.viz-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px; color: var(--text3);
+  margin-bottom: 0.7rem; letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* ─── CONTROLS ─── */
+.controls { display: flex; gap: 8px; flex-wrap: wrap; margin: 0.8rem 0; align-items: center; }
+.btn {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px; font-weight: 500;
+  padding: 7px 16px; border-radius: 8px;
+  border: 1px solid var(--border2);
+  background: var(--bg3); color: var(--text2);
+  cursor: pointer; transition: all 0.2s;
+}
+.btn:hover { background: var(--bg4); color: var(--text); }
+.btn.primary { background: rgba(79,142,247,0.15); color: var(--accent); border-color: rgba(79,142,247,0.3); }
+.btn.primary:hover { background: rgba(79,142,247,0.28); }
+.btn.danger { background: rgba(248,113,113,0.12); color: var(--red); border-color: rgba(248,113,113,0.25); }
+.btn.danger:hover { background: rgba(248,113,113,0.22); }
+.btn.success { background: rgba(52,211,153,0.12); color: var(--green); border-color: rgba(52,211,153,0.25); }
+.btn.success:hover { background: rgba(52,211,153,0.22); }
+
+input[type="range"] { accent-color: var(--accent); width: 100%; }
+input[type="text"], input[type="number"], select {
+  background: var(--bg3); border: 1px solid var(--border2);
+  border-radius: 6px; color: var(--text);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px; padding: 7px 10px; outline: none;
+}
+input[type="text"]:focus, input[type="number"]:focus, select:focus { border-color: var(--accent); }
+select option { background: var(--bg3); }
+
+/* ─── MEMORY CELLS ─── */
+.mem-cell { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.mem-box {
+  width: 58px; height: 46px;
+  background: var(--bg3); border: 1.5px solid var(--border2);
+  border-radius: 7px; display: flex; align-items: center; justify-content: center;
+  font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 600;
+  color: var(--text); transition: all 0.35s cubic-bezier(0.34,1.56,0.64,1);
+}
+.mem-box.hi-blue   { background:rgba(79,142,247,0.18); border-color:var(--accent); color:var(--accent); }
+.mem-box.hi-green  { background:rgba(52,211,153,0.15); border-color:var(--green); color:var(--green); }
+.mem-box.hi-amber  { background:rgba(251,191,36,0.13); border-color:var(--amber); color:var(--amber); }
+.mem-box.hi-red    { background:rgba(248,113,113,0.13); border-color:var(--red); color:var(--red); }
+.mem-box.hi-purple { background:rgba(124,95,245,0.15); border-color:var(--accent2); color:var(--accent2); }
+.mem-addr { font-family:'IBM Plex Mono',monospace; font-size:9.5px; color:var(--text3); }
+.mem-name { font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:var(--text2); font-weight:600; }
+
+/* ─── GRID LAYOUTS ─── */
+.two-col   { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
+@media(max-width: 680px) {
+  .two-col, .three-col { grid-template-columns: 1fr; }
+}
+
+/* ─── INFO LINE ─── */
+.info-line {
+  font-family: 'IBM Plex Mono', monospace; font-size: 12px;
+  color: var(--text2); padding: 7px 12px;
+  background: var(--bg); border-left: 3px solid var(--accent);
+  border-radius: 0 6px 6px 0; margin: 0.5rem 0;
+  transition: border-color 0.3s, background 0.3s;
+  white-space: pre-wrap; word-break: break-word;
+}
+[data-theme="light"] .info-line { background: #f0f2fa; }
+.info-line.green  { border-left-color: var(--green); }
+.info-line.amber  { border-left-color: var(--amber); }
+.info-line.red    { border-left-color: var(--red); }
+
+/* ─── ARRAY CELLS ─── */
+.array-cell { display: inline-flex; flex-direction: column; align-items: center; gap: 3px; }
+.arr-box {
+  width: 50px; height: 44px;
+  background: var(--bg3); border: 1.5px solid var(--border2);
+  border-radius: 7px; display: flex; align-items: center; justify-content: center;
+  font-family: 'IBM Plex Mono',monospace; font-size: 13px; font-weight: 600;
+  transition: all 0.4s cubic-bezier(0.34,1.56,0.64,1);
+}
+.arr-box.green  { background:rgba(52,211,153,0.18); border-color:var(--green); color:var(--green); }
+.arr-box.amber  { background:rgba(251,191,36,0.15); border-color:var(--amber); color:var(--amber); }
+.arr-box.blue   { background:rgba(79,142,247,0.18); border-color:var(--accent); color:var(--accent); }
+.arr-box.red    { background:rgba(248,113,113,0.15); border-color:var(--red); color:var(--red); }
+.arr-box.purple { background:rgba(124,95,245,0.15); border-color:var(--accent2); color:var(--accent2); }
+
+/* ─── STRUCT TABLE ─── */
+.struct-box { border: 1.5px solid var(--border2); border-radius: 9px; overflow: hidden; width: fit-content; min-width: 320px; }
+.struct-header { background: rgba(79,142,247,0.15); border-bottom: 1px solid rgba(79,142,247,0.2); padding: 7px 14px; font-family: 'IBM Plex Mono',monospace; font-size: 12px; color: var(--accent); font-weight: 600; }
+.struct-field { display: flex; align-items: center; padding: 7px 14px; gap: 14px; border-bottom: 1px solid var(--border); font-family: 'IBM Plex Mono',monospace; font-size: 12px; }
+.struct-field:last-child { border-bottom: none; }
+.sf-type { color: var(--teal); min-width: 72px; }
+.sf-name { color: var(--text); min-width: 90px; }
+.sf-val  { color: var(--green); }
+.sf-off  { color: var(--text3); font-size: 10px; margin-left: auto; }
+.struct-field.pad-row { background: rgba(248,113,113,0.05); border-left: 3px solid rgba(248,113,113,0.4); }
+
+/* ─── TERMINAL ─── */
+.terminal {
+  background: #080a0f;
+  border: 1px solid var(--border);
+  border-radius: 8px; padding: 1rem;
+  font-family: 'IBM Plex Mono',monospace; font-size: 12.5px;
+  color: #a3e635; min-height: 60px; white-space: pre-wrap; line-height: 1.65;
+}
+[data-theme="light"] .terminal { background: #1a1d2e; }
+.terminal .prompt { color: var(--text3); }
+
+/* ─── STACK / QUEUE ─── */
+.stack-frame {
+  background: var(--bg3); border: 1.5px solid var(--border2);
+  border-radius: 7px; padding: 8px 14px;
+  font-family: 'IBM Plex Mono',monospace; font-size: 12px;
+  animation: slideInUp 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  min-width: 200px;
+}
+.stack-frame.top-frame { background: rgba(79,142,247,0.15); border-color: var(--accent); }
+@keyframes slideInUp { from { opacity:0; transform:translateY(12px) scale(0.96); } }
+@keyframes popOut    { to   { opacity:0; transform:translateY(-10px) scale(0.95); } }
+
+/* ─── LL NODES ─── */
+.ll-wrap { display: flex; align-items: center; flex-wrap: wrap; gap: 2px; }
+.ll-node { display: inline-flex; align-items: stretch; border-radius: 7px; overflow: hidden; border: 1.5px solid var(--border2); transition: all 0.3s; }
+.ll-data { background: var(--bg3); padding: 8px 14px; font-family: 'IBM Plex Mono',monospace; font-size: 13px; font-weight: 600; color: var(--text); border-right: 1px solid var(--border2); min-width: 44px; text-align: center; }
+.ll-nxt  { background: rgba(79,142,247,0.1); padding: 8px 10px; font-family: 'IBM Plex Mono',monospace; font-size: 11px; color: var(--accent); min-width: 50px; text-align: center; }
+.ll-arrow { color: var(--accent); font-size: 22px; line-height: 1; padding: 0 4px; display: flex; align-items: center; }
+.ll-null { font-family: 'IBM Plex Mono',monospace; font-size: 12px; color: var(--text3); padding: 0 8px; }
+.ll-node.head-node { border-color: var(--green); }
+.ll-node.head-node .ll-data { color: var(--green); background: rgba(52,211,153,0.12); }
+.ll-node.new-node { border-color: var(--amber); }
+.ll-node.new-node .ll-data { color: var(--amber); background: rgba(251,191,36,0.12); }
+
+/* ─── CONCEPT PILL TABS ─── */
+.concept-tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 1rem; }
+.ctab { font-family: 'IBM Plex Mono',monospace; font-size: 11px; padding: 5px 12px; border-radius: 100px; border: 1px solid var(--border); background: var(--bg2); color: var(--text3); cursor: pointer; transition: all 0.2s; }
+.ctab:hover { border-color: var(--border2); color: var(--text2); }
+.ctab.active { background: rgba(79,142,247,0.12); border-color: rgba(79,142,247,0.35); color: var(--accent); }
+
+/* ─── SCROLLBAR ─── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--bg4); border-radius: 3px; }
+
+/* ─── ANIMATIONS ─── */
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+@keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(79,142,247,0.35)} 50%{box-shadow:0 0 0 5px rgba(79,142,247,0.0)} }
+.pulse-anim { animation: pulse 1.8s infinite; }
+
+/* ─── PROGRESS BAR ─── */
+.prog-bar { height: 3px; background: var(--bg4); border-radius: 2px; margin-top: 0.5rem; }
+.prog-fill { height: 100%; background: var(--accent); border-radius: 2px; transition: width 0.4s; }
+
+/* ─── DIVIDER ─── */
+.divider { border: none; border-top: 1px solid var(--border); margin: 1.2rem 0; }
+
+/* ─── TOOLTIP ─── */
+.tip { position: relative; cursor: help; }
+.tip::after { content: attr(data-tip); position: absolute; bottom: 125%; left: 50%; transform: translateX(-50%); background: var(--bg4); color: var(--text); font-family: 'DM Sans',sans-serif; font-size: 12px; padding: 5px 10px; border-radius: 6px; white-space: nowrap; pointer-events: none; opacity: 0; transition: opacity 0.2s; z-index: 99; border: 1px solid var(--border2); }
+.tip:hover::after { opacity: 1; }
+
+/* ─── HIGHLIGHT ROWS ─── */
+.step-row { display: flex; align-items: flex-start; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+.step-row:last-child { border-bottom: none; }
+.step-num { font-family: 'IBM Plex Mono',monospace; font-size: 11px; color: var(--accent); background: rgba(79,142,247,0.12); border: 1px solid rgba(79,142,247,0.25); border-radius: 100px; padding: 1px 8px; flex-shrink: 0; margin-top: 2px; }
+.step-text { font-size: 0.875rem; color: var(--text2); line-height: 1.6; }
+.step-text code { font-family: 'IBM Plex Mono',monospace; font-size: 12px; color: var(--teal); background: rgba(34,211,238,0.08); padding: 1px 5px; border-radius: 4px; }
+
+/* ─── CALLOUT ─── */
+.callout { border-radius: 8px; padding: 0.75rem 1rem; margin: 0.8rem 0; font-size: 0.875rem; line-height: 1.6; display: flex; gap: 10px; align-items: flex-start; }
+.callout-warn { background: rgba(251,191,36,0.08); border: 1px solid rgba(251,191,36,0.2); color: var(--amber); }
+.callout-danger { background: rgba(248,113,113,0.08); border: 1px solid rgba(248,113,113,0.2); color: var(--red); }
+.callout-info  { background: rgba(79,142,247,0.08);  border: 1px solid rgba(79,142,247,0.2);  color: var(--accent); }
+.callout-good  { background: rgba(52,211,153,0.08);  border: 1px solid rgba(52,211,153,0.2);  color: var(--green); }
+.callout-icon { font-size: 18px; flex-shrink: 0; line-height: 1.5; }
+.callout-body { color: var(--text2); }
+.callout-body strong { color: var(--text); }
+
+/* ─── QUIZ STYLES ─── */
+.quiz-option {
+  display: block; width: 100%; text-align: left;
+  padding: 9px 14px; margin: 5px 0;
+  border: 1px solid var(--border2); border-radius: 7px;
+  background: var(--bg3); color: var(--text2);
+  font-family: 'DM Sans',sans-serif; font-size: 13px;
+  cursor: pointer; transition: all 0.2s;
+}
+.quiz-option:hover { border-color: var(--accent); color: var(--text); }
+.quiz-option.correct { background: rgba(52,211,153,0.15); border-color: var(--green); color: var(--green); }
+.quiz-option.wrong   { background: rgba(248,113,113,0.12); border-color: var(--red); color: var(--red); }
+.quiz-feedback { font-family: 'IBM Plex Mono',monospace; font-size: 12px; margin-top: 6px; padding: 6px 10px; border-radius: 6px; }
+
+/* ─── SORTING VIZ ─── */
+.sort-bar {
+  width: 28px; border-radius: 4px 4px 0 0;
+  background: var(--accent); opacity: 0.7;
+  transition: height 0.35s ease, background 0.3s;
+  display: inline-block;
+  position: absolute; bottom: 0;
+}
+</style>
+</head>
+<body>
+    <!-- ====== HUB NAVIGATION ====== -->
+    <nav style="position:sticky;top:0;z-index:1000;background:rgba(20,20,35,0.92);backdrop-filter:blur(10px);padding:10px 16px;display:flex;align-items:center;justify-content:center;gap:18px;flex-wrap:wrap;font-family:'Inter',sans-serif;font-size:0.85rem;border-bottom:1px solid rgba(255,255,255,0.08);">
+        <a href="../01-why-dsa/index.html" style="color:#4285F4;font-weight:600;text-decoration:none;">← Why DSA</a>
+        <a href="../index.html" style="color:#fff;font-weight:700;text-decoration:none;padding:4px 12px;border:1px solid rgba(255,255,255,0.25);border-radius:20px;">🏠 Hub Home</a>
+        <a href="../03-arrays-in-c/index.html" style="color:#4285F4;font-weight:600;text-decoration:none;">Next: Arrays in C →</a>
+    </nav>
+
+
+<div class="hero">
+  <div class="hero-inner">
+    <div>
+      <div class="hero-tag">✦ Powered by AmygdalaAI India</div>
+      <h1>C Prerequisites for<br><span>Data Structures</span></h1>
+      <p>Rigorous, interactive visualizations covering every C concept you need — from bits to malloc — before tackling linked lists, trees, and graphs.</p>
+    </div>
+    <div class="hero-controls">
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-btn">
+        <span class="toggle-icon">🌙</span>
+        <span id="theme-label">Dark Mode</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<nav class="nav-bar">
+  <div class="nav-inner">
+    <button class="nav-btn active" onclick="showSection('vars',this)">📦 Types & Memory</button>
+    <button class="nav-btn" onclick="showSection('arrays',this)">🔢 Arrays</button>
+    <button class="nav-btn" onclick="showSection('ptrs',this)">🔗 Pointers</button>
+    <button class="nav-btn" onclick="showSection('structs',this)">🏗️ Structs</button>
+    <button class="nav-btn" onclick="showSection('malloc',this)">🧠 Dynamic Mem</button>
+    <button class="nav-btn" onclick="showSection('ll',this)">🔄 Linked List Ops</button>
+    <button class="nav-btn" onclick="showSection('funcs',this)">⚙️ Functions</button>
+    <button class="nav-btn" onclick="showSection('recursion',this)">🌀 Recursion</button>
+    <button class="nav-btn" onclick="showSection('sorting',this)">📊 Sorting Basics</button>
+    <button class="nav-btn" onclick="showSection('bitops',this)">⚡ Bit Ops</button>
+  </div>
+</nav>
+
+<div class="main">
+
+<!-- ══════════════════════════════════════════════════════════
+     SECTION 1: VARIABLES & TYPES
+══════════════════════════════════════════════════════════ -->
+<div class="section active" id="sec-vars">
+  <div class="section-head">
+    <div class="section-title">Variables, Data Types & Memory Layout</div>
+    <div class="section-sub">Every variable occupies real bytes in RAM. Understanding type sizes and memory layout is the absolute foundation before you write even the simplest data structure.</div>
+  </div>
+
+  <!-- TYPE SIZE EXPLORER -->
+  <div class="card">
+    <div class="card-title">Data Type Size Explorer <span class="badge badge-blue">INTERACTIVE</span></div>
+    <p>Select a C type to see how many bytes it occupies in memory, its binary layout, and value range. All sizes shown for a 64-bit system.</p>
+    <div class="controls">
+      <select id="type-select" onchange="updateTypeViz()">
+        <option value="char">char — 1 byte</option>
+        <option value="short">short — 2 bytes</option>
+        <option value="int" selected>int — 4 bytes</option>
+        <option value="long">long — 8 bytes</option>
+        <option value="float">float — 4 bytes</option>
+        <option value="double">double — 8 bytes</option>
+        <option value="ptr">int* (pointer) — 8 bytes</option>
+        <option value="size_t">size_t — 8 bytes</option>
+      </select>
+    </div>
+    <div class="viz-area">
+      <div class="viz-label">Memory Layout — each box = 1 byte</div>
+      <div id="type-bytes" style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:10px;"></div>
+      <div id="type-info" class="info-line"></div>
+    </div>
+    <div class="code-block" id="type-code"></div>
+  </div>
+
+  <!-- VARIABLE DECLARATION SIMULATOR -->
+  <div class="card">
+    <div class="card-title">Stack Frame Builder <span class="badge badge-green">ANIMATE</span></div>
+    <p>Declare variables and watch them get placed on the <strong>stack</strong> at consecutive decreasing addresses (stack grows downward on x86-64). Notice how types of different sizes take up different amounts of space.</p>
+    <div class="controls">
+      <select id="decl-type">
+        <option value="int">int (4B)</option>
+        <option value="char">char (1B)</option>
+        <option value="float">float (4B)</option>
+        <option value="double">double (8B)</option>
+        <option value="ptr">int* (8B)</option>
+      </select>
+      <input type="text" id="decl-name" placeholder="name" style="width:90px" value="x">
+      <input type="number" id="decl-val" placeholder="value" style="width:80px" value="42">
+      <button class="btn primary" onclick="declareVar()">Push to Stack</button>
+      <button class="btn danger" onclick="clearVars()">Clear All</button>
+    </div>
+    <div class="viz-area">
+      <div style="display:grid;grid-template-columns:auto 1fr;gap:1.5rem;align-items:start;">
+        <div>
+          <div class="viz-label">Stack (grows ↓)</div>
+          <div id="stack-mem" style="display:flex;flex-direction:column;gap:4px;min-width:220px;"></div>
+        </div>
+        <div>
+          <div class="viz-label">Code</div>
+          <div class="code-block" style="margin:0;" id="decl-code-preview">
+<span class="cmt">// Declare variables to see them here</span></div>
+        </div>
+      </div>
+    </div>
+    <div id="decl-info" class="info-line" style="display:none"></div>
+  </div>
+
+  <!-- SIGNED/UNSIGNED -->
+  <div class="two-col">
+    <div class="card">
+      <div class="card-title">Signed vs Unsigned <span class="badge badge-amber">CONCEPT</span></div>
+      <p>The MSB (most significant bit) acts as a sign bit in signed types. Same bit pattern, different interpretation!</p>
+      <div class="viz-area" style="padding:0.8rem;">
+        <div class="viz-label">8-bit: 0xFF = 11111111</div>
+        <div style="display:flex;gap:8px;margin-bottom:8px;font-family:'IBM Plex Mono',monospace;font-size:12px;">
+          <span style="color:var(--amber)">signed char:</span>
+          <span id="sv-signed" style="color:var(--text)">-1</span>
+        </div>
+        <div style="display:flex;gap:8px;font-family:'IBM Plex Mono',monospace;font-size:12px;">
+          <span style="color:var(--green)">unsigned char:</span>
+          <span id="sv-unsigned" style="color:var(--text)">255</span>
+        </div>
+        <input type="range" id="sv-slider" min="0" max="255" value="255" oninput="updateSignedViz()" style="margin-top:10px;">
+        <div id="sv-bits" style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text3);margin-top:6px;letter-spacing:2px;"></div>
+      </div>
+      <div class="code-block" style="margin-top:0.5rem;">
+<span class="ty">unsigned int</span> u = <span class="num">4294967295</span>; <span class="cmt">// 2^32 - 1</span>
+<span class="ty">signed int</span>   s = <span class="num">-1</span>;
+<span class="cmt">// SAME 32 bits: 0xFFFFFFFF</span>
+<span class="cmt">// Use size_t for array indices!</span></div>
+    </div>
+    <div class="card">
+      <div class="card-title">sizeof() Operator <span class="badge badge-teal">REFERENCE</span></div>
+      <p>Always use <code style="font-family:'IBM Plex Mono',monospace;color:var(--teal)">sizeof(type)</code> instead of hardcoding sizes. Code must be portable across architectures.</p>
+      <div class="code-block">
+<span class="pp">#include</span> <span class="str">&lt;stdio.h&gt;</span>
+<span class="pp">#include</span> <span class="str">&lt;stddef.h&gt;</span>
+
+<span class="kw">int</span> <span class="fn">main</span>() {
+  printf(<span class="str">"%zu\n"</span>, <span class="kw">sizeof</span>(<span class="ty">char</span>));    <span class="cmt">// 1</span>
+  printf(<span class="str">"%zu\n"</span>, <span class="kw">sizeof</span>(<span class="ty">int</span>));     <span class="cmt">// 4</span>
+  printf(<span class="str">"%zu\n"</span>, <span class="kw">sizeof</span>(<span class="ty">double</span>));  <span class="cmt">// 8</span>
+  printf(<span class="str">"%zu\n"</span>, <span class="kw">sizeof</span>(<span class="ty">int</span>*));    <span class="cmt">// 8 (64-bit)</span>
+  <span class="cmt">// ALWAYS use sizeof in malloc:</span>
+  <span class="cmt">// malloc(n * sizeof(int))  ✓</span>
+  <span class="cmt">// malloc(n * 4)            ✗</span>
+}</div>
+    </div>
+  </div>
+
+  <!-- MEMORY REGIONS -->
+  <div class="card">
+    <div class="card-title">C Memory Regions — The Big Picture <span class="badge badge-purple">ARCHITECTURE</span></div>
+    <p>A running C program has 4 memory regions. Data structures live in different regions depending on how they're created.</p>
+    <div class="viz-area">
+      <div style="display:flex;gap:6px;align-items:stretch;height:200px;font-family:'IBM Plex Mono',monospace;font-size:11.5px;">
+        <div style="display:flex;flex-direction:column;justify-content:space-between;color:var(--text3);padding:4px 0;font-size:10px;">
+          <span>High addr</span>
+          <span>Low addr</span>
+        </div>
+        <div style="display:flex;flex-direction:column;width:100%;gap:3px;">
+          <div style="flex:1.2;background:rgba(248,113,113,0.12);border:1.5px solid rgba(248,113,113,0.25);border-radius:6px;padding:6px 10px;display:flex;flex-direction:column;justify-content:center;">
+            <div style="color:var(--red);font-weight:600;">Stack</div>
+            <div style="color:var(--text3);font-size:10px;">Local variables, function params, return addresses</div>
+            <div style="color:var(--text3);font-size:10px;">Grows ↓ downward. Auto-freed on return.</div>
+          </div>
+          <div style="display:flex;gap:3px;align-items:center;color:var(--text3);font-size:10px;padding:0 8px;">
+            ↕ gap (unmapped — segfault zone)
+          </div>
+          <div style="flex:2;background:rgba(52,211,153,0.10);border:1.5px solid rgba(52,211,153,0.25);border-radius:6px;padding:6px 10px;display:flex;flex-direction:column;justify-content:center;">
+            <div style="color:var(--green);font-weight:600;">Heap</div>
+            <div style="color:var(--text3);font-size:10px;">malloc() / calloc() allocations</div>
+            <div style="color:var(--text3);font-size:10px;">Grows ↑ upward. YOU must free() it.</div>
+          </div>
+          <div style="flex:0.8;background:rgba(34,211,238,0.10);border:1.5px solid rgba(34,211,238,0.2);border-radius:6px;padding:6px 10px;display:flex;flex-direction:column;justify-content:center;">
+            <div style="color:var(--teal);font-weight:600;">BSS / Data Segment</div>
+            <div style="color:var(--text3);font-size:10px;">Global &amp; static variables</div>
+          </div>
+          <div style="flex:0.8;background:rgba(124,95,245,0.10);border:1.5px solid rgba(124,95,245,0.2);border-radius:6px;padding:6px 10px;display:flex;flex-direction:column;justify-content:center;">
+            <div style="color:var(--accent2);font-weight:600;">Text (Code) Segment</div>
+            <div style="color:var(--text3);font-size:10px;">Your compiled program instructions</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="callout callout-info">
+      <span class="callout-icon">💡</span>
+      <div class="callout-body"><strong>Key rule:</strong> Linked lists, trees, and graphs use <strong>heap</strong> memory (malloc). Arrays declared locally use <strong>stack</strong>. Understanding this prevents 90% of segfaults and memory leaks.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     SECTION 2: ARRAYS
+══════════════════════════════════════════════════════════ -->
+<div class="section" id="sec-arrays">
+  <div class="section-head">
+    <div class="section-title">Arrays — Contiguous Memory Blocks</div>
+    <div class="section-sub">Arrays are the simplest data structure and the foundation for stacks, queues, and hash tables. The key insight: <code style="font-family:'IBM Plex Mono',monospace;color:var(--teal)">arr[i]</code> is literally pointer arithmetic.</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Array Memory Visualizer <span class="badge badge-blue">INTERACTIVE</span></div>
+    <p>Arrays store elements at consecutive addresses. Accessing element <code style="font-family:'IBM Plex Mono',monospace;color:var(--teal)">arr[i]</code> computes address <code style="font-family:'IBM Plex Mono',monospace;color:var(--teal)">base + i × sizeof(type)</code> — this is O(1) random access!</p>
+    <div class="controls">
+      <input type="text" id="arr-input" value="10, 25, 7, 42, 18, 3, 61" style="width:230px" placeholder="values (comma-separated)">
+      <select id="arr-type">
+        <option value="int">int (4B)</option>
+        <option value="char">char (1B)</option>
+        <option value="double">double (8B)</option>
+      </select>
+      <button class="btn primary" onclick="buildArray()">Build Array</button>
+      <input type="number" id="arr-access" placeholder="index" style="width:55px" min="0">
+      <button class="btn" onclick="accessArray()">Access [i]</button>
+    </div>
+    <div class="viz-area">
+      <div class="viz-label">Array in Memory — base address: 0x1000</div>
+      <div id="arr-viz" style="display:flex;gap:4px;flex-wrap:wrap;align-items:flex-end;"></div>
+    </div>
+    <div id="arr-info" class="info-line" style="display:none"></div>
+    <div class="code-block">
+<span class="ty">int</span> arr[] = {<span class="num">10</span>, <span class="num">25</span>, <span class="num">7</span>, <span class="num">42</span>, <span class="num">18</span>, <span class="num">3</span>, <span class="num">61</span>};
+<span class="cmt">// arr[i]  ≡  *(arr + i)</span>
+<span class="cmt">// &arr[i] ≡  arr + i  (address)</span>
+<span class="cmt">// addr of arr[i] = base + i × 4  (for int)</span>
+<span class="cmt">// Proof: arr[2] → 0x1000 + 2×4 = 0x1008</span></div>
+  </div>
+
+  <!-- SEARCH VISUALIZER -->
+  <div class="card">
+    <div class="card-title">Search Algorithm Visualizer <span class="badge badge-green">ANIMATE</span></div>
+    <div class="concept-tabs">
+      <div class="ctab active" onclick="selectSearch('linear',this)">Linear Search O(n)</div>
+      <div class="ctab" onclick="selectSearch('binary',this)">Binary Search O(log n)</div>
+    </div>
+    <div id="search-linear-desc">
+      <p>Scans every element one by one. Works on <strong>unsorted</strong> arrays. Worst case: n comparisons.</p>
+    </div>
+    <div id="search-binary-desc" style="display:none">
+      <p>Requires a <strong>sorted</strong> array. Eliminates half the remaining elements with each comparison. Much faster for large arrays.</p>
+    </div>
+    <div class="controls">
+      <input type="number" id="search-target" placeholder="search value" style="width:120px" value="42">
+      <button class="btn primary" onclick="startSearch()">▶ Run Search</button>
+      <button class="btn" onclick="resetSearch()">↺ Reset</button>
+    </div>
+    <div class="viz-area">
+      <div class="viz-label" id="search-viz-label">Array — scanning position highlighted</div>
+      <div id="search-viz" style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:4px;"></div>
+      <div id="search-ptrs" style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text3);display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;"></div>
+    </div>
+    <div id="search-info" class="info-line" style="display:none"></div>
+    <div id="search-code-linear" class="code-block">
+<span class="kw">int</span> <span class="fn">linearSearch</span>(<span class="ty">int</span> arr[], <span class="ty">int</span> n, <span class="ty">int</span> target) {
+  <span class="kw">for</span> (<span class="ty">int</span> i = <span class="num">0</span>; i &lt; n; i++) {
+    <span class="kw">if</span> (arr[i] == target)
+      <span class="kw">return</span> i;       <span class="cmt">// found!</span>
+  }
+  <span class="kw">return</span> <span class="num">-1</span>;           <span class="cmt">// not found</span>
+}   <span class="cmt">// O(n) worst case</span></div>
+    <div id="search-code-binary" class="code-block" style="display:none">
+<span class="kw">int</span> <span class="fn">binarySearch</span>(<span class="ty">int</span> arr[], <span class="ty">int</span> n, <span class="ty">int</span> target) {
+  <span class="ty">int</span> lo = <span class="num">0</span>, hi = n - <span class="num">1</span>;
+  <span class="kw">while</span> (lo &lt;= hi) {
+    <span class="ty">int</span> mid = lo + (hi - lo) / <span class="num">2</span>; <span class="cmt">// avoids overflow!</span>
+    <span class="kw">if</span>      (arr[mid] == target) <span class="kw">return</span> mid;
+    <span class="kw">else if</span> (arr[mid] &lt;  target) lo = mid + <span class="num">1</span>;
+    <span class="kw">else</span>                         hi = mid - <span class="num">1</span>;
+  }
+  <span class="kw">return</span> <span class="num">-1</span>; <span class="cmt">// O(log n) worst case</span>
+}</div>
+  </div>
+
+  <!-- 2D ARRAYS -->
+  <div class="card">
+    <div class="card-title">2D Arrays — Row-Major Layout <span class="badge badge-amber">CONCEPT</span></div>
+    <p>2D arrays are stored as one contiguous block in <strong>row-major order</strong>. Critical for adjacency matrices in graphs. Click a cell to see its 1D memory offset.</p>
+    <div style="display:flex;gap:1.5rem;flex-wrap:wrap;align-items:flex-start;margin:0.8rem 0;">
+      <div>
+        <div class="viz-label">2D View (click a cell)</div>
+        <div id="matrix-2d" style="display:inline-block;"></div>
+      </div>
+      <div style="flex:1;min-width:220px;">
+        <div class="viz-label">Linear Memory (row-major)</div>
+        <div id="matrix-linear" style="display:flex;gap:3px;flex-wrap:wrap;"></div>
+        <div id="matrix-info" class="info-line" style="margin-top:8px;display:none"></div>
+      </div>
+    </div>
+    <div class="code-block">
+<span class="ty">int</span> M[<span class="num">3</span>][<span class="num">4</span>];
+<span class="cmt">// Address of M[r][c] = base + (r×COLS + c) × sizeof(int)</span>
+<span class="cmt">// M[1][2] offset = (1×4 + 2) × 4 = 24 bytes from base</span>
+<span class="cmt">// In memory: M[0][0] M[0][1] M[0][2] M[0][3]</span>
+<span class="cmt">//            M[1][0] M[1][1] M[1][2] M[1][3]  (contiguous!)</span></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     SECTION 3: POINTERS
+══════════════════════════════════════════════════════════ -->
+<div class="section" id="sec-ptrs">
+  <div class="section-head">
+    <div class="section-title">Pointers — The Heart of Data Structures</div>
+    <div class="section-sub">Without pointers there are no linked lists, no trees, no graphs. A pointer is just a variable that stores a memory address. That's it. Master this and everything else follows.</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Pointer Visualizer <span class="badge badge-blue">INTERACTIVE</span></div>
+    <p>A pointer stores the <em>address</em> of another variable. Use <code style="font-family:'IBM Plex Mono',monospace;color:var(--teal)">&amp;</code> to get an address, <code style="font-family:'IBM Plex Mono',monospace;color:var(--teal)">*</code> to dereference (follow the arrow to the value).</p>
+    <div class="controls">
+      <input type="number" id="ptr-val" value="99" style="width:80px" placeholder="value">
+      <button class="btn primary" onclick="animatePointer()">Create &amp; Point</button>
+      <button class="btn success" onclick="modifyViaPtr()">*ptr = 200 (modify)</button>
+      <button class="btn" onclick="makeNullPtr()">ptr = NULL</button>
+    </div>
+    <div class="viz-area" id="ptr-viz">
+      <div class="viz-label">Memory Layout</div>
+      <div id="ptr-mem" style="display:flex;gap:32px;align-items:flex-start;flex-wrap:wrap;"></div>
+      <div id="ptr-arrow-area" style="margin-top:10px;"></div>
+    </div>
+    <div id="ptr-info" class="info-line" style="display:none"></div>
+    <div class="code-block" id="ptr-code-block">
+<span class="ty">int</span>  x   = <span class="num">99</span>;         <span class="cmt">// at address 0x2004</span>
+<span class="ty">int</span>* ptr = <span class="op">&amp;</span>x;          <span class="cmt">// ptr holds 0x2004</span>
+printf(<span class="str">"%d"</span>, *ptr);    <span class="cmt">// dereference → 99</span>
+*ptr = <span class="num">200</span>;            <span class="cmt">// changes x to 200</span>
+printf(<span class="str">"%d"</span>, x);       <span class="cmt">// prints 200!</span></div>
+  </div>
+
+  <!-- POINTER ARITHMETIC -->
+  <div class="card">
+    <div class="card-title">Pointer Arithmetic <span class="badge badge-green">ANIMATE</span></div>
+    <p>When you do <code style="font-family:'IBM Plex Mono',monospace;color:var(--teal)">ptr++</code>, the pointer advances by <code style="font-family:'IBM Plex Mono',monospace;color:var(--teal)">sizeof(type)</code> bytes, not 1 byte. This is how array traversal, memcpy, and string operations work internally.</p>
+    <div class="controls">
+      <select id="pa-type" onchange="resetPtrArith()">
+        <option value="char">char (1 byte/step)</option>
+        <option value="int" selected>int (4 bytes/step)</option>
+        <option value="double">double (8 bytes/step)</option>
+      </select>
+      <button class="btn primary" onclick="ptrNext()">ptr++ →</button>
+      <button class="btn" onclick="ptrPrev()">← ptr--</button>
+      <button class="btn" onclick="resetPtrArith()">↺ Reset</button>
+    </div>
+    <div class="viz-area">
+      <div class="viz-label">Array traversal via pointer</div>
+      <div id="pa-array-row" style="display:flex;gap:4px;flex-wrap:wrap;"></div>
+      <div id="pa-ptr-indicator" style="margin-top:6px;"></div>
+    </div>
+    <div id="pa-info" class="info-line"></div>
+  </div>
+
+  <!-- PTR CONCEPTS -->
+  <div class="two-col">
+    <div class="card">
+      <div class="card-title">NULL Pointer & Safety <span class="badge badge-red">DANGER</span></div>
+      <p>NULL means "points to nothing". ALWAYS check for NULL before dereferencing — NULL dereference is the most common segfault in student code.</p>
+      <div class="callout callout-danger">
+        <span class="callout-icon">☠️</span>
+        <div class="callout-body">
+          <strong>Never do:</strong> <code style="font-family:'IBM Plex Mono',monospace">*ptr</code> without checking <code style="font-family:'IBM Plex Mono',monospace">ptr != NULL</code> first.
+        </div>
+      </div>
+      <div class="code-block">
+<span class="ty">int</span>* p = <span class="kw">NULL</span>;
+<span class="cmt">// SAFE pattern:</span>
+<span class="kw">if</span> (p != <span class="kw">NULL</span>) {
+  *p = <span class="num">5</span>;         <span class="cmt">// safe ✓</span>
+}
+<span class="cmt">// In linked lists:</span>
+<span class="kw">while</span> (node != <span class="kw">NULL</span>) {
+  node = node<span class="op">-></span>next; <span class="cmt">// traverse</span>
+}</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Pointer to Pointer (double pointer) <span class="badge badge-amber">ADVANCED</span></div>
+      <p>Used when a function needs to change which node the head pointer points to — e.g., inserting at the beginning of a linked list.</p>
+      <div class="code-block">
+<span class="ty">int</span>  x  = <span class="num">42</span>;
+<span class="ty">int</span>* p  = <span class="op">&amp;</span>x;    <span class="cmt">// points to x</span>
+<span class="ty">int</span>** pp = <span class="op">&amp;</span>p;  <span class="cmt">// points to p</span>
+<span class="cmt">// *pp  → p  (the pointer)</span>
+<span class="cmt">// **pp → 42 (the value)</span>
+
+<span class="cmt">// Used in linked list insertion:</span>
+<span class="kw">void</span> <span class="fn">insert</span>(<span class="ty">Node</span>** head, <span class="ty">int</span> val) {
+  <span class="ty">Node</span>* n = <span class="fn">newNode</span>(val);
+  n<span class="op">-></span>next = *head;
+  *head = n;  <span class="cmt">// modifies caller's head!</span>
+}</div>
+    </div>
+  </div>
+
+  <!-- POINTER QUIZ -->
+  <div class="card">
+    <div class="card-title">Quick Check <span class="badge badge-purple">QUIZ</span></div>
+    <p id="ptr-quiz-q" style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--text);margin-bottom:0.5rem;"></p>
+    <div id="ptr-quiz-opts"></div>
+    <div id="ptr-quiz-feedback" class="quiz-feedback" style="display:none"></div>
+    <button class="btn" onclick="nextPtrQuiz()" style="margin-top:8px;">Next Question →</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     SECTION 4: STRUCTS
+══════════════════════════════════════════════════════════ -->
+<div class="section" id="sec-structs">
+  <div class="section-head">
+    <div class="section-title">Structures — Building Data Structure Nodes</div>
+    <div class="section-sub">Every node in a linked list, tree, or graph IS a struct. Structs group related data — they are the DNA of every data structure you'll implement.</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Struct Memory Layout with Padding <span class="badge badge-blue">INTERACTIVE</span></div>
+    <p>The compiler adds <strong>padding bytes</strong> to satisfy alignment requirements (an 8-byte pointer must be at an 8-byte-aligned address). This affects <code style="font-family:'IBM Plex Mono',monospace;color:var(--teal)">sizeof(struct)</code>!</p>
+    <div class="controls">
+      <button class="btn active" onclick="showStruct('node')">LL Node</button>
+      <button class="btn" onclick="showStruct('tree')">Tree Node</button>
+      <button class="btn" onclick="showStruct('student')">Student</button>
+      <button class="btn" onclick="showStruct('graph')">Graph Vertex</button>
+      <button class="btn" onclick="showStruct('stack')">Stack (array-based)</button>
+    </div>
+    <div class="viz-area">
+      <div style="display:flex;gap:1.5rem;flex-wrap:wrap;align-items:flex-start;">
+        <div>
+          <div class="viz-label">Struct Layout in Memory</div>
+          <div id="struct-viz"></div>
+        </div>
+        <div style="flex:1;min-width:220px;">
+          <div class="viz-label">Memory bytes (each square = 1 byte)</div>
+          <div id="struct-bytes" style="display:flex;flex-wrap:wrap;gap:3px;"></div>
+          <div id="struct-total" class="info-line" style="margin-top:8px;"></div>
+        </div>
+      </div>
+    </div>
+    <div class="code-block" id="struct-code"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Dot (.) vs Arrow (-&gt;) Operator <span class="badge badge-green">ANIMATE</span></div>
+    <p>The <code style="font-family:'IBM Plex Mono',monospace;color:var(--teal)">-&gt;</code> operator dereferences a pointer AND accesses a field in one step. It's just shorthand for <code style="font-family:'IBM Plex Mono',monospace;color:var(--teal)">(*ptr).field</code>. Click on fields to highlight!</p>
+    <div id="struct-access-viz" style="display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap;margin:0.8rem 0;"></div>
+    <div class="two-col">
+      <div class="code-block">
+<span class="cmt">// Direct struct variable</span>
+<span class="ty">Node</span> n;
+n.data = <span class="num">42</span>;
+n.next = <span class="kw">NULL</span>;
+printf(<span class="str">"%d"</span>, n.data); <span class="cmt">// 42</span></div>
+      <div class="code-block">
+<span class="cmt">// Pointer to struct</span>
+<span class="ty">Node</span>* p = <span class="op">&amp;</span>n;
+p<span class="op">-></span>data = <span class="num">42</span>;         <span class="cmt">// (*p).data</span>
+p<span class="op">-></span>next = <span class="kw">NULL</span>;
+<span class="cmt">// p->x  ≡  (*p).x</span></div>
+    </div>
+  </div>
+
+  <div class="two-col">
+    <div class="card">
+      <div class="card-title">typedef — Cleaner Syntax <span class="badge badge-teal">BEST PRACTICE</span></div>
+      <div class="code-block">
+<span class="cmt">// Without typedef (verbose)</span>
+<span class="kw">struct</span> <span class="ty">Node</span> {
+  <span class="ty">int</span>          data;
+  <span class="kw">struct</span> <span class="ty">Node</span>* next;
+};
+<span class="kw">struct</span> <span class="ty">Node</span>* head;  <span class="cmt">// ugly!</span>
+
+<span class="cmt">// With typedef (preferred ✓)</span>
+<span class="kw">typedef struct</span> <span class="ty">Node</span> {
+  <span class="ty">int</span>        data;
+  <span class="kw">struct</span> <span class="ty">Node</span>* next; <span class="cmt">// must use struct here</span>
+} <span class="ty">Node</span>;
+<span class="ty">Node</span>* head;         <span class="cmt">// clean!</span></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Self-Referential Structs <span class="badge badge-amber">KEY CONCEPT</span></div>
+      <p>A struct can contain a pointer to another struct of the SAME type — this is how linked lists and trees work!</p>
+      <div class="code-block">
+<span class="kw">typedef struct</span> <span class="ty">TreeNode</span> {
+  <span class="ty">int</span>   data;
+  <span class="kw">struct</span> <span class="ty">TreeNode</span>* left;  <span class="cmt">// left child</span>
+  <span class="kw">struct</span> <span class="ty">TreeNode</span>* right; <span class="cmt">// right child</span>
+} <span class="ty">TreeNode</span>;
+<span class="cmt">// Each node points to more TreeNodes!</span>
+<span class="cmt">// This creates the tree structure.</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     SECTION 5: DYNAMIC MEMORY
+══════════════════════════════════════════════════════════ -->
+<div class="section" id="sec-malloc">
+  <div class="section-head">
+    <div class="section-title">Dynamic Memory Allocation</div>
+    <div class="section-sub">Linked lists, trees, and hash tables grow and shrink at runtime — they MUST use heap memory. malloc/calloc/free are the only tools for this in C.</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Heap Allocator Simulator <span class="badge badge-blue">INTERACTIVE</span></div>
+    <p>malloc() asks the OS for memory on the heap. The returned pointer is the only way to access that memory. If you lose it (without freeing) — <strong>memory leak</strong>.</p>
+    <div class="controls">
+      <button class="btn primary" onclick="heapMalloc()">malloc(sizeof(Node))</button>
+      <button class="btn danger" onclick="heapFree()">free(last node)</button>
+      <button class="btn" onclick="heapLeakDemo()">Simulate Leak 💀</button>
+      <button class="btn" onclick="resetHeap()">↺ Reset</button>
+    </div>
+    <div class="viz-area">
+      <div style="display:grid;grid-template-columns:160px 1fr;gap:1.5rem;">
+        <div>
+          <div class="viz-label">Stack</div>
+          <div id="heap-stack-viz">
+            <div style="background:rgba(248,113,113,0.1);border:1.5px solid rgba(248,113,113,0.25);border-radius:7px;padding:8px 12px;font-family:'IBM Plex Mono',monospace;font-size:11px;">
+              <div style="color:var(--red);font-weight:600;">main()</div>
+              <div style="color:var(--text3);margin-top:4px;" id="head-ptr-display">head = NULL</div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="viz-label">Heap (malloc'd nodes)</div>
+          <div id="heap-viz" style="display:flex;flex-direction:column;gap:5px;"></div>
+        </div>
+      </div>
+    </div>
+    <div id="heap-info" class="info-line" style="display:none"></div>
+    <div class="code-block">
+<span class="kw">typedef struct</span> <span class="ty">Node</span> { <span class="ty">int</span> data; <span class="kw">struct</span> <span class="ty">Node</span>* next; } <span class="ty">Node</span>;
+
+<span class="ty">Node</span>* <span class="fn">newNode</span>(<span class="ty">int</span> data) {
+  <span class="ty">Node</span>* n = (<span class="ty">Node</span>*) <span class="fn">malloc</span>(<span class="kw">sizeof</span>(<span class="ty">Node</span>));
+  <span class="kw">if</span> (!n) { perror(<span class="str">"malloc"</span>); exit(<span class="num">1</span>); } <span class="cmt">// ALWAYS check!</span>
+  n<span class="op">-></span>data = data;
+  n<span class="op">-></span>next = <span class="kw">NULL</span>;
+  <span class="kw">return</span> n;
+}</div>
+  </div>
+
+  <div class="two-col">
+    <div class="card">
+      <div class="card-title">malloc vs calloc vs realloc <span class="badge badge-teal">REFERENCE</span></div>
+      <div class="code-block">
+<span class="cmt">// malloc — uninitialized garbage bytes</span>
+<span class="ty">int</span>* p = (<span class="ty">int</span>*)<span class="fn">malloc</span>(<span class="num">4</span> * <span class="kw">sizeof</span>(<span class="ty">int</span>));
+
+<span class="cmt">// calloc — zero-initialized (safer default)</span>
+<span class="ty">int</span>* p = (<span class="ty">int</span>*)<span class="fn">calloc</span>(<span class="num">4</span>, <span class="kw">sizeof</span>(<span class="ty">int</span>));
+
+<span class="cmt">// realloc — resize (for dynamic arrays)</span>
+<span class="ty">int</span>* tmp = (<span class="ty">int</span>*)<span class="fn">realloc</span>(p, <span class="num">8</span>*<span class="kw">sizeof</span>(<span class="ty">int</span>));
+<span class="kw">if</span> (!tmp) { <span class="fn">free</span>(p); exit(<span class="num">1</span>); } <span class="cmt">// don't lose p!</span>
+p = tmp;
+
+<span class="fn">free</span>(p);  <span class="cmt">// return to OS</span>
+p = <span class="kw">NULL</span>; <span class="cmt">// prevent dangling ptr!</span></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Memory Leak Demo <span class="badge badge-red">DANGER</span></div>
+      <p>Valgrind output — every BTech student should know how to read this.</p>
+      <div class="controls">
+        <button class="btn success" onclick="leakDemo('good')">✓ Correct (no leak)</button>
+        <button class="btn danger" onclick="leakDemo('bad')">✗ Memory Leak</button>
+      </div>
+      <div class="terminal" id="leak-terminal"><span class="prompt">$ ./program  # click a button above</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     SECTION 6: LINKED LIST OPERATIONS
+══════════════════════════════════════════════════════════ -->
+<div class="section" id="sec-ll">
+  <div class="section-head">
+    <div class="section-title">Linked List — Operations Visualized</div>
+    <div class="section-sub">This section puts everything together: structs + pointers + malloc. Watch each operation manipulate pointers step-by-step. This is the foundation before implementing stacks/queues as linked lists.</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Singly Linked List Simulator <span class="badge badge-blue">FULL INTERACTIVE</span></div>
+    <p>Build a linked list node by node. Every operation is explained with the exact C pointer manipulation happening under the hood.</p>
+    <div class="controls">
+      <input type="number" id="ll-val" placeholder="value" style="width:80px" value="10">
+      <button class="btn primary" onclick="llInsertFront()">Insert at Front</button>
+      <button class="btn" onclick="llInsertBack()">Insert at Back</button>
+      <button class="btn danger" onclick="llDeleteFront()">Delete Front</button>
+      <button class="btn" onclick="llReverse()">Reverse List</button>
+      <button class="btn" onclick="llClear()">Clear All</button>
+    </div>
+    <div class="viz-area">
+      <div class="viz-label">Linked List — head pointer shown on left</div>
+      <div id="ll-viz" class="ll-wrap" style="padding:0.5rem 0;min-height:60px;"></div>
+    </div>
+    <div id="ll-info" class="info-line" style="display:none"></div>
+    <div id="ll-code" class="code-block">
+<span class="cmt">// Build a list by inserting values above</span></div>
+  </div>
+
+  <div class="two-col">
+    <div class="card">
+      <div class="card-title">Traversal Pattern <span class="badge badge-green">ESSENTIAL</span></div>
+      <p>The universal pattern for traversing any linked list. Used inside print, search, and length functions.</p>
+      <div class="code-block">
+<span class="kw">void</span> <span class="fn">printList</span>(<span class="ty">Node</span>* head) {
+  <span class="ty">Node</span>* curr = head;     <span class="cmt">// don't move head!</span>
+  <span class="kw">while</span> (curr != <span class="kw">NULL</span>) {
+    printf(<span class="str">"%d → "</span>, curr<span class="op">-></span>data);
+    curr = curr<span class="op">-></span>next;   <span class="cmt">// advance pointer</span>
+  }
+  printf(<span class="str">"NULL\n"</span>);
+}
+<span class="cmt">// ⚠ Never do: head = head->next</span>
+<span class="cmt">// You'd lose the entire list!</span></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Free the Entire List <span class="badge badge-red">MEMORY SAFETY</span></div>
+      <p>When done, free every single node. If you free head first, you lose access to the rest — classic mistake!</p>
+      <div class="code-block">
+<span class="kw">void</span> <span class="fn">freeList</span>(<span class="ty">Node</span>* head) {
+  <span class="ty">Node</span>* curr = head;
+  <span class="kw">while</span> (curr != <span class="kw">NULL</span>) {
+    <span class="ty">Node</span>* tmp = curr<span class="op">-></span>next; <span class="cmt">// save next!</span>
+    <span class="fn">free</span>(curr);             <span class="cmt">// free current</span>
+    curr = tmp;             <span class="cmt">// advance safely</span>
+  }
+}
+<span class="cmt">// ⚠ free(head) directly = memory leak!</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     SECTION 7: FUNCTIONS
+══════════════════════════════════════════════════════════ -->
+<div class="section" id="sec-funcs">
+  <div class="section-head">
+    <div class="section-title">Functions, Call Stack & Pass-by-Reference</div>
+    <div class="section-sub">Every data structure operation (insert, delete, search) is a function. The critical distinction: C passes everything by value — to modify something, pass a pointer to it.</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Call Stack Simulator <span class="badge badge-blue">INTERACTIVE</span></div>
+    <p>Each function call pushes a <em>stack frame</em> containing local variables and the return address. Stack frames are popped (destroyed) when the function returns.</p>
+    <div class="controls">
+      <button class="btn primary" onclick="callFunc('push')">Call next function →</button>
+      <button class="btn" onclick="callFunc('pop')">← Return</button>
+      <button class="btn" onclick="callFunc('reset')">↺ Reset</button>
+    </div>
+    <div class="viz-area" style="display:flex;gap:2rem;flex-wrap:wrap;align-items:flex-start;">
+      <div>
+        <div class="viz-label">Call Stack (grows ↓)</div>
+        <div id="call-stack-viz" style="display:flex;flex-direction:column-reverse;gap:4px;min-width:220px;"></div>
+      </div>
+      <div style="flex:1;min-width:200px;">
+        <div class="viz-label">Active Code</div>
+        <div id="call-code-display" class="code-block" style="margin:0;"></div>
+      </div>
+    </div>
+    <div id="stack-info" class="info-line" style="display:none"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Pass by Value vs Reference — Side by Side <span class="badge badge-green">ANIMATE</span></div>
+    <p>This is the most common source of bugs in student implementations: forgetting to pass a pointer when you need to modify the original.</p>
+    <div class="controls">
+      <button class="btn" onclick="passDemo('val')">Demonstrate: Pass by Value</button>
+      <button class="btn primary" onclick="passDemo('ref')">Demonstrate: Pass by Reference</button>
+    </div>
+    <div class="viz-area" id="pass-viz" style="min-height:100px;"></div>
+    <div id="pass-info" class="info-line" style="display:none"></div>
+    <div class="two-col" style="margin-top:0.5rem;">
+      <div class="code-block">
+<span class="cmt">// By VALUE — copy made</span>
+<span class="kw">void</span> <span class="fn">doubleIt</span>(<span class="ty">int</span> x) {
+  x = x * <span class="num">2</span>; <span class="cmt">// only local copy!</span>
+}
+<span class="ty">int</span> a = <span class="num">5</span>;
+<span class="fn">doubleIt</span>(a);
+<span class="cmt">// a is still 5 — BUG!</span></div>
+      <div class="code-block">
+<span class="cmt">// By REFERENCE — pointer passed</span>
+<span class="kw">void</span> <span class="fn">doubleIt</span>(<span class="ty">int</span>* x) {
+  *x = *x * <span class="num">2</span>; <span class="cmt">// modifies original</span>
+}
+<span class="ty">int</span> a = <span class="num">5</span>;
+<span class="fn">doubleIt</span>(<span class="op">&amp;</span>a);
+<span class="cmt">// a is now 10 ✓</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     SECTION 8: RECURSION
+══════════════════════════════════════════════════════════ -->
+<div class="section" id="sec-recursion">
+  <div class="section-head">
+    <div class="section-title">Recursion — Solving Problems with Sub-Problems</div>
+    <div class="section-sub">Tree traversals, graph DFS, merge sort, and tower of Hanoi are all naturally recursive. Every recursive function needs: (1) a base case, (2) progress toward the base case, (3) a recursive call.</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Factorial — Call Tree & Stack Depth <span class="badge badge-blue">INTERACTIVE</span></div>
+    <p>Watch how each recursive call pushes a new stack frame. The "unwinding" happens when the base case is hit and values return back up the call chain.</p>
+    <div class="controls">
+      <input type="number" id="fact-n" value="5" min="0" max="8" style="width:60px">
+      <button class="btn primary" onclick="animateFactorial()">▶ Animate</button>
+      <button class="btn" onclick="document.getElementById('fact-tree').innerHTML=''">Clear</button>
+    </div>
+    <div class="viz-area">
+      <div class="viz-label">Recursion unwind trace</div>
+      <div id="fact-tree" style="font-family:'IBM Plex Mono',monospace;font-size:12.5px;line-height:1.9;"></div>
+    </div>
+    <div id="fact-info" class="info-line" style="display:none"></div>
+    <div class="code-block">
+<span class="kw">int</span> <span class="fn">factorial</span>(<span class="ty">int</span> n) {
+  <span class="cmt">// BASE CASE: prevents infinite recursion</span>
+  <span class="kw">if</span> (n &lt;= <span class="num">1</span>) <span class="kw">return</span> <span class="num">1</span>;
+  <span class="cmt">// RECURSIVE CASE: progress toward n=1</span>
+  <span class="kw">return</span> n * <span class="fn">factorial</span>(n - <span class="num">1</span>);
+}
+<span class="cmt">// Stack depth = n frames = O(n) space!</span></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Fibonacci Tree — Overlapping Subproblems <span class="badge badge-green">ANIMATE</span></div>
+    <p>The Fibonacci call tree reveals <strong>overlapping subproblems</strong> — fib(3) is computed multiple times! This motivates <strong>dynamic programming</strong>. Red nodes = redundant computations.</p>
+    <div class="controls">
+      <input type="number" id="fib-n" value="5" min="1" max="7" style="width:60px">
+      <button class="btn primary" onclick="animateFib()">Draw Tree</button>
+    </div>
+    <div class="viz-area" style="overflow-x:auto;">
+      <div class="viz-label">Fibonacci call tree — red = repeated subproblem</div>
+      <canvas id="fib-canvas" width="860" height="260" style="max-width:100%;display:block;"></canvas>
+    </div>
+    <div class="code-block">
+<span class="cmt">// Naive — exponential time O(2^n)</span>
+<span class="kw">int</span> <span class="fn">fib</span>(<span class="ty">int</span> n) {
+  <span class="kw">if</span> (n &lt;= <span class="num">1</span>) <span class="kw">return</span> n;
+  <span class="kw">return</span> <span class="fn">fib</span>(n-<span class="num">1</span>) + <span class="fn">fib</span>(n-<span class="num">2</span>);
+}
+<span class="cmt">// Memoized — O(n) time</span>
+<span class="kw">int</span> memo[<span class="num">100</span>] = {<span class="num">0</span>};
+<span class="kw">int</span> <span class="fn">fibMemo</span>(<span class="ty">int</span> n) {
+  <span class="kw">if</span> (n &lt;= <span class="num">1</span>) <span class="kw">return</span> n;
+  <span class="kw">if</span> (memo[n]) <span class="kw">return</span> memo[n];
+  <span class="kw">return</span> memo[n] = <span class="fn">fibMemo</span>(n-<span class="num">1</span>) + <span class="fn">fibMemo</span>(n-<span class="num">2</span>);
+}</div>
+  </div>
+
+  <div class="two-col">
+    <div class="card">
+      <div class="card-title">Recursion on a Linked List <span class="badge badge-teal">APPLICATION</span></div>
+      <p>Most tree/list operations are elegantly expressed recursively. This is the pattern used in tree traversals.</p>
+      <div class="code-block">
+<span class="cmt">// Sum all values in a linked list</span>
+<span class="ty">int</span> <span class="fn">sumList</span>(<span class="ty">Node</span>* node) {
+  <span class="kw">if</span> (node == <span class="kw">NULL</span>)     <span class="cmt">// base case</span>
+    <span class="kw">return</span> <span class="num">0</span>;
+  <span class="kw">return</span> node<span class="op">-></span>data     <span class="cmt">// current</span>
+       + <span class="fn">sumList</span>(node<span class="op">-></span>next); <span class="cmt">// rest</span>
+}
+<span class="cmt">// Think: sum = head + sum(tail)</span></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Stack Overflow Risk <span class="badge badge-red">DANGER</span></div>
+      <p>Recursion uses stack memory. A list of 10,000 nodes will create 10,000 stack frames — stack overflow! Use iteration for long lists.</p>
+      <div class="code-block">
+<span class="cmt">// Iterative sum — O(1) stack space ✓</span>
+<span class="ty">int</span> <span class="fn">sumListIter</span>(<span class="ty">Node</span>* head) {
+  <span class="ty">int</span> total = <span class="num">0</span>;
+  <span class="kw">while</span> (head) {
+    total += head<span class="op">-></span>data;
+    head = head<span class="op">-></span>next;
+  }
+  <span class="kw">return</span> total;
+}
+<span class="cmt">// Use recursion for: trees, graphs (DFS)</span>
+<span class="cmt">// Use iteration for: linked list traversal</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     SECTION 9: SORTING BASICS
+══════════════════════════════════════════════════════════ -->
+<div class="section" id="sec-sorting">
+  <div class="section-head">
+    <div class="section-title">Sorting Algorithms — Visualized</div>
+    <div class="section-sub">Sorting is the gateway to algorithm analysis — understanding O(n²) vs O(n log n). Bubble, insertion, and selection sort are the prerequisite before merge sort (which requires recursion + arrays).</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Sorting Algorithm Visualizer <span class="badge badge-blue">INTERACTIVE</span></div>
+    <div class="concept-tabs">
+      <div class="ctab active" onclick="selectSort('bubble',this)">Bubble Sort O(n²)</div>
+      <div class="ctab" onclick="selectSort('selection',this)">Selection Sort O(n²)</div>
+      <div class="ctab" onclick="selectSort('insertion',this)">Insertion Sort O(n²)</div>
+    </div>
+    <p id="sort-desc"></p>
+    <div class="controls">
+      <button class="btn primary" onclick="startSort()">▶ Sort</button>
+      <button class="btn" onclick="shuffleSort()">🔀 Shuffle</button>
+      <button class="btn" onclick="resetSort()">↺ Reset</button>
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text3);">Comparisons: <span id="sort-cmp-count" style="color:var(--amber);">0</span></span>
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text3);">Swaps: <span id="sort-swap-count" style="color:var(--red);">0</span></span>
+    </div>
+    <div class="viz-area" style="overflow-x:auto;">
+      <div class="viz-label" id="sort-step-label">Press Sort to begin</div>
+      <div id="sort-viz" style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:4px;"></div>
+    </div>
+    <div class="code-block" id="sort-code"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Complexity Comparison <span class="badge badge-teal">ANALYSIS</span></div>
+    <div style="overflow-x:auto;">
+      <table style="width:100%;border-collapse:collapse;font-family:'IBM Plex Mono',monospace;font-size:12px;">
+        <thead>
+          <tr style="border-bottom:1px solid var(--border2);">
+            <th style="padding:8px 12px;text-align:left;color:var(--text2);">Algorithm</th>
+            <th style="padding:8px 12px;text-align:center;color:var(--text2);">Best</th>
+            <th style="padding:8px 12px;text-align:center;color:var(--text2);">Average</th>
+            <th style="padding:8px 12px;text-align:center;color:var(--text2);">Worst</th>
+            <th style="padding:8px 12px;text-align:center;color:var(--text2);">Space</th>
+            <th style="padding:8px 12px;text-align:left;color:var(--text2);">Stable?</th>
+          </tr>
+        </thead>
+        <tbody id="sort-table">
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:7px 12px;color:var(--text);">Bubble Sort</td>
+            <td style="padding:7px 12px;text-align:center;color:var(--green);">O(n)</td>
+            <td style="padding:7px 12px;text-align:center;color:var(--amber);">O(n²)</td>
+            <td style="padding:7px 12px;text-align:center;color:var(--red);">O(n²)</td>
+            <td style="padding:7px 12px;text-align:center;color:var(--green);">O(1)</td>
+            <td style="padding:7px 12px;color:var(--green);">Yes ✓</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:7px 12px;color:var(--text);">Selection Sort</td>
+            <td style="padding:7px 12px;text-align:center;color:var(--amber);">O(n²)</td>
+            <td style="padding:7px 12px;text-align:center;color:var(--amber);">O(n²)</td>
+            <td style="padding:7px 12px;text-align:center;color:var(--red);">O(n²)</td>
+            <td style="padding:7px 12px;text-align:center;color:var(--green);">O(1)</td>
+            <td style="padding:7px 12px;color:var(--red);">No ✗</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:7px 12px;color:var(--text);">Insertion Sort</td>
+            <td style="padding:7px 12px;text-align:center;color:var(--green);">O(n)</td>
+            <td style="padding:7px 12px;text-align:center;color:var(--amber);">O(n²)</td>
+            <td style="padding:7px 12px;text-align:center;color:var(--red);">O(n²)</td>
+            <td style="padding:7px 12px;text-align:center;color:var(--green);">O(1)</td>
+            <td style="padding:7px 12px;color:var(--green);">Yes ✓</td>
+          </tr>
+          <tr>
+            <td style="padding:7px 12px;color:var(--teal);">Merge Sort</td>
+            <td style="padding:7px 12px;text-align:center;color:var(--green);">O(n log n)</td>
+            <td style="padding:7px 12px;text-align:center;color:var(--green);">O(n log n)</td>
+            <td style="padding:7px 12px;text-align:center;color:var(--green);">O(n log n)</td>
+            <td style="padding:7px 12px;text-align:center;color:var(--amber);">O(n)</td>
+            <td style="padding:7px 12px;color:var(--green);">Yes ✓</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     SECTION 10: BIT OPS
+══════════════════════════════════════════════════════════ -->
+<div class="section" id="sec-bitops">
+  <div class="section-head">
+    <div class="section-title">Bitwise Operations</div>
+    <div class="section-sub">Used in hash functions, bloom filters, visited arrays in BFS/DFS, memory-efficient flags, and low-level optimizations. A bit array can store 32 boolean values in a single int.</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Bit Operation Visualizer <span class="badge badge-blue">INTERACTIVE</span></div>
+    <p>See each operation on individual bits. For graph algorithms: a 32-bit <code style="font-family:'IBM Plex Mono',monospace;color:var(--teal)">unsigned int</code> can replace a <code style="font-family:'IBM Plex Mono',monospace;color:var(--teal)">bool visited[32]</code> array!</p>
+    <div class="controls">
+      <input type="number" id="bit-a" value="60" style="width:70px" min="0" max="255">
+      <select id="bit-op" onchange="calcBits()">
+        <option value="and">AND (&amp;)</option>
+        <option value="or">OR (|)</option>
+        <option value="xor">XOR (^)</option>
+        <option value="not">NOT (~) on A</option>
+        <option value="shl">Left Shift (&lt;&lt; 1)</option>
+        <option value="shr">Right Shift (&gt;&gt; 1)</option>
+      </select>
+      <input type="number" id="bit-b" value="13" style="width:70px" min="0" max="255">
+      <button class="btn primary" onclick="calcBits()">Compute</button>
+    </div>
+    <div class="viz-area" id="bit-viz">
+      <div class="viz-label">8-bit representation</div>
+      <div id="bit-rows"></div>
+    </div>
+    <div class="code-block" id="bit-code"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Bit Tricks for Data Structures <span class="badge badge-teal">APPLICATIONS</span></div>
+    <div class="two-col">
+      <div class="code-block">
+<span class="cmt">// ── COMMON BIT TRICKS ──</span>
+
+<span class="cmt">// 1. Check if power of 2</span>
+<span class="kw">if</span> (n &amp; (n-<span class="num">1</span>) == <span class="num">0</span>) <span class="cmt">// power of 2</span>
+
+<span class="cmt">// 2. Check odd/even (faster than %)</span>
+<span class="kw">if</span> (n &amp; <span class="num">1</span>) <span class="cmt">// odd</span>
+
+<span class="cmt">// 3. Multiply/divide by 2</span>
+n &lt;&lt; <span class="num">1</span>; <span class="cmt">// n × 2</span>
+n &gt;&gt; <span class="num">1</span>; <span class="cmt">// n ÷ 2 (floor)</span>
+
+<span class="cmt">// 4. Swap without temp</span>
+a ^= b; b ^= a; a ^= b;</div>
+      <div class="code-block">
+<span class="cmt">// ── BIT ARRAY (visited[] in BFS) ──</span>
+
+<span class="ty">unsigned int</span> visited = <span class="num">0</span>; <span class="cmt">// 32 nodes!</span>
+
+<span class="cmt">// Mark node i as visited</span>
+visited |= (<span class="num">1u</span> &lt;&lt; i);
+
+<span class="cmt">// Check if node i is visited</span>
+<span class="kw">if</span> (visited &amp; (<span class="num">1u</span> &lt;&lt; i)) { ... }
+
+<span class="cmt">// Unmark node i</span>
+visited &amp;= ~(<span class="num">1u</span> &lt;&lt; i);
+
+<span class="cmt">// Count visited (Kernighan's trick)</span>
+<span class="ty">int</span> count = <span class="num">0</span>;
+<span class="kw">while</span> (visited) {
+  visited &amp;= visited - <span class="num">1</span>; count++;
+}</div>
+    </div>
+    <div class="controls" style="margin-top:0.5rem;">
+      <button class="btn primary" onclick="bitArrayDemo()">Demo: BFS visited[] using bit array</button>
+    </div>
+    <div class="viz-area" id="bit-array-viz" style="display:none;"></div>
+  </div>
+</div>
+
+</div><!-- end .main -->
+
+<!-- ═══════════ JAVASCRIPT ═══════════ -->
+<script>
+'use strict';
+
+// ─── THEME ───
+let isDark = true;
+function toggleTheme() {
+  isDark = !isDark;
+  document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+  document.getElementById('theme-btn').innerHTML = `<span class="toggle-icon">${isDark ? '🌙' : '☀️'}</span><span id="theme-label">${isDark ? 'Dark Mode' : 'Light Mode'}</span>`;
+  if (document.getElementById('fib-canvas').style.display !== 'none') animateFib();
+}
+
+// ─── NAVIGATION ───
+function showSection(id, btn) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('sec-' + id).classList.add('active');
+  btn.classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ═══════════════════════════════════════════════
+// SECTION 1: VARIABLES & TYPES
+// ═══════════════════════════════════════════════
+const typeData = {
+  char:   { bytes:1,  range:'−128 to 127 (signed)',          color:'#34d399', desc:'1 byte — stores a char or tiny integer' },
+  short:  { bytes:2,  range:'−32,768 to 32,767',             color:'#60a5fa', desc:'2 bytes — short integer' },
+  int:    { bytes:4,  range:'−2,147,483,648 to 2,147,483,647',color:'#4f8ef7', desc:'4 bytes — standard integer' },
+  long:   { bytes:8,  range:'−9.2×10¹⁸ to 9.2×10¹⁸',        color:'#7c5ff5', desc:'8 bytes — 64-bit integer' },
+  float:  { bytes:4,  range:'±3.4×10³⁸, 7 significant digits',color:'#fbbf24',desc:'4 bytes — single precision float' },
+  double: { bytes:8,  range:'±1.7×10³⁰⁸, 15 sig. digits',   color:'#f472b6', desc:'8 bytes — double precision float' },
+  ptr:    { bytes:8,  range:'0x0 to 0xFFFFFFFFFFFFFFFF',      color:'#22d3ee', desc:'8 bytes — holds a memory address (64-bit)' },
+  size_t: { bytes:8,  range:'0 to 18,446,744,073,709,551,615',color:'#fb923c',desc:'8 bytes — unsigned, used for sizes/indices' },
+};
+const typeCode = {
+  char:   `<span class="ty">char</span> c = <span class="str">'A'</span>;\nprintf(<span class="str">"%c %d"</span>, c, c); <span class="cmt">// A  65</span>\n<span class="cmt">// sizeof(char) == 1 always (C standard)</span>`,
+  short:  `<span class="ty">short</span> s = <span class="num">1000</span>;\nprintf(<span class="str">"%hd"</span>, s); <span class="cmt">// 1000</span>`,
+  int:    `<span class="ty">int</span> x = <span class="num">42</span>;   <span class="cmt">// most common choice for loop counters</span>\nprintf(<span class="str">"%d"</span>, x);`,
+  long:   `<span class="ty">long</span> l = <span class="num">9876543210L</span>;\nprintf(<span class="str">"%ld"</span>, l); <span class="cmt">// note suffix L</span>`,
+  float:  `<span class="ty">float</span> f = <span class="num">3.14f</span>;  <span class="cmt">// suffix f required!</span>\nprintf(<span class="str">"%.4f"</span>, f);`,
+  double: `<span class="ty">double</span> d = <span class="num">3.14159265358979</span>;\nprintf(<span class="str">"%.10f"</span>, d);`,
+  ptr:    `<span class="ty">int</span>  x = <span class="num">42</span>;\n<span class="ty">int</span>* p = <span class="op">&amp;</span>x;  <span class="cmt">// p holds address of x</span>\nprintf(<span class="str">"%p %d"</span>, (void*)p, *p);`,
+  size_t: `<span class="pp">#include</span> <span class="str">&lt;stddef.h&gt;</span>\n<span class="ty">size_t</span> n = <span class="num">100</span>;\n<span class="ty">int</span>* arr = malloc(n * <span class="kw">sizeof</span>(<span class="ty">int</span>)); <span class="cmt">// correct!</span>`,
+};
+
+function updateTypeViz() {
+  const t = document.getElementById('type-select').value;
+  const d = typeData[t];
+  const container = document.getElementById('type-bytes');
+  container.innerHTML = '';
+  for (let i = 0; i < d.bytes; i++) {
+    const cell = document.createElement('div');
+    cell.style.textAlign = 'center';
+    const box = document.createElement('div');
+    box.className = 'mem-box';
+    box.style.background = d.color + '20';
+    box.style.borderColor = d.color;
+    box.style.color = d.color;
+    box.style.animationDelay = (i * 0.07) + 's';
+    box.style.animation = 'fadeUp 0.3s ease both';
+    box.textContent = 'B' + i;
+    const addr = document.createElement('div');
+    addr.className = 'mem-addr';
+    addr.textContent = '0x' + (0x1000 + i).toString(16).toUpperCase();
+    cell.appendChild(box); cell.appendChild(addr);
+    container.appendChild(cell);
+  }
+  document.getElementById('type-info').textContent =
+    `sizeof(${t}) = ${d.bytes} byte${d.bytes>1?'s':''} | Range: ${d.range} | ${d.desc}`;
+  document.getElementById('type-code').innerHTML = typeCode[t];
+}
+updateTypeViz();
+
+// signed/unsigned slider
+function updateSignedViz() {
+  const v = parseInt(document.getElementById('sv-slider').value);
+  const signed8 = v > 127 ? v - 256 : v;
+  document.getElementById('sv-signed').textContent = signed8;
+  document.getElementById('sv-unsigned').textContent = v;
+  document.getElementById('sv-bits').textContent = v.toString(2).padStart(8,'0');
+}
+updateSignedViz();
+
+// Variable stack builder
+let declVars = [], declBase = 0x7fff2010;
+const tSizes = { int:4, char:1, float:4, double:8, ptr:8 };
+
+function declareVar() {
+  const type = document.getElementById('decl-type').value;
+  const name = document.getElementById('decl-name').value || 'v'+declVars.length;
+  const val  = document.getElementById('decl-val').value || '0';
+  if (declVars.length >= 7) { alert('Clear some variables first'); return; }
+  const size = tSizes[type];
+  const addr = declBase - size;
+  declBase = addr;
+  declVars.push({ type, name, val, addr, size });
+  renderDeclVars();
+}
+
+function renderDeclVars() {
+  const container = document.getElementById('stack-mem');
+  container.innerHTML = '';
+  [...declVars].reverse().forEach((v, ridx) => {
+    const row = document.createElement('div');
+    row.style.cssText = `display:flex;align-items:center;gap:8px;animation:fadeUp 0.3s ease;`;
+    const box = document.createElement('div');
+    box.className = 'mem-box';
+    box.style.cssText = `width:64px;background:rgba(79,142,247,0.15);border-color:var(--accent);color:var(--accent);`;
+    if (ridx === 0) { box.style.background = 'rgba(52,211,153,0.15)'; box.style.borderColor = 'var(--green)'; box.style.color = 'var(--green)'; }
+    box.textContent = v.val;
+    const meta = document.createElement('div');
+    meta.style.fontFamily = "'IBM Plex Mono',monospace"; meta.style.fontSize = '11px';
+    meta.innerHTML = `<div style="color:var(--text);font-weight:600">${v.type} ${v.name}</div><div style="color:var(--text3)">0x${v.addr.toString(16).toUpperCase()} · ${v.size}B</div>`;
+    row.appendChild(box); row.appendChild(meta);
+    container.appendChild(row);
+  });
+  // build code preview
+  const lines = declVars.map(v => `<span class="ty">${v.type === 'ptr' ? 'int*' : v.type}</span> ${v.name} = <span class="num">${v.val}</span>; <span class="cmt">// 0x${v.addr.toString(16).toUpperCase()}</span>`).join('\n');
+  document.getElementById('decl-code-preview').innerHTML = lines || '<span class="cmt">// Declare variables to see them here</span>';
+  if (declVars.length > 0) {
+    const last = declVars[declVars.length-1];
+    const info = document.getElementById('decl-info');
+    info.style.display = 'block';
+    info.textContent = `${last.type} ${last.name} = ${last.val}  |  address: 0x${last.addr.toString(16).toUpperCase()}  |  ${last.size} byte(s)`;
+  }
+}
+
+function clearVars() {
+  declVars = []; declBase = 0x7fff2010;
+  document.getElementById('stack-mem').innerHTML = '';
+  document.getElementById('decl-info').style.display = 'none';
+  document.getElementById('decl-code-preview').innerHTML = '<span class="cmt">// Declare variables to see them here</span>';
+}
+
+// ═══════════════════════════════════════════════
+// SECTION 2: ARRAYS
+// ═══════════════════════════════════════════════
+let arrData = [10, 25, 7, 42, 18, 3, 61];
+
+function renderArrViz(containerId, data, colorMap) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = '';
+  const typeEl = document.getElementById('arr-type');
+  const type = typeEl ? typeEl.value : 'int';
+  const sizes = { int:4, char:1, double:8 };
+  const sz = sizes[type] || 4;
+  data.forEach((val, i) => {
+    const cell = document.createElement('div');
+    cell.className = 'array-cell';
+    const box = document.createElement('div');
+    box.className = 'arr-box ' + (colorMap && colorMap[i] ? colorMap[i] : '');
+    box.style.width = (sz * 6 + 30) + 'px';
+    box.textContent = val;
+    const idx = document.createElement('div');
+    idx.style.cssText = "font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3)";
+    idx.textContent = '[' + i + ']';
+    const addr = document.createElement('div');
+    addr.style.cssText = "font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--text3);opacity:0.6";
+    addr.textContent = '0x' + (0x1000 + i * sz).toString(16).toUpperCase();
+    cell.appendChild(box); cell.appendChild(idx); cell.appendChild(addr);
+    container.appendChild(cell);
+  });
+}
+
+function buildArray() {
+  const input = document.getElementById('arr-input').value;
+  arrData = input.split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n)).slice(0, 12);
+  renderArrViz('arr-viz', arrData, {});
+  document.getElementById('arr-info').style.display = 'none';
+}
+
+function accessArray() {
+  const idx = parseInt(document.getElementById('arr-access').value);
+  if (isNaN(idx) || idx < 0 || idx >= arrData.length) { alert('Invalid index'); return; }
+  const cmap = {};
+  cmap[idx] = 'blue';
+  renderArrViz('arr-viz', arrData, cmap);
+  const type = document.getElementById('arr-type').value;
+  const sizes = { int:4, char:1, double:8 };
+  const sz = sizes[type] || 4;
+  const info = document.getElementById('arr-info');
+  info.style.display = 'block'; info.className = 'info-line';
+  info.textContent = `arr[${idx}] = ${arrData[idx]}  |  addr = 0x1000 + ${idx}×${sz} = 0x${(0x1000+idx*sz).toString(16).toUpperCase()}`;
+}
+buildArray();
+
+// 2D matrix
+(function buildMatrix() {
+  const m = [[1,2,3,4],[5,6,7,8],[9,10,11,12]];
+  const rows = 3, cols = 4;
+  const c2d = document.getElementById('matrix-2d');
+  const clin = document.getElementById('matrix-linear');
+  c2d.innerHTML = ''; clin.innerHTML = '';
+  const colors = ['#4f8ef7','#7c5ff5','#22d3ee'];
+  m.forEach((row, ri) => {
+    const rowEl = document.createElement('div');
+    rowEl.style.cssText = 'display:flex;gap:3px;margin-bottom:3px;';
+    row.forEach((val, ci) => {
+      const box = document.createElement('div');
+      box.style.cssText = `width:38px;height:34px;display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;border-radius:5px;border:1.5px solid ${colors[ri]}44;background:${colors[ri]}16;color:${colors[ri]};cursor:pointer;transition:all 0.2s;`;
+      box.textContent = val;
+      box.onclick = () => {
+        document.querySelectorAll('.mat-cell').forEach(b => b.style.borderWidth = '1.5px');
+        box.style.borderWidth = '2.5px';
+        const linIdx = ri * cols + ci;
+        document.querySelectorAll('.lin-cell').forEach((b,j) => {
+          b.style.background = j === linIdx ? colors[ri]+'44' : colors[Math.floor(j/cols)]+'16';
+          b.style.borderWidth = j === linIdx ? '2.5px' : '1.5px';
+        });
+        const info = document.getElementById('matrix-info');
+        info.style.display = 'block';
+        info.textContent = `M[${ri}][${ci}] = ${val}  |  offset = (${ri}×${cols} + ${ci}) × 4 = ${(ri*cols+ci)*4} bytes  |  linear index [${ri*cols+ci}]`;
+      };
+      box.className = 'mat-cell';
+      rowEl.appendChild(box);
+    });
+    c2d.appendChild(rowEl);
+  });
+  // linear
+  m.flat().forEach((val, i) => {
+    const ri = Math.floor(i / cols);
+    const box = document.createElement('div');
+    box.style.cssText = `width:34px;height:34px;display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;border-radius:5px;border:1.5px solid ${colors[ri]}44;background:${colors[ri]}16;color:${colors[ri]};`;
+    box.textContent = val;
+    box.className = 'lin-cell';
+    clin.appendChild(box);
+  });
+})();
+
+// Search
+let searchMode = 'linear', searchRunning = false;
+function selectSearch(mode, el) {
+  searchMode = mode;
+  document.querySelectorAll('#sec-arrays .ctab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('search-linear-desc').style.display = mode==='linear' ? '' : 'none';
+  document.getElementById('search-binary-desc').style.display = mode==='binary' ? '' : 'none';
+  document.getElementById('search-code-linear').style.display = mode==='linear' ? '' : 'none';
+  document.getElementById('search-code-binary').style.display = mode==='binary' ? '' : 'none';
+  resetSearch();
+}
+function resetSearch() {
+  searchRunning = false;
+  const data = searchMode === 'binary'
+    ? [3, 7, 10, 18, 25, 37, 42, 55, 61, 78]
+    : [10, 25, 7, 42, 18, 3, 61, 55, 37, 78];
+  renderArrViz('search-viz', data, {});
+  document.getElementById('search-info').style.display = 'none';
+  document.getElementById('search-ptrs').innerHTML = '';
+  document.getElementById('search-viz-label').textContent = searchMode === 'binary'
+    ? 'Sorted array for binary search' : 'Unsorted array for linear search';
+}
+resetSearch();
+
+function startSearch() {
+  if (searchRunning) return;
+  searchRunning = true;
+  const target = parseInt(document.getElementById('search-target').value);
+  const data = searchMode === 'binary'
+    ? [3, 7, 10, 18, 25, 37, 42, 55, 61, 78]
+    : [10, 25, 7, 42, 18, 3, 61, 55, 37, 78];
+  const info = document.getElementById('search-info');
+  info.style.display = 'block'; info.className = 'info-line';
+
+  if (searchMode === 'linear') {
+    let i = 0;
+    function step() {
+      if (i >= data.length) {
+        renderArrViz('search-viz', data, {});
+        info.className = 'info-line red'; info.textContent = `Not found! Checked all ${data.length} elements.`;
+        searchRunning = false; return;
+      }
+      const cmap = {};
+      for (let j = 0; j < i; j++) cmap[j] = 'green';
+      cmap[i] = 'amber';
+      info.textContent = `Checking arr[${i}] = ${data[i]}  ...  ${data[i] === target ? '✓ FOUND!' : '≠ move on'}`;
+      if (data[i] === target) {
+        cmap[i] = 'green'; info.className = 'info-line green';
+        info.textContent = `✓ Found ${target} at index [${i}]! Compared ${i+1} element(s).`;
+        renderArrViz('search-viz', data, cmap); searchRunning = false; return;
+      }
+      renderArrViz('search-viz', data, cmap); i++;
+      setTimeout(step, 550);
+    }
+    step();
+  } else {
+    let lo = 0, hi = data.length - 1;
+    function bstep() {
+      if (lo > hi) {
+        info.className = 'info-line red'; info.textContent = `Not found! Binary search eliminated all possibilities.`;
+        searchRunning = false; return;
+      }
+      const mid = lo + Math.floor((hi - lo) / 2);
+      const cmap = {};
+      for (let j = 0; j < data.length; j++) {
+        if (j < lo || j > hi) cmap[j] = 'red';
+      }
+      cmap[mid] = 'amber';
+      document.getElementById('search-ptrs').innerHTML =
+        `<span style="color:var(--green)">lo[${lo}]</span>  <span style="color:var(--amber)">mid[${mid}]</span>  <span style="color:var(--red)">hi[${hi}]</span>`;
+      if (data[mid] === target) {
+        cmap[mid] = 'green'; info.className = 'info-line green';
+        info.textContent = `✓ Found ${target} at index [${mid}]! Binary search needed far fewer comparisons.`;
+        renderArrViz('search-viz', data, cmap); searchRunning = false; return;
+      }
+      info.textContent = `mid[${mid}]=${data[mid]} ${data[mid]<target?'<':'>'} ${target}  →  ${data[mid]<target?`lo = ${mid+1}` : `hi = ${mid-1}`}`;
+      renderArrViz('search-viz', data, cmap);
+      if (data[mid] < target) lo = mid + 1; else hi = mid - 1;
+      setTimeout(bstep, 750);
+    }
+    bstep();
+  }
+}
+
+// ═══════════════════════════════════════════════
+// SECTION 3: POINTERS
+// ═══════════════════════════════════════════════
+let ptrState = { val: 99, changed: false, isNull: false };
+
+function renderPointerViz() {
+  const mem = document.getElementById('ptr-mem');
+  mem.innerHTML = '';
+  const { val, changed, isNull } = ptrState;
+
+  // x cell
+  const xcell = document.createElement('div');
+  xcell.className = 'mem-cell';
+  xcell.innerHTML = `<div class="mem-name">x</div>`;
+  const xbox = document.createElement('div');
+  xbox.className = 'mem-box ' + (changed ? 'hi-green' : 'hi-blue');
+  xbox.textContent = val;
+  xcell.appendChild(xbox);
+  xcell.innerHTML += '<div class="mem-addr">0x2004</div>';
+  mem.appendChild(xcell);
+
+  // ptr cell
+  const pcell = document.createElement('div');
+  pcell.className = 'mem-cell';
+  pcell.innerHTML = `<div class="mem-name">ptr</div>`;
+  const pbox = document.createElement('div');
+  pbox.className = 'mem-box hi-purple';
+  pbox.style.width = '84px'; pbox.style.fontSize = '11px';
+  pbox.textContent = isNull ? 'NULL' : '0x2004';
+  pcell.appendChild(pbox);
+  pcell.innerHTML += '<div class="mem-addr">0x3008</div>';
+  mem.appendChild(pcell);
+
+  // arrow area
+  const arrow = document.getElementById('ptr-arrow-area');
+  arrow.innerHTML = isNull
+    ? `<div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--red);">ptr = NULL  →  points nowhere  |  dereferencing = segfault ☠️</div>`
+    : `<div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text2);display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+        <span style="color:var(--accent2)">ptr (0x3008)</span>
+        <span style="color:var(--accent);font-size:20px">→</span>
+        <span style="color:var(--accent)">0x2004</span>
+        <span style="color:var(--accent);font-size:20px">→</span>
+        <span style="${changed?'color:var(--green)':'color:var(--text)'}">${val}</span>
+        <span style="color:var(--text3)">(value of x)</span>
+      </div>`;
+
+  const info = document.getElementById('ptr-info');
+  info.style.display = 'block';
+  info.textContent = isNull
+    ? 'ptr = NULL — must check before dereferencing!'
+    : `&x = 0x2004  |  ptr = 0x2004  |  *ptr = ${val}  |  &ptr = 0x3008`;
+}
+
+function animatePointer() {
+  ptrState.val = parseInt(document.getElementById('ptr-val').value) || 99;
+  ptrState.changed = false; ptrState.isNull = false;
+  renderPointerViz();
+  document.getElementById('ptr-code-block').innerHTML =
+    `<span class="ty">int</span>  x   = <span class="num">${ptrState.val}</span>;   <span class="cmt">// at 0x2004</span>\n<span class="ty">int</span>* ptr = <span class="op">&amp;</span>x;  <span class="cmt">// ptr = 0x2004</span>\nprintf(<span class="str">"%d"</span>, *ptr); <span class="cmt">// → ${ptrState.val}</span>`;
+}
+
+function modifyViaPtr() {
+  ptrState.val = 200; ptrState.changed = true; ptrState.isNull = false;
+  renderPointerViz();
+  document.getElementById('ptr-code-block').innerHTML =
+    `*ptr = <span class="num">200</span>;         <span class="cmt">// write to address 0x2004</span>\nprintf(<span class="str">"%d"</span>, x); <span class="cmt">// → 200 (x was changed!)</span>`;
+}
+
+function makeNullPtr() {
+  ptrState.isNull = true; renderPointerViz();
+  document.getElementById('ptr-code-block').innerHTML =
+    `ptr = <span class="kw">NULL</span>;  <span class="cmt">// safe — points to nothing</span>\n<span class="kw">if</span> (ptr != <span class="kw">NULL</span>) *ptr = <span class="num">5</span>; <span class="cmt">// guard!</span>`;
+}
+animatePointer();
+
+// Pointer arithmetic
+let paIdx = 0;
+const paSizes = { char:1, int:4, double:8 };
+const paData = [65,72,69,76,76,79,33,0,100,200,300,400,500,600,700,800];
+
+function resetPtrArith() { paIdx = 0; renderPtrArith(); }
+function ptrNext() { const t = document.getElementById('pa-type').value; if (paIdx < 7) { paIdx++; renderPtrArith(); } }
+function ptrPrev() { if (paIdx > 0) { paIdx--; renderPtrArith(); } }
+
+function renderPtrArith() {
+  const t = document.getElementById('pa-type').value;
+  const sz = paSizes[t];
+  const count = 8;
+  const arrRow = document.getElementById('pa-array-row');
+  arrRow.innerHTML = '';
+  for (let i = 0; i < count; i++) {
+    const cell = document.createElement('div');
+    cell.className = 'array-cell';
+    const box = document.createElement('div');
+    box.className = 'arr-box ' + (i === paIdx ? 'blue' : '');
+    box.style.width = (sz * 5 + 24) + 'px';
+    box.textContent = t === 'char' ? String.fromCharCode(paData[i]) : (paData[i] * (sz === 8 ? 100 : 1));
+    const addr = document.createElement('div');
+    addr.style.cssText = "font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--text3)";
+    addr.textContent = '0x' + (0x3000 + i * sz).toString(16).toUpperCase();
+    cell.appendChild(box); cell.appendChild(addr);
+    arrRow.appendChild(cell);
+  }
+  const ind = document.getElementById('pa-ptr-indicator');
+  ind.innerHTML = `<span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--accent);">↑ ptr  [index ${paIdx}]  addr = 0x${(0x3000+paIdx*sz).toString(16).toUpperCase()}</span>`;
+  document.getElementById('pa-info').textContent =
+    `ptr points to index [${paIdx}]  |  addr = 0x${(0x3000+paIdx*sz).toString(16).toUpperCase()}  |  each ptr++ moves +${sz} byte(s) (sizeof(${t}))`;
+}
+resetPtrArith();
+
+// Pointer quiz
+const ptrQuizzes = [
+  { q: 'int x=5; int* p=&x; *p=10; printf("%d",x);', opts: ['5','10','address of x','undefined'], ans: 1, exp: '*p modifies the original variable x through the pointer.' },
+  { q: 'int a=3; int* p=NULL; p=&a; printf("%d",*p);', opts: ['NULL','3','0','segfault'], ans: 1, exp: 'p is first NULL but then assigned &a, so *p is 3.' },
+  { q: 'int arr[3]={1,2,3}; printf("%d",*(arr+2));', opts: ['1','2','3','arr+2'], ans: 2, exp: 'arr+2 is a pointer to arr[2], dereferencing gives 3.' },
+  { q: 'sizeof(int*) on a 64-bit system?', opts: ['4','8','2','depends on int'], ans: 1, exp: 'All pointers are 8 bytes on a 64-bit system regardless of the type they point to.' },
+];
+let ptrQuizIdx = 0, ptrAnswered = false;
+
+function renderPtrQuiz() {
+  ptrAnswered = false;
+  const q = ptrQuizzes[ptrQuizIdx % ptrQuizzes.length];
+  document.getElementById('ptr-quiz-q').textContent = q.q;
+  const opts = document.getElementById('ptr-quiz-opts');
+  opts.innerHTML = '';
+  q.opts.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'quiz-option';
+    btn.textContent = opt;
+    btn.onclick = () => {
+      if (ptrAnswered) return;
+      ptrAnswered = true;
+      btn.className = 'quiz-option ' + (i === q.ans ? 'correct' : 'wrong');
+      if (i !== q.ans) opts.querySelectorAll('.quiz-option')[q.ans].className = 'quiz-option correct';
+      const fb = document.getElementById('ptr-quiz-feedback');
+      fb.style.display = 'block';
+      fb.style.background = i === q.ans ? 'rgba(52,211,153,0.1)' : 'rgba(248,113,113,0.1)';
+      fb.style.color = i === q.ans ? 'var(--green)' : 'var(--red)';
+      fb.textContent = (i === q.ans ? '✓ Correct! ' : '✗ Wrong. ') + q.exp;
+    };
+    opts.appendChild(btn);
+  });
+  document.getElementById('ptr-quiz-feedback').style.display = 'none';
+}
+
+function nextPtrQuiz() { ptrQuizIdx++; renderPtrQuiz(); }
+renderPtrQuiz();
+
+// ═══════════════════════════════════════════════
+// SECTION 4: STRUCTS
+// ═══════════════════════════════════════════════
+const structDefs = {
+  node: {
+    name:'Linked List Node', total:16,
+    fields:[
+      { type:'int',    name:'data', val:'42',    size:4, off:0 },
+      { type:'(pad)',  name:'——',   val:'',      size:4, off:4, pad:true },
+      { type:'Node*',  name:'next', val:'0x5500',size:8, off:8 },
+    ],
+    code:`<span class="kw">typedef struct</span> <span class="ty">Node</span> {\n  <span class="ty">int</span>          data;   <span class="cmt">// offset 0, 4 bytes</span>\n  <span class="cmt">                      // 4 bytes padding (align pointer to 8B)</span>\n  <span class="kw">struct</span> <span class="ty">Node</span>*  next;   <span class="cmt">// offset 8, 8 bytes</span>\n} <span class="ty">Node</span>;\n<span class="cmt">// sizeof(Node) = 16 bytes (NOT 12!)</span>`
+  },
+  tree: {
+    name:'Binary Tree Node', total:24,
+    fields:[
+      { type:'int',    name:'data',  val:'7',    size:4, off:0 },
+      { type:'(pad)',  name:'——',    val:'',     size:4, off:4, pad:true },
+      { type:'Node*',  name:'left',  val:'0x4400',size:8, off:8 },
+      { type:'Node*',  name:'right', val:'0x6600',size:8, off:16 },
+    ],
+    code:`<span class="kw">typedef struct</span> <span class="ty">TreeNode</span> {\n  <span class="ty">int</span>        data;   <span class="cmt">// offset 0</span>\n  <span class="cmt">                   // 4B padding</span>\n  <span class="kw">struct</span> <span class="ty">TreeNode</span>* left;  <span class="cmt">// offset 8</span>\n  <span class="kw">struct</span> <span class="ty">TreeNode</span>* right; <span class="cmt">// offset 16</span>\n} <span class="ty">TreeNode</span>;\n<span class="cmt">// sizeof(TreeNode) = 24 bytes</span>`
+  },
+  student: {
+    name:'Student', total:44,
+    fields:[
+      { type:'int',    name:'roll_no',val:'101',  size:4, off:0 },
+      { type:'char[32]',name:'name',  val:'"Alice"',size:32,off:4 },
+      { type:'float',  name:'cgpa',   val:'9.2',  size:4, off:36 },
+      { type:'int',    name:'year',   val:'2',    size:4, off:40 },
+    ],
+    code:`<span class="kw">typedef struct</span> {\n  <span class="ty">int</span>   roll_no; <span class="cmt">// 4B at offset 0</span>\n  <span class="ty">char</span>  name[<span class="num">32</span>];<span class="cmt">// 32B at offset 4</span>\n  <span class="ty">float</span> cgpa;    <span class="cmt">// 4B at offset 36</span>\n  <span class="ty">int</span>   year;    <span class="cmt">// 4B at offset 40</span>\n} <span class="ty">Student</span>;\n<span class="cmt">// sizeof(Student) = 44 bytes (no padding needed here)</span>`
+  },
+  graph: {
+    name:'Graph Vertex', total:40,
+    fields:[
+      { type:'int',  name:'id',        val:'3',      size:4, off:0 },
+      { type:'int',  name:'degree',    val:'2',      size:4, off:4 },
+      { type:'int*', name:'neighbors', val:'0x7700', size:8, off:8 },
+      { type:'char[16]',name:'label',  val:'"v3"',   size:16,off:16 },
+      { type:'bool', name:'visited',   val:'false',  size:1, off:32 },
+      { type:'(pad)', name:'——',       val:'',       size:7, off:33, pad:true },
+    ],
+    code:`<span class="kw">typedef struct</span> {\n  <span class="ty">int</span>   id, degree;\n  <span class="ty">int</span>*  neighbors;  <span class="cmt">// dynamic adjacency list</span>\n  <span class="ty">char</span>  label[<span class="num">16</span>];\n  <span class="ty">bool</span>  visited;\n  <span class="cmt">            // 7B padding</span>\n} <span class="ty">Vertex</span>;\n<span class="cmt">// sizeof(Vertex) = 40 bytes</span>`
+  },
+  stack: {
+    name:'Array-based Stack', total:24,
+    fields:[
+      { type:'int[MAX]',name:'data',   val:'[arr]', size:8, off:0 },
+      { type:'int',     name:'top',    val:'-1',    size:4, off:8 },
+      { type:'int',     name:'maxSize',val:'100',   size:4, off:12 },
+    ],
+    code:`<span class="pp">#define</span> MAX <span class="num">100</span>\n<span class="kw">typedef struct</span> {\n  <span class="ty">int</span> data[MAX];\n  <span class="ty">int</span> top;     <span class="cmt">// -1 = empty</span>\n  <span class="ty">int</span> maxSize;\n} <span class="ty">Stack</span>;\n<span class="cmt">// push: stack.data[++stack.top] = val;</span>\n<span class="cmt">// pop:  return stack.data[stack.top--];</span>`
+  },
+};
+const fieldColors = ['#4f8ef7','#34d399','#fbbf24','#f472b6','#22d3ee','#fb923c','#a78bfa'];
+
+function showStruct(type) {
+  const def = structDefs[type];
+  const viz = document.getElementById('struct-viz');
+  viz.innerHTML = '';
+  const box = document.createElement('div');
+  box.className = 'struct-box';
+  const hdr = document.createElement('div'); hdr.className = 'struct-header';
+  hdr.textContent = 'struct ' + def.name;
+  box.appendChild(hdr);
+  let colorIdx = 0;
+  def.fields.forEach(f => {
+    const row = document.createElement('div');
+    row.className = 'struct-field' + (f.pad ? ' pad-row' : '');
+    row.innerHTML = `<span class="sf-type">${f.type}</span><span class="sf-name">${f.name}</span><span class="sf-val">${f.val}</span><span class="sf-off">+${f.off} (${f.size}B)</span>`;
+    if (!f.pad) colorIdx++;
+    box.appendChild(row);
+  });
+  viz.appendChild(box);
+
+  // byte-level visual
+  const bytesDiv = document.getElementById('struct-bytes');
+  bytesDiv.innerHTML = '';
+  colorIdx = 0;
+  def.fields.forEach(f => {
+    const c = f.pad ? 'rgba(248,113,113,0.25)' : fieldColors[colorIdx % fieldColors.length] + '33';
+    const bc = f.pad ? 'rgba(248,113,113,0.5)' : fieldColors[colorIdx % fieldColors.length];
+    for (let i = 0; i < Math.min(f.size, 16); i++) {
+      const b = document.createElement('div');
+      b.style.cssText = `width:22px;height:22px;border-radius:3px;border:1px solid ${bc}88;background:${c};font-family:'IBM Plex Mono',monospace;font-size:8px;color:${bc};display:flex;align-items:center;justify-content:center;`;
+      b.textContent = f.pad ? '·' : f.name[0];
+      bytesDiv.appendChild(b);
+    }
+    if (f.size > 16) {
+      const ell = document.createElement('div');
+      ell.style.cssText = `font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3);display:flex;align-items:center;padding:0 4px;`;
+      ell.textContent = `+${f.size-16}…`;
+      bytesDiv.appendChild(ell);
+    }
+    if (!f.pad) colorIdx++;
+  });
+  document.getElementById('struct-total').textContent = `sizeof(${def.name.split(' ').pop()}) = ${def.total} bytes  |  fields may have padding for alignment`;
+  document.getElementById('struct-code').innerHTML = def.code;
+}
+showStruct('node');
+
+// Struct access viz
+(function() {
+  const viz = document.getElementById('struct-access-viz');
+  const mkCard = (title, access, color) => {
+    const card = document.createElement('div');
+    card.innerHTML = `<div class="viz-label">${title}</div>`;
+    const sbox = document.createElement('div');
+    sbox.className = 'struct-box';
+    sbox.style.borderColor = color + '44';
+    sbox.innerHTML = `<div class="struct-header" style="color:${color}">Node</div>
+      <div class="struct-field" style="cursor:pointer;transition:background 0.2s" onmouseenter="this.style.background='${color}14'" onmouseleave="this.style.background=''"><span class="sf-type">int</span><span class="sf-name">data</span><span class="sf-val" style="color:var(--green)">42</span><span style="font-size:10px;color:${color}">${access}.data</span></div>
+      <div class="struct-field" style="cursor:pointer;transition:background 0.2s" onmouseenter="this.style.background='${color}14'" onmouseleave="this.style.background=''"><span class="sf-type">Node*</span><span class="sf-name">next</span><span class="sf-val" style="color:var(--teal)">NULL</span><span style="font-size:10px;color:${color}">${access}.next</span></div>`;
+    card.appendChild(sbox);
+    return card;
+  };
+  viz.appendChild(mkCard('Node n (direct)', 'n', 'var(--accent)'));
+  viz.appendChild(mkCard('Node* p = &n (pointer)', 'p->', 'var(--pink)'));
+})();
+
+// ═══════════════════════════════════════════════
+// SECTION 5: MALLOC
+// ═══════════════════════════════════════════════
+let heapNodes = [], heapBase = 0x55a00;
+let leakCount = 0;
+
+function heapMalloc() {
+  if (heapNodes.length >= 7) { alert('Demo heap full!'); return; }
+  const val = Math.floor(Math.random() * 90) + 10;
+  const addr = heapBase; heapBase += 16;
+  heapNodes.push({ val, addr });
+  renderHeap();
+  document.getElementById('head-ptr-display').textContent =
+    `head → 0x${heapNodes[0].addr.toString(16).toUpperCase()}`;
+  const info = document.getElementById('heap-info');
+  info.style.display = 'block'; info.className = 'info-line';
+  info.textContent = `malloc(sizeof(Node)) = 16 bytes → 0x${addr.toString(16).toUpperCase()}  |  data=${val}, next=NULL`;
+}
+
+function heapFree() {
+  if (heapNodes.length === 0) return;
+  const n = heapNodes.pop();
+  renderHeap();
+  document.getElementById('head-ptr-display').textContent =
+    heapNodes.length > 0 ? `head → 0x${heapNodes[0].addr.toString(16).toUpperCase()}` : 'head = NULL';
+  const info = document.getElementById('heap-info');
+  info.style.display = 'block'; info.className = 'info-line red';
+  info.textContent = `free(0x${n.addr.toString(16).toUpperCase()}) — memory returned. Pointer now dangling! Set to NULL.`;
+}
+
+function heapLeakDemo() {
+  leakCount++;
+  const addr = heapBase; heapBase += 16;
+  const info = document.getElementById('heap-info');
+  info.style.display = 'block'; info.className = 'info-line red';
+  info.textContent = `⚠ malloc(16) → 0x${addr.toString(16).toUpperCase()} allocated but pointer overwritten! ${leakCount * 16}B leaked so far.`;
+}
+
+function resetHeap() {
+  heapNodes = []; heapBase = 0x55a00; leakCount = 0;
+  document.getElementById('heap-viz').innerHTML = '';
+  document.getElementById('heap-info').style.display = 'none';
+  document.getElementById('head-ptr-display').textContent = 'head = NULL';
+}
+
+function renderHeap() {
+  const viz = document.getElementById('heap-viz');
+  viz.innerHTML = '';
+  heapNodes.forEach((n, i) => {
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;align-items:center;gap:6px;animation:fadeUp 0.3s ease;';
+    const d = document.createElement('div');
+    d.className = 'mem-box hi-green'; d.style.width = '50px';
+    d.textContent = n.val;
+    const nx = document.createElement('div');
+    nx.className = 'mem-box hi-blue'; nx.style.width = '76px'; nx.style.fontSize = '11px';
+    nx.textContent = i < heapNodes.length - 1 ? '0x'+heapNodes[i+1].addr.toString(16).toUpperCase() : 'NULL';
+    const addr = document.createElement('div');
+    addr.style.cssText = "font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3)";
+    addr.textContent = '0x'+n.addr.toString(16).toUpperCase();
+    row.appendChild(d); row.appendChild(nx); row.appendChild(addr);
+    viz.appendChild(row);
+  });
+}
+
+function leakDemo(type) {
+  const term = document.getElementById('leak-terminal');
+  if (type === 'good') {
+    term.innerHTML = `<span class="prompt">$ valgrind --leak-check=full ./program</span>\n\nAllocating Node 1 → 0x5500 (16B)\nAllocating Node 2 → 0x5510 (16B)\nAllocating Node 3 → 0x5520 (16B)\nUsing nodes...\nfree(0x5500) ✓  free(0x5510) ✓  free(0x5520) ✓\n\n<span style="color:#a3e635">==PID== HEAP SUMMARY:\n==PID==   total heap usage: 3 allocs, 3 frees, 48 bytes\n==PID== All heap blocks were freed\n==PID== ERROR SUMMARY: 0 errors ✓</span>`;
+  } else {
+    term.innerHTML = `<span class="prompt">$ valgrind --leak-check=full ./program</span>\n\nAllocating Node 1 → 0x5500 (16B)\nAllocating Node 2 → 0x5510 (16B)\nAllocating Node 3 → 0x5520 (16B)\nUsing nodes...\n<span style="color:#fbbf24">⚠ No free() called anywhere!</span>\n\n<span style="color:#f87171">==PID== LEAK SUMMARY:\n==PID==    definitely lost: 48 bytes in 3 blocks\n==PID==    still reachable: 0 bytes\n==PID== ERROR SUMMARY: 3 errors from 1 context\n==PID==\n==PID== For every malloc there must be a free!\n💀 In a long-running program, leaks accumulate until crash.</span>`;
+  }
+}
+
+// ═══════════════════════════════════════════════
+// SECTION 6: LINKED LIST
+// ═══════════════════════════════════════════════
+let llList = [];
+
+function renderLL() {
+  const viz = document.getElementById('ll-viz');
+  viz.innerHTML = '';
+  if (llList.length === 0) {
+    viz.innerHTML = `<span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text3);">head → NULL  (empty list)</span>`;
+    return;
+  }
+  // head label
+  const headLabel = document.createElement('span');
+  headLabel.style.cssText = "font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--green);margin-right:6px;";
+  headLabel.textContent = 'head →';
+  viz.appendChild(headLabel);
+
+  llList.forEach((val, i) => {
+    const node = document.createElement('div');
+    node.className = 'll-node' + (i === 0 ? ' head-node' : '');
+    node.innerHTML = `<div class="ll-data">${val}</div><div class="ll-nxt">${i < llList.length-1 ? '→' : 'NULL'}</div>`;
+    viz.appendChild(node);
+    if (i < llList.length - 1) {
+      const arr = document.createElement('span');
+      arr.className = 'll-arrow'; arr.textContent = '→';
+      viz.appendChild(arr);
+    }
+  });
+}
+
+function llInsertFront() {
+  const v = parseInt(document.getElementById('ll-val').value);
+  if (isNaN(v)) return;
+  llList.unshift(v);
+  renderLL();
+  const info = document.getElementById('ll-info');
+  info.style.display = 'block'; info.className = 'info-line';
+  info.textContent = `Insert Front: newNode(${v}) → newNode->next = head → head = newNode  |  O(1)`;
+  document.getElementById('ll-code').innerHTML =
+    `<span class="ty">Node</span>* n = <span class="fn">newNode</span>(<span class="num">${v}</span>);\nn<span class="op">-></span>next = head;   <span class="cmt">// link to old head</span>\nhead = n;        <span class="cmt">// update head</span>`;
+}
+
+function llInsertBack() {
+  const v = parseInt(document.getElementById('ll-val').value);
+  if (isNaN(v)) return;
+  llList.push(v);
+  renderLL();
+  const info = document.getElementById('ll-info');
+  info.style.display = 'block'; info.className = 'info-line amber';
+  info.textContent = `Insert Back: traverse to last node, set last->next = newNode(${v})  |  O(n) — must traverse whole list`;
+  document.getElementById('ll-code').innerHTML =
+    `<span class="ty">Node</span>* n = <span class="fn">newNode</span>(<span class="num">${v}</span>);\n<span class="kw">if</span> (!head) { head = n; <span class="kw">return</span>; }\n<span class="ty">Node</span>* t = head;\n<span class="kw">while</span> (t<span class="op">-></span>next) t = t<span class="op">-></span>next; <span class="cmt">// find tail</span>\nt<span class="op">-></span>next = n;`;
+}
+
+function llDeleteFront() {
+  if (llList.length === 0) return;
+  const old = llList.shift();
+  renderLL();
+  const info = document.getElementById('ll-info');
+  info.style.display = 'block'; info.className = 'info-line green';
+  info.textContent = `Delete Front: tmp=head → head=head->next → free(tmp)  |  Deleted: ${old}  |  O(1)`;
+  document.getElementById('ll-code').innerHTML =
+    `<span class="ty">Node</span>* tmp = head;\nhead = head<span class="op">-></span>next; <span class="cmt">// advance head</span>\n<span class="fn">free</span>(tmp);           <span class="cmt">// free old head</span>\ntmp = <span class="kw">NULL</span>;          <span class="cmt">// dangling ptr guard</span>`;
+}
+
+function llReverse() {
+  llList.reverse();
+  renderLL();
+  const info = document.getElementById('ll-info');
+  info.style.display = 'block'; info.className = 'info-line';
+  info.textContent = 'Reversed! Pointer-based reverse: 3 pointers (prev, curr, next) — O(n)';
+  document.getElementById('ll-code').innerHTML =
+    `<span class="ty">Node</span> *prev = <span class="kw">NULL</span>, *curr = head, *nxt;\n<span class="kw">while</span> (curr) {\n  nxt = curr<span class="op">-></span>next;\n  curr<span class="op">-></span>next = prev;  <span class="cmt">// reverse link</span>\n  prev = curr;\n  curr = nxt;\n}\nhead = prev;`;
+}
+
+function llClear() {
+  llList = []; renderLL();
+  document.getElementById('ll-info').style.display = 'none';
+  document.getElementById('ll-code').innerHTML = '<span class="cmt">// Build a list by inserting values above</span>';
+}
+renderLL();
+
+// ═══════════════════════════════════════════════
+// SECTION 7: FUNCTIONS
+// ═══════════════════════════════════════════════
+const callScenario = [
+  { name:'main()', vars:'val: ?, retAddr: —', code:`<span class="kw">int</span> <span class="fn">main</span>() {\n  <span class="ty">int</span> val = <span class="fn">compute</span>(<span class="num">5</span>);\n  <span class="kw">return</span> <span class="num">0</span>;\n}` },
+  { name:'compute(x=5)', vars:'x: 5, r: ?', code:`<span class="kw">int</span> <span class="fn">compute</span>(<span class="ty">int</span> x) {\n  <span class="ty">int</span> r = <span class="fn">sum</span>(x, <span class="num">10</span>);\n  <span class="kw">return</span> r;\n}` },
+  { name:'sum(a=5,b=10)', vars:'a: 5, b: 10, ret: 15', code:`<span class="kw">int</span> <span class="fn">sum</span>(<span class="ty">int</span> a, <span class="ty">int</span> b) {\n  <span class="kw">return</span> a + b; <span class="cmt">// = 15</span>\n}` },
+];
+let callDepth = 0;
+
+function callFunc(action) {
+  if (action === 'reset') callDepth = 0;
+  else if (action === 'push' && callDepth < callScenario.length) callDepth++;
+  else if (action === 'pop' && callDepth > 0) callDepth--;
+  renderCallStack();
+}
+
+function renderCallStack() {
+  const viz = document.getElementById('call-stack-viz');
+  viz.innerHTML = '';
+  if (callDepth === 0) {
+    viz.innerHTML = `<div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text3)">Press "Call next function" to push frames</div>`;
+    document.getElementById('stack-info').style.display = 'none';
+    document.getElementById('call-code-display').innerHTML = callScenario[0].code;
+    return;
+  }
+  for (let i = 0; i < callDepth; i++) {
+    const f = callScenario[i];
+    const frame = document.createElement('div');
+    frame.className = 'stack-frame' + (i === callDepth - 1 ? ' top-frame' : '');
+    frame.innerHTML = `<div style="font-weight:600;color:${i===callDepth-1?'var(--accent)':'var(--text)'}">${f.name}</div><div style="font-size:11px;color:var(--text3);margin-top:2px">${f.vars}</div>`;
+    viz.appendChild(frame);
+  }
+  const cur = callScenario[callDepth - 1];
+  document.getElementById('call-code-display').innerHTML = cur.code;
+  const info = document.getElementById('stack-info');
+  info.style.display = 'block';
+  info.textContent = `Depth: ${callDepth} frame(s)  |  Active: ${cur.name}  |  Locals: ${cur.vars}`;
+}
+renderCallStack();
+
+function passDemo(type) {
+  const viz = document.getElementById('pass-viz');
+  const info = document.getElementById('pass-info');
+  info.style.display = 'block';
+  if (type === 'val') {
+    viz.innerHTML = `
+      <div style="display:flex;gap:2rem;flex-wrap:wrap;align-items:flex-start;padding:0.5rem 0">
+        <div style="text-align:center">
+          <div class="viz-label">Caller — main()</div>
+          <div class="mem-cell"><div class="mem-name">a</div><div class="mem-box hi-blue">5</div><div class="mem-addr">0x2000</div></div>
+        </div>
+        <div style="font-size:22px;color:var(--text3);padding-top:36px">→</div>
+        <div style="text-align:center">
+          <div class="viz-label">Callee — doubleIt(int x)</div>
+          <div class="mem-cell"><div class="mem-name">x (copy!)</div><div class="mem-box hi-amber">10</div><div class="mem-addr">0x3000 (new!)</div></div>
+        </div>
+        <div style="font-size:22px;color:var(--text3);padding-top:36px">→</div>
+        <div style="text-align:center">
+          <div class="viz-label">After Return</div>
+          <div class="mem-cell"><div class="mem-name">a unchanged!</div><div class="mem-box hi-blue">5</div><div class="mem-addr">0x2000</div></div>
+        </div>
+      </div>`;
+    info.className = 'info-line amber';
+    info.textContent = 'Pass by value: a COPY of the variable is made. Changes inside the function have NO effect on the original!';
+  } else {
+    viz.innerHTML = `
+      <div style="display:flex;gap:2rem;flex-wrap:wrap;align-items:flex-start;padding:0.5rem 0">
+        <div style="text-align:center">
+          <div class="viz-label">Caller — main()</div>
+          <div class="mem-cell"><div class="mem-name">a (modified!)</div><div class="mem-box hi-green">10</div><div class="mem-addr">0x2000</div></div>
+        </div>
+        <div style="font-size:22px;color:var(--accent);padding-top:36px">⇄</div>
+        <div style="text-align:center">
+          <div class="viz-label">Callee — doubleIt(int *x)</div>
+          <div class="mem-cell"><div class="mem-name">x (pointer)</div><div class="mem-box hi-purple" style="width:80px;font-size:11px">0x2000</div><div class="mem-addr">holds address of a</div></div>
+        </div>
+      </div>`;
+    info.className = 'info-line green';
+    info.textContent = 'Pass by reference: we pass the ADDRESS of a. The function uses *x to read/write the ORIGINAL variable. ✓';
+  }
+}
+
+// ═══════════════════════════════════════════════
+// SECTION 8: RECURSION
+// ═══════════════════════════════════════════════
+function animateFactorial() {
+  const n = parseInt(document.getElementById('fact-n').value) || 5;
+  const tree = document.getElementById('fact-tree');
+  tree.innerHTML = '';
+  const lines = [];
+
+  function build(k, depth) {
+    const pad = '  '.repeat(depth);
+    if (k <= 1) { lines.push({ t: `${pad}factorial(${k})  ← base case  →  return 1`, c:'green', d:depth }); return 1; }
+    lines.push({ t: `${pad}factorial(${k})  →  calls factorial(${k-1})`, c:'text2', d:depth });
+    const sub = build(k-1, depth+1);
+    const res = k * sub;
+    lines.push({ t: `${pad}factorial(${k})  =  ${k} × ${sub} = ${res}  ✓`, c:'accent', d:depth });
+    return res;
+  }
+  build(n, 0);
+
+  let i = 0;
+  function show() {
+    if (i >= lines.length) {
+      const r = lines[lines.length-1].t.match(/= (\d+)/);
+      const info = document.getElementById('fact-info');
+      info.style.display = 'block'; info.className = 'info-line green';
+      info.textContent = `factorial(${n}) = ${r ? r[1] : '?'}  |  Stack depth reached: ${n} frames  |  Space: O(n)`;
+      return;
+    }
+    const ln = lines[i];
+    const el = document.createElement('div');
+    el.style.cssText = `padding-left:${ln.d*18}px;color:var(--${ln.c});animation:fadeUp 0.2s ease;`;
+    el.textContent = ln.t;
+    tree.appendChild(el); i++;
+    setTimeout(show, 300);
+  }
+  show();
+}
+
+function animateFib() {
+  const n = parseInt(document.getElementById('fib-n').value) || 5;
+  const canvas = document.getElementById('fib-canvas');
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  const callCounts = {};
+  function count(k) {
+    callCounts[k] = (callCounts[k]||0)+1;
+    if (k <= 1) return;
+    count(k-1); count(k-2);
+  }
+  count(n);
+
+  const nodeList = [], edgeList = [];
+  function layout(k, depth, minX, maxX) {
+    const x = (minX+maxX)/2, y = 28 + depth*52;
+    const key = `${k}:${depth}:${minX}:${maxX}`;
+    nodeList.push({ x, y, k, depth, key });
+    if (k <= 1) return { x, y };
+    const half = (maxX-minX)/2;
+    const L = layout(k-1, depth+1, minX, minX+half);
+    const R = layout(k-2, depth+1, minX+half, maxX);
+    edgeList.push({ x1:x,y1:y, x2:L.x,y2:L.y });
+    edgeList.push({ x1:x,y1:y, x2:R.x,y2:R.y });
+    return { x, y };
+  }
+  layout(n, 0, 20, canvas.width-20);
+
+  const edgeColor = isDark ? '#2a3050' : '#c8cedf';
+  ctx.strokeStyle = edgeColor; ctx.lineWidth = 1.2;
+  edgeList.forEach(e => { ctx.beginPath(); ctx.moveTo(e.x1,e.y1); ctx.lineTo(e.x2,e.y2); ctx.stroke(); });
+
+  nodeList.forEach(nd => {
+    const rep = callCounts[nd.k] > 1 && nd.depth > 0;
+    ctx.beginPath(); ctx.arc(nd.x, nd.y, 19, 0, Math.PI*2);
+    ctx.fillStyle = rep ? (isDark?'rgba(248,113,113,0.18)':'rgba(220,38,38,0.1)') : (isDark?'rgba(79,142,247,0.18)':'rgba(37,99,235,0.1)');
+    ctx.fill();
+    ctx.strokeStyle = rep ? (isDark?'#f87171':'#dc2626') : (isDark?'#4f8ef7':'#2563eb');
+    ctx.lineWidth = 1.5; ctx.stroke();
+    ctx.fillStyle = rep ? (isDark?'#fca5a5':'#dc2626') : (isDark?'#93c5fd':'#1e40af');
+    ctx.font = '11px IBM Plex Mono, monospace';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(`f(${nd.k})`, nd.x, nd.y);
+  });
+}
+setTimeout(animateFib, 200);
+
+// ═══════════════════════════════════════════════
+// SECTION 9: SORTING
+// ═══════════════════════════════════════════════
+let sortData = [64, 34, 25, 12, 22, 11, 90, 45, 3, 58];
+let sortMode = 'bubble', sortRunning = false, sortCmps = 0, sortSwaps = 0;
+
+const sortDescs = {
+  bubble: 'Repeatedly compare adjacent pairs and swap if out of order. The largest "bubbles" to the end each pass.',
+  selection: 'Find the minimum element in the unsorted portion and place it at the beginning each pass.',
+  insertion: 'Build sorted portion one element at a time, inserting each into its correct position.',
+};
+const sortCodes = {
+  bubble: `<span class="kw">void</span> <span class="fn">bubbleSort</span>(<span class="ty">int</span> arr[], <span class="ty">int</span> n) {\n  <span class="kw">for</span> (<span class="ty">int</span> i = <span class="num">0</span>; i &lt; n-<span class="num">1</span>; i++)\n    <span class="kw">for</span> (<span class="ty">int</span> j = <span class="num">0</span>; j &lt; n-i-<span class="num">1</span>; j++)\n      <span class="kw">if</span> (arr[j] &gt; arr[j+<span class="num">1</span>])\n        <span class="fn">swap</span>(&amp;arr[j], &amp;arr[j+<span class="num">1</span>]);\n} <span class="cmt">// O(n²) comparisons</span>`,
+  selection:`<span class="kw">void</span> <span class="fn">selectionSort</span>(<span class="ty">int</span> arr[], <span class="ty">int</span> n) {\n  <span class="kw">for</span> (<span class="ty">int</span> i = <span class="num">0</span>; i &lt; n-<span class="num">1</span>; i++) {\n    <span class="ty">int</span> min = i;\n    <span class="kw">for</span> (<span class="ty">int</span> j = i+<span class="num">1</span>; j &lt; n; j++)\n      <span class="kw">if</span> (arr[j] &lt; arr[min]) min = j;\n    <span class="fn">swap</span>(&amp;arr[i], &amp;arr[min]);\n  }\n} <span class="cmt">// Always O(n²) — no early exit</span>`,
+  insertion:`<span class="kw">void</span> <span class="fn">insertionSort</span>(<span class="ty">int</span> arr[], <span class="ty">int</span> n) {\n  <span class="kw">for</span> (<span class="ty">int</span> i = <span class="num">1</span>; i &lt; n; i++) {\n    <span class="ty">int</span> key = arr[i], j = i - <span class="num">1</span>;\n    <span class="kw">while</span> (j &gt;= <span class="num">0</span> &amp;&amp; arr[j] &gt; key) {\n      arr[j+<span class="num">1</span>] = arr[j]; j--;\n    }\n    arr[j+<span class="num">1</span>] = key;\n  }\n} <span class="cmt">// O(n) best case (already sorted)</span>`,
+};
+
+function selectSort(mode, el) {
+  sortMode = mode;
+  document.querySelectorAll('#sec-sorting .ctab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('sort-desc').textContent = sortDescs[mode];
+  document.getElementById('sort-code').innerHTML = sortCodes[mode];
+  resetSort();
+}
+document.getElementById('sort-desc').textContent = sortDescs.bubble;
+document.getElementById('sort-code').innerHTML = sortCodes.bubble;
+
+function renderSortViz(data, cmap) {
+  const viz = document.getElementById('sort-viz');
+  viz.innerHTML = '';
+  data.forEach((val, i) => {
+    const cell = document.createElement('div');
+    cell.className = 'array-cell';
+    const box = document.createElement('div');
+    box.className = 'arr-box ' + (cmap && cmap[i] ? cmap[i] : '');
+    box.style.width = '42px';
+    box.textContent = val;
+    const lbl = document.createElement('div');
+    lbl.style.cssText = "font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--text3)";
+    lbl.textContent = '['+i+']';
+    cell.appendChild(box); cell.appendChild(lbl);
+    viz.appendChild(cell);
+  });
+}
+
+function resetSort() {
+  sortRunning = false; sortCmps = 0; sortSwaps = 0;
+  sortData = [64, 34, 25, 12, 22, 11, 90, 45, 3, 58];
+  renderSortViz(sortData, {});
+  document.getElementById('sort-cmp-count').textContent = '0';
+  document.getElementById('sort-swap-count').textContent = '0';
+  document.getElementById('sort-step-label').textContent = 'Press Sort to begin';
+}
+
+function shuffleSort() {
+  sortData = sortData.sort(() => Math.random()-0.5);
+  sortCmps = 0; sortSwaps = 0;
+  renderSortViz(sortData, {});
+  document.getElementById('sort-cmp-count').textContent = '0';
+  document.getElementById('sort-swap-count').textContent = '0';
+  document.getElementById('sort-step-label').textContent = 'Shuffled! Press Sort to begin';
+}
+resetSort();
+
+function startSort() {
+  if (sortRunning) return;
+  sortRunning = true; sortCmps = 0; sortSwaps = 0;
+  const d = [...sortData];
+  const steps = [];
+
+  if (sortMode === 'bubble') {
+    for (let i = 0; i < d.length-1; i++) {
+      for (let j = 0; j < d.length-i-1; j++) {
+        steps.push({ type:'compare', i:j, j:j+1, arr:[...d], sorted:d.length-1-i });
+        if (d[j] > d[j+1]) { [d[j],d[j+1]]=[d[j+1],d[j]]; steps.push({ type:'swap', i:j, j:j+1, arr:[...d], sorted:d.length-1-i }); }
+      }
+    }
+  } else if (sortMode === 'selection') {
+    for (let i = 0; i < d.length-1; i++) {
+      let m = i;
+      for (let j = i+1; j < d.length; j++) {
+        steps.push({ type:'compare', i:m, j, arr:[...d], pivot:i });
+        if (d[j] < d[m]) m = j;
+      }
+      if (m !== i) { [d[i],d[m]]=[d[m],d[i]]; steps.push({ type:'swap', i, j:m, arr:[...d], pivot:i }); }
+    }
+  } else {
+    for (let i = 1; i < d.length; i++) {
+      let j = i;
+      while (j > 0) {
+        steps.push({ type:'compare', i:j-1, j, arr:[...d], key:i });
+        if (d[j] < d[j-1]) { [d[j],d[j-1]]=[d[j-1],d[j]]; steps.push({ type:'swap', i:j-1, j, arr:[...d], key:i }); j--; } else break;
+      }
+    }
+  }
+  steps.push({ type:'done', arr:[...d] });
+
+  let s = 0;
+  function step() {
+    if (s >= steps.length) { sortRunning = false; return; }
+    const st = steps[s++];
+    const cmap = {};
+    if (st.type === 'compare') { sortCmps++; cmap[st.i] = 'amber'; cmap[st.j] = 'amber'; }
+    if (st.type === 'swap')    { sortSwaps++; cmap[st.i] = 'red'; cmap[st.j] = 'red'; }
+    if (st.type === 'done')    { for (let k = 0; k < st.arr.length; k++) cmap[k] = 'green'; }
+    if (st.sorted !== undefined) for (let k = st.sorted; k < st.arr.length; k++) if (!cmap[k]) cmap[k] = 'green';
+    renderSortViz(st.arr || sortData, cmap);
+    document.getElementById('sort-cmp-count').textContent = sortCmps;
+    document.getElementById('sort-swap-count').textContent = sortSwaps;
+    document.getElementById('sort-step-label').textContent =
+      st.type === 'done' ? `✓ Sorted! ${sortCmps} comparisons, ${sortSwaps} swaps` :
+      st.type === 'compare' ? `Comparing arr[${st.i}]=${st.arr[st.i]} vs arr[${st.j}]=${st.arr[st.j]}` :
+      `Swapping arr[${st.i}]=${st.arr[st.i]} ↔ arr[${st.j}]=${st.arr[st.j]}`;
+    setTimeout(step, 180);
+  }
+  step();
+}
+
+// ═══════════════════════════════════════════════
+// SECTION 10: BIT OPS
+// ═══════════════════════════════════════════════
+function toBin8(n) { return ((n & 0xFF) >>> 0).toString(2).padStart(8,'0'); }
+
+function calcBits() {
+  const a = parseInt(document.getElementById('bit-a').value) || 0;
+  const b = parseInt(document.getElementById('bit-b').value) || 0;
+  const op = document.getElementById('bit-op').value;
+  let result, opStr, desc;
+  switch(op) {
+    case 'and': result = a & b;       opStr = `${a} & ${b}`;    desc = 'AND: result bit=1 only if BOTH input bits are 1'; break;
+    case 'or':  result = a | b;       opStr = `${a} | ${b}`;    desc = 'OR: result bit=1 if EITHER input bit is 1'; break;
+    case 'xor': result = a ^ b;       opStr = `${a} ^ ${b}`;    desc = 'XOR: result bit=1 if the bits are DIFFERENT'; break;
+    case 'not': result = (~a) & 0xFF; opStr = `~${a}`;          desc = 'NOT: every bit flipped (one\'s complement)'; break;
+    case 'shl': result = (a << 1) & 0xFF; opStr = `${a} << 1`; desc = 'Left shift by 1 = multiply by 2'; break;
+    case 'shr': result = a >> 1;      opStr = `${a} >> 1`;      desc = 'Right shift by 1 = integer divide by 2'; break;
+  }
+  const bA = toBin8(a), bB = toBin8(b), bR = toBin8(result);
+  const viz = document.getElementById('bit-rows');
+
+  function makeRow(label, bin, col) {
+    let h = `<div style="display:flex;align-items:center;gap:8px;margin:5px 0;">`;
+    h += `<span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text3);width:76px;text-align:right">${label}</span><span style="color:var(--text3);font-family:'IBM Plex Mono',monospace;font-size:11px"> = </span>`;
+    for (let i = 0; i < 8; i++) {
+      const on = bin[i]==='1';
+      h += `<div style="width:30px;height:30px;border-radius:5px;display:inline-flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:13px;background:${on?col+'22':'var(--bg3)'};border:1.5px solid ${on?col:'var(--border2)'};color:${on?col:'var(--text3)'};transition:all 0.3s">${bin[i]}</div>`;
+    }
+    h += `<span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text3);margin-left:4px;">= ${parseInt(bin,2)}</span></div>`;
+    return h;
+  }
+
+  let rows = makeRow(`A (${a})`, bA, '#4f8ef7');
+  if (!['not','shl','shr'].includes(op)) rows += makeRow(`B (${b})`, bB, '#7c5ff5');
+  rows += `<div style="height:1px;background:var(--border2);margin:5px 80px 5px 92px"></div>`;
+  rows += makeRow('Result', bR, '#34d399');
+  viz.innerHTML = rows;
+
+  document.getElementById('bit-code').innerHTML =
+    `<span class="ty">uint8_t</span> a = <span class="num">${a}</span>;   <span class="cmt">// 0b${bA} = 0x${a.toString(16).toUpperCase().padStart(2,'0')}</span>\n` +
+    (op !== 'not' && op !== 'shl' && op !== 'shr' ? `<span class="ty">uint8_t</span> b = <span class="num">${b}</span>;   <span class="cmt">// 0b${bB}</span>\n` : '') +
+    `<span class="ty">uint8_t</span> r = ${opStr}; <span class="cmt">// 0b${bR} = ${result}</span>\n<span class="cmt">// ${desc}</span>`;
+}
+setTimeout(calcBits, 100);
+
+function bitArrayDemo() {
+  const viz = document.getElementById('bit-array-viz');
+  viz.style.display = 'block';
+  const nodes = 8;
+  let visited = 0;
+  const order = [0, 2, 5, 3, 7, 1, 4, 6];
+  viz.innerHTML = `<div class="viz-label">BFS visited[] — single unsigned int tracks 8 nodes</div>`;
+  const grid = document.createElement('div');
+  grid.style.cssText = 'display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;';
+  for (let i = 0; i < nodes; i++) {
+    const c = document.createElement('div');
+    c.style.textAlign = 'center';
+    const b = document.createElement('div');
+    b.className = 'arr-box'; b.id = 'ba-'+i; b.textContent = i;
+    b.style.width = '44px';
+    const l = document.createElement('div');
+    l.style.cssText = "font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--text3)";
+    l.textContent = 'node '+i;
+    c.appendChild(b); c.appendChild(l); grid.appendChild(c);
+  }
+  const info = document.createElement('div');
+  info.className = 'info-line';
+  viz.appendChild(grid); viz.appendChild(info);
+
+  let step = 0;
+  function next() {
+    if (step >= order.length) { info.textContent = `Done! visited = 0b${toBin8(visited)} = ${visited} (8 nodes, 1 int!)`;
+      info.className='info-line green'; return; }
+    const nd = order[step++];
+    visited |= (1 << nd);
+    const box = document.getElementById('ba-'+nd);
+    box.className = 'arr-box green';
+    info.textContent = `Visit node ${nd}: visited |= (1<<${nd})  →  0b${toBin8(visited)} = ${visited}`;
+    setTimeout(next, 700);
+  }
+  next();
+}
+</script>
+</body>
+</html>
