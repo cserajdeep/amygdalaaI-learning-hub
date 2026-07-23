@@ -1,4 +1,4 @@
-# DSA & AI Learning Hub
+# C & DSA Learning Hub
 
 Interactive learning modules by **Dr. Rajdeep Chatterjee** ([@cserajdeep](https://github.com/cserajdeep)).
 
