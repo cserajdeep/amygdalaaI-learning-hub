@@ -1,0 +1,1314 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>McCulloch–Pitts Neuron</title>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700;9..144,900&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        /* ─── THEME TOKENS ─── */
+        :root[data-theme="dark"] {
+            --bg: #0c0e14;
+            --bg2: #13161f;
+            --bg3: #1a1e2b;
+            --bg4: #222637;
+            --surface: #1c2030;
+            --border: rgba(255, 255, 255, 0.07);
+            --border2: rgba(255, 255, 255, 0.13);
+            --text: #e8eaf2;
+            --text2: #9ba5c0;
+            --text3: #5a6280;
+            --accent: #4f8ef7;
+            --accent2: #7c5ff5;
+            --green: #34d399;
+            --amber: #fbbf24;
+            --red: #f87171;
+            --teal: #22d3ee;
+            --pink: #f472b6;
+            --orange: #fb923c;
+            --shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
+            --card-bg: #1c2030;
+            --mono: 'IBM Plex Mono', monospace;
+        }
+        :root[data-theme="light"] {
+            --bg: #f6f7fb;
+            --bg2: #ffffff;
+            --bg3: #eef0f7;
+            --bg4: #e2e5f0;
+            --surface: #ffffff;
+            --border: rgba(0, 0, 0, 0.08);
+            --border2: rgba(0, 0, 0, 0.14);
+            --text: #1a1d2e;
+            --text2: #4a5170;
+            --text3: #8b93b0;
+            --accent: #2563eb;
+            --accent2: #7c3aed;
+            --green: #059669;
+            --amber: #d97706;
+            --red: #dc2626;
+            --teal: #0891b2;
+            --pink: #db2777;
+            --orange: #ea580c;
+            --shadow: 0 4px 24px rgba(0, 0, 0, 0.10);
+            --card-bg: #ffffff;
+            --mono: 'IBM Plex Mono', monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        /* ─── HERO ─── */
+        .hero {
+            background: var(--bg2);
+            border-bottom: 1px solid var(--border);
+            padding: 2rem 2rem 1.6rem;
+            position: relative;
+            overflow: hidden;
+        }
+        [data-theme="dark"] .hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse 60% 80% at 80% 50%, rgba(79, 142, 247, 0.07) 0%, transparent 70%),
+                radial-gradient(ellipse 40% 60% at 10% 20%, rgba(124, 95, 245, 0.05) 0%, transparent 60%);
+            pointer-events: none;
+        }
+        .hero-inner {
+            max-width: 1100px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            flex-wrap: wrap;
+            position: relative;
+            z-index: 1;
+        }
+        .hero-tag {
+            display: inline-block;
+            background: rgba(79, 142, 247, 0.12);
+            border: 1px solid rgba(79, 142, 247, 0.3);
+            color: var(--accent);
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px;
+            padding: 4px 12px;
+            border-radius: 100px;
+            letter-spacing: 0.08em;
+            margin-bottom: 0.6rem;
+        }
+        .hero h1 {
+            font-family: 'Fraunces', serif;
+            font-size: clamp(1.7rem, 4vw, 2.6rem);
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 0.4rem;
+            color: var(--text);
+        }
+        .hero h1 span {
+            color: var(--accent);
+        }
+        .hero p {
+            color: var(--text2);
+            font-size: 0.92rem;
+            max-width: 520px;
+            line-height: 1.6;
+        }
+        .hero-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-shrink: 0;
+        }
+
+        .theme-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--bg3);
+            border: 1px solid var(--border2);
+            border-radius: 100px;
+            padding: 6px 16px;
+            cursor: pointer;
+            font-size: 13px;
+            color: var(--text2);
+            font-family: 'DM Sans', sans-serif;
+            transition: all 0.2s;
+        }
+        .theme-toggle:hover {
+            border-color: var(--accent);
+            color: var(--text);
+        }
+        .toggle-icon {
+            font-size: 16px;
+        }
+
+        /* ─── NAV ─── */
+        .nav-bar {
+            background: var(--bg2);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            overflow-x: auto;
+            scrollbar-width: none;
+        }
+        .nav-bar::-webkit-scrollbar {
+            display: none;
+        }
+        .nav-inner {
+            max-width: 1100px;
+            margin: 0 auto;
+            display: flex;
+            padding: 0 1.2rem;
+        }
+        .nav-btn {
+            font-family: 'DM Sans', sans-serif;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text3);
+            background: none;
+            border: none;
+            border-bottom: 2px solid transparent;
+            padding: 12px 14px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: color 0.2s, border-color 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .nav-btn:hover {
+            color: var(--text);
+        }
+        .nav-btn.active {
+            color: var(--accent);
+            border-bottom-color: var(--accent);
+        }
+
+        /* ─── LAYOUT ─── */
+        .main {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 1.8rem 1.4rem;
+        }
+        .section {
+            display: none;
+        }
+        .section.active {
+            display: block;
+            animation: fadeUp 0.3s ease;
+        }
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .section-head {
+            margin-bottom: 1.8rem;
+        }
+        .section-title {
+            font-family: 'Fraunces', serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.3rem;
+            color: var(--text);
+        }
+        .section-sub {
+            color: var(--text2);
+            font-size: 0.9rem;
+            line-height: 1.65;
+        }
+
+        /* ─── CARDS ─── */
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 1.2rem 1.4rem;
+            margin-bottom: 1.2rem;
+            box-shadow: var(--shadow);
+        }
+        .card-title {
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.97rem;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 100px;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+        }
+        .badge-blue {
+            background: rgba(79, 142, 247, 0.15);
+            color: var(--accent);
+            border: 1px solid rgba(79, 142, 247, 0.25);
+        }
+        .badge-green {
+            background: rgba(52, 211, 153, 0.12);
+            color: var(--green);
+            border: 1px solid rgba(52, 211, 153, 0.2);
+        }
+        .badge-amber {
+            background: rgba(251, 191, 36, 0.12);
+            color: var(--amber);
+            border: 1px solid rgba(251, 191, 36, 0.2);
+        }
+        .badge-red {
+            background: rgba(248, 113, 113, 0.12);
+            color: var(--red);
+            border: 1px solid rgba(248, 113, 113, 0.2);
+        }
+        .badge-teal {
+            background: rgba(34, 211, 238, 0.12);
+            color: var(--teal);
+            border: 1px solid rgba(34, 211, 238, 0.2);
+        }
+        .badge-purple {
+            background: rgba(124, 95, 245, 0.12);
+            color: var(--accent2);
+            border: 1px solid rgba(124, 95, 245, 0.2);
+        }
+        .badge-orange {
+            background: rgba(251, 146, 60, 0.12);
+            color: var(--orange);
+            border: 1px solid rgba(251, 146, 60, 0.2);
+        }
+        .badge-pink {
+            background: rgba(244, 114, 182, 0.12);
+            color: var(--pink);
+            border: 1px solid rgba(244, 114, 182, 0.2);
+        }
+
+        .card p {
+            color: var(--text2);
+            font-size: 0.875rem;
+            line-height: 1.7;
+            margin-bottom: 0.6rem;
+        }
+        .card p:last-child {
+            margin-bottom: 0;
+        }
+
+        /* ─── CODE BLOCKS ─── */
+        .code-block {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.9rem 1.2rem;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 12.5px;
+            line-height: 1.75;
+            color: var(--text);
+            overflow-x: auto;
+            margin: 0.6rem 0;
+            position: relative;
+        }
+        [data-theme="light"] .code-block {
+            background: #f0f2fa;
+        }
+        .kw {
+            color: #c084fc;
+        }
+        .fn {
+            color: #60a5fa;
+        }
+        .str {
+            color: #86efac;
+        }
+        .num {
+            color: #fb923c;
+        }
+        .cmt {
+            color: var(--text3);
+            font-style: italic;
+        }
+        .ty {
+            color: #67e8f9;
+        }
+        .op {
+            color: #fcd34d;
+        }
+        .pp {
+            color: #f9a8d4;
+        }
+        [data-theme="light"] .kw {
+            color: #7c3aed;
+        }
+        [data-theme="light"] .fn {
+            color: #1d4ed8;
+        }
+        [data-theme="light"] .str {
+            color: #15803d;
+        }
+        [data-theme="light"] .num {
+            color: #c2410c;
+        }
+        [data-theme="light"] .ty {
+            color: #0891b2;
+        }
+        [data-theme="light"] .op {
+            color: #92400e;
+        }
+        [data-theme="light"] .pp {
+            color: #db2777;
+        }
+
+        /* ─── VIZ AREA ─── */
+        .viz-area {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1rem;
+            margin: 0.6rem 0;
+            min-height: 70px;
+        }
+        [data-theme="light"] .viz-area {
+            background: #f0f2fa;
+        }
+        .viz-label {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 10px;
+            color: var(--text3);
+            margin-bottom: 0.6rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        /* ─── CONTROLS ─── */
+        .controls {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin: 0.6rem 0;
+            align-items: center;
+        }
+        .btn {
+            font-family: 'DM Sans', sans-serif;
+            font-size: 13px;
+            font-weight: 500;
+            padding: 6px 14px;
+            border-radius: 8px;
+            border: 1px solid var(--border2);
+            background: var(--bg3);
+            color: var(--text2);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn:hover {
+            background: var(--bg4);
+            color: var(--text);
+        }
+        .btn.primary {
+            background: rgba(79, 142, 247, 0.15);
+            color: var(--accent);
+            border-color: rgba(79, 142, 247, 0.3);
+        }
+        .btn.primary:hover {
+            background: rgba(79, 142, 247, 0.28);
+        }
+        .btn.danger {
+            background: rgba(248, 113, 113, 0.12);
+            color: var(--red);
+            border-color: rgba(248, 113, 113, 0.25);
+        }
+        .btn.danger:hover {
+            background: rgba(248, 113, 113, 0.22);
+        }
+        .btn.success {
+            background: rgba(52, 211, 153, 0.12);
+            color: var(--green);
+            border-color: rgba(52, 211, 153, 0.25);
+        }
+        .btn.success:hover {
+            background: rgba(52, 211, 153, 0.22);
+        }
+        .btn.amber {
+            background: rgba(251, 191, 36, 0.12);
+            color: var(--amber);
+            border-color: rgba(251, 191, 36, 0.25);
+        }
+        .btn.amber:hover {
+            background: rgba(251, 191, 36, 0.22);
+        }
+        .btn.green {
+            background: rgba(52, 211, 153, 0.12);
+            color: var(--green);
+            border-color: rgba(52, 211, 153, 0.25);
+        }
+        .btn.green:hover {
+            background: rgba(52, 211, 153, 0.22);
+        }
+        .btn.red {
+            background: rgba(248, 113, 113, 0.12);
+            color: var(--red);
+            border-color: rgba(248, 113, 113, 0.25);
+        }
+        .btn.red:hover {
+            background: rgba(248, 113, 113, 0.22);
+        }
+
+        input[type="range"] {
+            accent-color: var(--accent);
+            width: 100%;
+        }
+        input[type="text"],
+        input[type="number"],
+        select {
+            background: var(--bg3);
+            border: 1px solid var(--border2);
+            border-radius: 6px;
+            color: var(--text);
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 12px;
+            padding: 6px 10px;
+            outline: none;
+        }
+        input[type="text"]:focus,
+        input[type="number"]:focus,
+        select:focus {
+            border-color: var(--accent);
+        }
+        select option {
+            background: var(--bg3);
+        }
+
+        /* ─── 1D ARRAY CELLS ─── */
+        .arr-wrap {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            align-items: flex-end;
+            padding: 6px 0;
+        }
+        .arr-cell {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+        }
+        .arr-box {
+            width: 52px;
+            height: 44px;
+            background: var(--bg3);
+            border: 1.5px solid var(--border2);
+            border-radius: 7px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text);
+            transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .arr-box.hi {
+            background: rgba(79, 142, 247, 0.18);
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+        .arr-box.found {
+            background: rgba(52, 211, 153, 0.18);
+            border-color: var(--green);
+            color: var(--green);
+        }
+        .arr-box.scan {
+            background: rgba(251, 191, 36, 0.15);
+            border-color: var(--amber);
+            color: var(--amber);
+        }
+        .arr-box.teal {
+            background: rgba(34, 211, 238, 0.15);
+            border-color: var(--teal);
+            color: var(--teal);
+        }
+        .arr-box.red {
+            background: rgba(248, 113, 113, 0.15);
+            border-color: var(--red);
+            color: var(--red);
+        }
+        .arr-box.amber {
+            background: rgba(251, 191, 36, 0.15);
+            border-color: var(--amber);
+            color: var(--amber);
+        }
+        .arr-box.purple {
+            background: rgba(124, 95, 245, 0.15);
+            border-color: var(--accent2);
+            color: var(--accent2);
+        }
+        .arr-box.green {
+            background: rgba(52, 211, 153, 0.15);
+            border-color: var(--green);
+            color: var(--green);
+        }
+        .arr-box.blue {
+            background: rgba(79, 142, 247, 0.15);
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .arr-lbl {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 9.5px;
+            color: var(--text3);
+        }
+        .arr-addr {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 8.5px;
+            color: var(--text3);
+            opacity: 0.7;
+        }
+
+        /* ─── 2D MATRIX CELLS ─── */
+        .matrix-row {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 4px;
+            flex-wrap: wrap;
+        }
+        .mat-cell {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+        }
+        .mat-box {
+            width: 48px;
+            height: 40px;
+            background: var(--bg3);
+            border: 1.5px solid var(--border2);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text);
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .mat-box.hi {
+            background: rgba(79, 142, 247, 0.18);
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+        .mat-box.found {
+            background: rgba(52, 211, 153, 0.18);
+            border-color: var(--green);
+            color: var(--green);
+        }
+        .mat-box.scan {
+            background: rgba(251, 191, 36, 0.15);
+            border-color: var(--amber);
+            color: var(--amber);
+        }
+        .mat-box.teal {
+            background: rgba(34, 211, 238, 0.15);
+            border-color: var(--teal);
+            color: var(--teal);
+        }
+        .mat-box.red {
+            background: rgba(248, 113, 113, 0.15);
+            border-color: var(--red);
+            color: var(--red);
+        }
+        .mat-box.amber {
+            background: rgba(251, 191, 36, 0.15);
+            border-color: var(--amber);
+            color: var(--amber);
+        }
+        .mat-box.purple {
+            background: rgba(124, 95, 245, 0.15);
+            border-color: var(--accent2);
+            color: var(--accent2);
+        }
+        .mat-box.green {
+            background: rgba(52, 211, 153, 0.15);
+            border-color: var(--green);
+            color: var(--green);
+        }
+        .mat-box.blue {
+            background: rgba(79, 142, 247, 0.15);
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .mat-lbl {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 8.5px;
+            color: var(--text3);
+        }
+
+        /* ─── FLAT MEMORY STRIP ─── */
+        .flat-strip {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 3px;
+            padding: 4px 0;
+        }
+        .flat-cell {
+            background: var(--bg3);
+            border: 1px solid var(--border2);
+            border-radius: 4px;
+            padding: 6px 10px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px;
+            color: var(--text2);
+            transition: all 0.3s;
+            min-width: 32px;
+            text-align: center;
+        }
+        .flat-cell.hi {
+            background: rgba(79, 142, 247, 0.18);
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        /* ─── INFO LINE ─── */
+        .info-line {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 12px;
+            color: var(--text2);
+            padding: 6px 12px;
+            background: var(--bg);
+            border-left: 3px solid var(--accent);
+            border-radius: 0 6px 6px 0;
+            margin: 0.4rem 0;
+            transition: border-color 0.3s, background 0.3s;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        [data-theme="light"] .info-line {
+            background: #f0f2fa;
+        }
+        .info-line.green {
+            border-left-color: var(--green);
+        }
+        .info-line.amber {
+            border-left-color: var(--amber);
+        }
+        .info-line.red {
+            border-left-color: var(--red);
+        }
+        .info-line.teal {
+            border-left-color: var(--teal);
+        }
+
+        /* ─── SUB TABS ─── */
+        .sub-tabs {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+            margin-bottom: 0.8rem;
+        }
+        .sub-tab {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px;
+            padding: 4px 12px;
+            border-radius: 100px;
+            border: 1px solid var(--border);
+            background: var(--bg2);
+            color: var(--text3);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .sub-tab:hover {
+            border-color: var(--border2);
+            color: var(--text2);
+        }
+        .sub-tab.active {
+            background: rgba(79, 142, 247, 0.12);
+            border-color: rgba(79, 142, 247, 0.35);
+            color: var(--accent);
+        }
+
+        /* ─── CONCEPT BOX ─── */
+        .concept-box {
+            background: rgba(79, 142, 247, 0.06);
+            border: 1px solid rgba(79, 142, 247, 0.12);
+            border-radius: 8px;
+            padding: 0.7rem 1rem;
+            font-size: 13px;
+            line-height: 1.8;
+            color: var(--text2);
+            margin: 0.5rem 0;
+        }
+        .concept-box.green {
+            background: rgba(52, 211, 153, 0.06);
+            border-color: rgba(52, 211, 153, 0.12);
+        }
+        .concept-box.amber {
+            background: rgba(251, 191, 36, 0.06);
+            border-color: rgba(251, 191, 36, 0.12);
+        }
+        .concept-box strong {
+            color: var(--text);
+        }
+
+        /* ─── FORMULA ─── */
+        .formula {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 12px;
+            color: var(--teal);
+            padding: 6px 12px;
+            background: rgba(34, 211, 238, 0.06);
+            border-radius: 6px;
+            border: 1px solid rgba(34, 211, 238, 0.12);
+            margin: 0.4rem 0;
+        }
+
+        /* ─── TWO / THREE COL ─── */
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        .three-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 1rem;
+        }
+        @media(max-width: 680px) {
+            .two-col,
+            .three-col {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* ─── BARS (sorting) ─── */
+        .bar-wrap {
+            display: flex;
+            gap: 8px;
+            align-items: flex-end;
+            justify-content: center;
+            padding: 12px 0;
+            min-height: 150px;
+            flex-wrap: wrap;
+        }
+        .bar {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+        .bar-body {
+            width: 36px;
+            border-radius: 4px 4px 0 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px;
+            font-weight: 600;
+            color: #0d0f14;
+            transition: height 0.3s ease, background 0.3s;
+            min-height: 20px;
+            padding: 2px 0;
+        }
+        .bar-lbl {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 8.5px;
+            color: var(--text3);
+        }
+
+        /* ─── INPUT GRID ─── */
+        .input-grid {
+            display: grid;
+            gap: 4px;
+            margin: 4px 0;
+        }
+
+        /* ─── TERMINAL ─── */
+        .terminal {
+            background: #080a0f;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.9rem;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 12.5px;
+            color: #a3e635;
+            min-height: 60px;
+            white-space: pre-wrap;
+            line-height: 1.65;
+        }
+        [data-theme="light"] .terminal {
+            background: #1a1d2e;
+        }
+        .terminal .prompt {
+            color: var(--text3);
+        }
+
+        /* ─── SCROLLBAR ─── */
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--bg4);
+            border-radius: 3px;
+        }
+
+        /* ─── RESPONSIVE TWEAKS ─── */
+        @media(max-width: 600px) {
+            .hero {
+                padding: 1.2rem 1rem;
+            }
+            .main {
+                padding: 1rem 0.8rem;
+            }
+            .card {
+                padding: 1rem;
+            }
+            .arr-box {
+                width: 40px;
+                height: 36px;
+                font-size: 11px;
+            }
+            .mat-box {
+                width: 38px;
+                height: 34px;
+                font-size: 11px;
+            }
+            .controls {
+                gap: 4px;
+            }
+            .btn {
+                font-size: 12px;
+                padding: 4px 10px;
+            }
+            .nav-btn {
+                font-size: 11px;
+                padding: 8px 10px;
+            }
+            .flat-cell {
+                padding: 4px 6px;
+                font-size: 9px;
+                min-width: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- ====== HUB NAVIGATION ====== -->
+    <nav style="position:sticky;top:0;z-index:1000;background:rgba(20,20,35,0.92);backdrop-filter:blur(10px);padding:10px 16px;display:flex;align-items:center;justify-content:center;gap:18px;flex-wrap:wrap;font-family:'Inter',sans-serif;font-size:0.85rem;border-bottom:1px solid rgba(255,255,255,0.08);">
+        <a href="../../index.html" style="color:#fff;font-weight:700;text-decoration:none;padding:4px 12px;border:1px solid rgba(255,255,255,0.25);border-radius:20px;">🏠 Hub Home</a>
+        <a href="../02-activation-functions/index.html" style="color:#4285F4;font-weight:600;text-decoration:none;">Next: Activation Functions →</a>
+    </nav>
+
+    <div class="hero">
+        <div class="hero-inner">
+            <div>
+                <div class="hero-tag">✦ ANN Module 00 · Amygdala AI</div>
+                <h1>McCulloch–Pitts Neuron<br><span>The 1943 Origin of Neural Computation</span></h1>
+                <p>The first mathematical model of a neuron — binary threshold logic, an absolute inhibitory veto, and the proof that networks of simple units can compute any Boolean function.</p>
+            </div>
+            <div class="hero-controls">
+                <button class="theme-toggle" onclick="toggleTheme()" id="theme-btn">
+                    <span class="toggle-icon" id="theme-icon">🌙</span>
+                    <span id="theme-label">Dark Mode</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <nav class="nav-bar">
+        <div class="nav-inner">
+            <button class="nav-btn active" onclick="showSection('concept',this)">💡 Concepts</button>
+            <button class="nav-btn" onclick="showSection('math',this)">🧮 Math Model</button>
+            <button class="nav-btn" onclick="showSection('gates',this)">🔌 Logic Gates Lab</button>
+            <button class="nav-btn" onclick="showSection('evolution',this)">🔁 Classical vs Modern</button>
+            <button class="nav-btn" onclick="showSection('examples',this)">📐 Worked Examples</button>
+            <button class="nav-btn" onclick="showSection('limits',this)">⚠️ Limits & Uses</button>
+        </div>
+    </nav>
+
+    <div class="main">
+
+        <!-- ═══════════════════════ CONCEPTS ═══════════════════════ -->
+        <div class="section active" id="sec-concept">
+            <div class="section-title">Historical & Biological Foundations</div>
+            <div class="section-sub">In 1943, Warren McCulloch (neurophysiologist) and Walter Pitts (logician) published "A Logical Calculus of the Ideas Immanent in Nervous Activity," proposing the first formal model of a neuron.</div>
+
+            <div class="card">
+                <div class="card-title">Key Contributions <span class="badge badge-blue">1943</span></div>
+                <p>The MCP paper gave the first mathematical model of an artificial neuron expressed in propositional logic, showed that networks of binary threshold units can compute any function expressible in propositional calculus, and laid the foundation for Hebbian learning (1949) and Rosenblatt's Perceptron (1958).</p>
+                <div class="concept-box">📌 The MCP neuron predates all learning algorithms — weights and thresholds were fixed by design, not learned from data. Learning only arrived later, with Hebb and Rosenblatt.</div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">Biological Analogy <span class="badge badge-green">MAPPING</span></div>
+                <p>The model draws an abstract correspondence between real neurons and its computational parts:</p>
+                <table style="width:100%;border-collapse:collapse;font-size:0.83rem;">
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:6px 4px;color:var(--text2);">Dendrites receive signals</td><td style="padding:6px 4px;">→ Inputs x₁, x₂, …, xₙ</td></tr>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:6px 4px;color:var(--text2);">Synaptic strength</td><td style="padding:6px 4px;">→ Fixed weight (+1 excitatory / inhibitory)</td></tr>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:6px 4px;color:var(--text2);">Cell body (soma) integration</td><td style="padding:6px 4px;">→ Weighted summation Σwᵢxᵢ</td></tr>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:6px 4px;color:var(--text2);">Firing threshold</td><td style="padding:6px 4px;">→ Threshold θ</td></tr>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:6px 4px;color:var(--text2);">Axon fires (all-or-none)</td><td style="padding:6px 4px;">→ Binary output y ∈ {0,1}</td></tr>
+                    <tr><td style="padding:6px 4px;color:var(--text2);">Inhibitory synapse blocks firing</td><td style="padding:6px 4px;">→ Inhibitory input forces y = 0</td></tr>
+                </table>
+                <div class="concept-box green">The "all-or-none" law of neuronal firing — a neuron either fires fully or not at all — directly motivates the binary threshold output.</div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">The Six Classical Assumptions <span class="badge badge-amber">RULES</span></div>
+                <p>1. Binary inputs/outputs — xᵢ, y ∈ {0,1}. &nbsp; 2. Equal excitatory weights — all wᵢ = +1. &nbsp; 3. Inhibitory veto principle — any active inhibitory input absolutely blocks firing. &nbsp; 4. Fixed threshold θ, not learned. &nbsp; 5. Synchronous, discrete-time operation. &nbsp; 6. No learning mechanism at all.</p>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════ MATH MODEL ═══════════════════════ -->
+        <div class="section" id="sec-math">
+            <div class="section-title">Mathematical Formulation</div>
+            <div class="section-sub">The inhibitory veto principle, expressed both as a piecewise rule and as an algebraic product.</div>
+
+            <div class="card">
+                <div class="card-title">Firing Rule <span class="badge badge-blue">DEFINITION</span></div>
+                <p>For m excitatory inputs x₁…xₘ and k inhibitory inputs z₁…z_k, all binary:</p>
+                <div class="formula">y = 1  if (Σxᵢ ≥ θ) AND (zⱼ = 0 for all j) &nbsp; else &nbsp; y = 0</div>
+                <p>Equivalently, using the Heaviside step function Θ(·):</p>
+                <div class="formula">y = Θ( Σxᵢ − θ ) · Π(1 − zⱼ)</div>
+                <div class="concept-box amber"><strong>Inhibitory Veto Principle:</strong> if any zⱼ = 1, the product Π(1−zⱼ) = 0, forcing y = 0 no matter how large the excitatory sum is. This is a strict, absolute veto — unlike modern networks where negative weights merely subtract.</div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">Firing Algorithm <span class="badge badge-purple">PSEUDOCODE</span></div>
+                <div class="code-block"><span class="cmt">// Require: x1..xm excitatory, z1..zk inhibitory, threshold θ</span>
+S ← Σ xᵢ  <span class="cmt">// sum of excitatory inputs</span>
+<span class="kw">if</span> ∃ j : zⱼ = 1 <span class="kw">then</span>
+    y ← 0                 <span class="cmt">// veto: any inhibition blocks firing</span>
+<span class="kw">else if</span> S ≥ θ <span class="kw">then</span>
+    y ← 1                 <span class="cmt">// excitatory sum meets threshold</span>
+<span class="kw">else</span>
+    y ← 0
+<span class="kw">return</span> y</div>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════ LOGIC GATES LAB ═══════════════════════ -->
+        <div class="section" id="sec-gates">
+            <div class="section-title">Logic Gates Lab — Build a Gate with an MCP Neuron</div>
+            <div class="section-sub">Toggle inputs, tune the threshold, and watch the excitatory sum, veto, and output update live — exactly as Section 8 of the handbook defines each gate.</div>
+
+            <div class="card">
+                <div class="card-title">Interactive Neuron <span class="badge badge-teal">LIVE</span></div>
+                <div class="sub-tabs">
+                    <button class="sub-tab active" onclick="setGate('AND',this)">AND (θ=2)</button>
+                    <button class="sub-tab" onclick="setGate('OR',this)">OR (θ=1)</button>
+                    <button class="sub-tab" onclick="setGate('NOT',this)">NOT (θ=0, veto)</button>
+                    <button class="sub-tab" onclick="setGate('NAND',this)">NAND (2-neuron)</button>
+                    <button class="sub-tab" onclick="setGate('XOR',this)">XOR (2-layer)</button>
+                    <button class="sub-tab" onclick="setGate('CUSTOM',this)">Custom θ</button>
+                </div>
+
+                <div id="gate-inputs" class="controls"></div>
+
+                <div id="gate-custom-theta" style="display:none;margin:0.6rem 0;">
+                    <label style="font-family:var(--mono);font-size:11px;color:var(--text3);">Threshold θ:
+                        <input type="number" id="theta-input" value="2" min="0" max="6" style="width:60px;margin-left:8px;" oninput="renderGate()">
+                    </label>
+                </div>
+
+                <div class="viz-area">
+                    <div class="viz-label">NEURON DIAGRAM</div>
+                    <div id="gate-diagram" style="font-family:var(--mono);font-size:13px;line-height:2;color:var(--text2);"></div>
+                </div>
+
+                <div id="gate-info" class="info-line">Toggle inputs above.</div>
+
+                <div class="viz-area">
+                    <div class="viz-label">FULL TRUTH TABLE</div>
+                    <div id="gate-truth"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════ EVOLUTION ═══════════════════════ -->
+        <div class="section" id="sec-evolution">
+            <div class="section-title">Classical MCP (1943) vs. Modern Threshold Neuron</div>
+            <div class="section-sub">Textbooks often teach NOT/NAND/XOR with signed weights (e.g. w=−1, θ=−0.5) — that's a later, algebraically-equivalent generalization, not the original 1943 formulation.</div>
+
+            <div class="card">
+                <div class="card-title">General Correspondence <span class="badge badge-blue">TABLE</span></div>
+                <table style="width:100%;border-collapse:collapse;font-size:0.82rem;">
+                    <tr style="border-bottom:1px solid var(--border2);color:var(--text3);font-family:var(--mono);font-size:10px;text-transform:uppercase;"><td style="padding:6px 4px;">Feature</td><td style="padding:6px 4px;">Classical MCP (1943)</td><td style="padding:6px 4px;">Modern Threshold Neuron</td></tr>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:6px 4px;color:var(--text2);">Excitatory strength</td><td style="padding:6px 4px;">Fixed, wᵢ = +1</td><td style="padding:6px 4px;">Arbitrary wᵢ ∈ ℝ</td></tr>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:6px 4px;color:var(--text2);">Inhibition</td><td style="padding:6px 4px;">Absolute veto (separate synapse)</td><td style="padding:6px 4px;">Negative weight wⱼ &lt; 0</td></tr>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:6px 4px;color:var(--text2);">Decision rule</td><td style="padding:6px 4px;">(Σxᵢ≥θ) ∧ (no inhibitor active)</td><td style="padding:6px 4px;">Σwᵢxᵢ ≥ θ</td></tr>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:6px 4px;color:var(--text2);">Bias / constant drive</td><td style="padding:6px 4px;">Explicit "always-on" bias neuron</td><td style="padding:6px 4px;">Implicit inside threshold value</td></tr>
+                    <tr><td style="padding:6px 4px;color:var(--text2);">Learning</td><td style="padding:6px 4px;">None</td><td style="padding:6px 4px;">None (learnable in Perceptron)</td></tr>
+                </table>
+                <div class="formula">Θ(S−θ)·Π(1−zⱼ) &nbsp;⇔&nbsp; Θ(Σwᵢxᵢ − θ′)</div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">NOT Gate: Bias+Veto vs. Signed Weight <span class="badge badge-green">EQUIVALENCE</span></div>
+                <p>Classical: bias b=1 (excitatory, +1) supplies default firing; input A is a pure inhibitory veto, θ=1 → y = 1−A.</p>
+                <p>Modern: y = Θ(−A − θ′), with θ′ = −0.5, w = −1 → identical truth table y = A̅.</p>
+            </div>
+
+            <div class="card">
+                <div class="card-title">NAND: Two Neurons vs. One <span class="badge badge-amber">COMPLEXITY CHANGE</span></div>
+                <p>Classical needs a two-neuron cascade (AND θ=2, then NOT θ=1) because a single equal-weight, veto-only unit cannot invert its own decision. Modern collapses this into <em>one</em> neuron: y = Θ(−x₁−x₂−θ′), θ′=−1.5, w₁=w₂=−1.</p>
+            </div>
+
+            <div class="card">
+                <div class="card-title">XOR: No Complexity Change <span class="badge badge-red">INVARIANT</span></div>
+                <p>XOR is not linearly separable in <em>either</em> formulation — a topological property of the function itself. Both the classical (OR, AND, veto-output — 3 neurons) and modern (2 signed-weight hidden units + OR output — 3 neurons) formulations require a hidden layer.</p>
+            </div>
+
+            <div class="card">
+                <div class="card-title">Summary of the Evolution</div>
+                <table style="width:100%;border-collapse:collapse;font-size:0.82rem;">
+                    <tr style="border-bottom:1px solid var(--border2);color:var(--text3);font-family:var(--mono);font-size:10px;text-transform:uppercase;"><td style="padding:6px 4px;">Gate</td><td style="padding:6px 4px;">Classical count</td><td style="padding:6px 4px;">Modern count</td><td style="padding:6px 4px;">Change?</td></tr>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:6px 4px;">NOT</td><td style="padding:6px 4px;">1 (bias+veto)</td><td style="padding:6px 4px;">1 (signed weight)</td><td style="padding:6px 4px;">No — same count</td></tr>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:6px 4px;">NAND</td><td style="padding:6px 4px;">2 (AND→NOT)</td><td style="padding:6px 4px;">1 (signed weights)</td><td style="padding:6px 4px;color:var(--amber);">Yes — classical needs +1</td></tr>
+                    <tr><td style="padding:6px 4px;">XOR</td><td style="padding:6px 4px;">3 (OR, AND, out)</td><td style="padding:6px 4px;">3 (hidden+out)</td><td style="padding:6px 4px;">No — both need hidden layer</td></tr>
+                </table>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════ WORKED EXAMPLES ═══════════════════════ -->
+        <div class="section" id="sec-examples">
+            <div class="section-title">Worked Examples</div>
+            <div class="section-sub">Threshold logic beyond the basic gates — majority voting, compound Boolean expressions, and the inhibitory veto in action.</div>
+
+            <div class="card">
+                <div class="card-title">Majority Function <span class="badge badge-blue">3 INPUTS</span></div>
+                <p>Three excitatory inputs x₁,x₂,x₃ (weight +1 each), θ=2 — fires if at least 2 of 3 are active.</p>
+                <div class="formula">x₁=1, x₂=1, x₃=0 → S=2 ≥ θ=2 → y=1 (majority active)</div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">Compound Expression: F = x₁·x₂ + x₃ <span class="badge badge-purple">2-NEURON NETWORK</span></div>
+                <p>Neuron 1 (AND): x₁,x₂, θ₁=2, computes x₁·x₂. Neuron 2 (OR): output of Neuron 1 and x₃, θ₂=1, computes F.</p>
+                <div class="formula">x₁=1,x₂=1,x₃=0 → AND=Θ(2−2)=1 → S₂=1+0=1≥1 → F=1</div>
+                <div class="formula">x₁=0,x₂=1,x₃=0 → AND=Θ(1−2)=0 → S₂=0+0=0&lt;1 → F=0</div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">Inhibitory Veto Example <span class="badge badge-red">SAFETY OVERRIDE</span></div>
+                <p>Four excitatory inputs x₁..x₄ (weight +1, θ=3) and one inhibitory "safety override" z.</p>
+                <div class="formula">x₁=x₂=x₃=x₄=1, z=0 → S=4≥3, no veto → y=1</div>
+                <div class="formula">x₁=x₂=x₃=x₄=1, z=1 → veto active → y=0 &nbsp;(even though S=4 ≫ θ=3)</div>
+                <div class="concept-box red">Even a hugely excess excitatory sum is unconditionally overridden by a single active inhibitory input — the veto is absolute, never graded.</div>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════ LIMITS & APPLICATIONS ═══════════════════════ -->
+        <div class="section" id="sec-limits">
+            <div class="section-title">Limitations & Applications</div>
+
+            <div class="two-col">
+                <div class="card">
+                    <div class="card-title">Limitations <span class="badge badge-red">⚠️</span></div>
+                    <p>• No learning mechanism — weights/thresholds are hand-designed<br>
+                    • Binary inputs/outputs only — no continuous signals<br>
+                    • Equal excitatory weights — biologically unrealistic<br>
+                    • Absolute (all-or-nothing) inhibition, not graded<br>
+                    • Linear separability constraint (e.g. XOR needs multiple layers)<br>
+                    • No rich temporal dynamics beyond synchronous discrete steps<br>
+                    • Fully deterministic — no probabilistic/noisy firing</p>
+                </div>
+                <div class="card">
+                    <div class="card-title">Applications <span class="badge badge-green">✓</span></div>
+                    <p>• Theoretical foundation of neural computation<br>
+                    • Digital logic circuit design (AND/OR/NOT/NAND/XOR ↔ neurons)<br>
+                    • Precursor to the Perceptron & deep learning<br>
+                    • Finite automata theory — MCP nets model finite-state machines<br>
+                    • Educational modeling of thresholding & decision boundaries</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">Summary</div>
+                <p>The McCulloch–Pitts neuron proved that networks of binary threshold units are computationally universal for propositional logic — a single neuron realizes AND, OR, NOT directly, while layered networks realize NAND and the non-linearly-separable XOR. Though superseded by learnable, weighted, continuous-valued models, it remains the first formal bridge between neuroscience, logic, and computation.</p>
+            </div>
+        </div>
+
+    </div>
+    <!-- end .main -->
+
+    <script>
+        // ════════════════════════════════════
+        //  NAVIGATION
+        // ════════════════════════════════════
+        function showSection(id, btn) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            const el = document.getElementById('sec-' + id);
+            if (el) el.classList.add('active');
+            if (btn) btn.classList.add('active');
+        }
+
+        // ════════════════════════════════════
+        //  THEME TOGGLE
+        // ════════════════════════════════════
+        function toggleTheme() {
+            const root = document.documentElement;
+            const current = root.getAttribute('data-theme');
+            const next = current === 'dark' ? 'light' : 'dark';
+            root.setAttribute('data-theme', next);
+            const icon = document.getElementById('theme-icon');
+            const label = document.getElementById('theme-label');
+            if (icon) icon.textContent = next === 'dark' ? '🌙' : '☀️';
+            if (label) label.textContent = next === 'dark' ? 'Dark Mode' : 'Light Mode';
+            try { localStorage.setItem('ann-theme', next); } catch (e) {}
+        }
+        (function () {
+            try {
+                const saved = localStorage.getItem('ann-theme');
+                if (saved) {
+                    document.documentElement.setAttribute('data-theme', saved);
+                    window.addEventListener('DOMContentLoaded', () => {
+                        const icon = document.getElementById('theme-icon');
+                        const label = document.getElementById('theme-label');
+                        if (icon) icon.textContent = saved === 'dark' ? '🌙' : '☀️';
+                        if (label) label.textContent = saved === 'dark' ? 'Dark Mode' : 'Light Mode';
+                    });
+                }
+            } catch (e) {}
+        })();
+
+        // ════════════════════════════════════
+        //  LOGIC GATES LAB
+        // ════════════════════════════════════
+        const GATE_DEFS = {
+            AND:    { inputs: ['x1', 'x2'], theta: 2, veto: [], desc: 'Two excitatory inputs (weight +1 each), θ=2. Fires only if BOTH inputs are 1.' },
+            OR:     { inputs: ['x1', 'x2'], theta: 1, veto: [], desc: 'Two excitatory inputs (weight +1 each), θ=1. Fires if AT LEAST ONE input is 1.' },
+            NOT:    { inputs: ['A'], theta: 0, veto: ['A'], bias: 1, desc: 'Bias b=1 always excites (θ=0 → fires by default); A is a pure inhibitory veto.' },
+            NAND:   { inputs: ['x1', 'x2'], theta: 2, veto: [], twoLayer: 'nand', desc: 'Two-neuron cascade: AND (θ=2) feeding a NOT neuron (θ=0) via inhibition.' },
+            XOR:    { inputs: ['x1', 'x2'], theta: 1, veto: [], twoLayer: 'xor', desc: 'OR (θ=1) and AND (θ=2) form a hidden layer; output neuron = OR excitatory − AND inhibitory veto, θ=1.' },
+            CUSTOM: { inputs: ['x1', 'x2', 'x3'], theta: 2, veto: [], desc: 'Three excitatory inputs, weight +1 each. Adjust θ to explore n-of-k threshold logic.' }
+        };
+        let currentGate = 'AND';
+        let gateState = { x1: 0, x2: 0, x3: 0, A: 0 };
+
+        function setGate(g, btn) {
+            currentGate = g;
+            document.querySelectorAll('#sec-gates .sub-tab').forEach(t => t.classList.remove('active'));
+            if (btn) btn.classList.add('active');
+            document.getElementById('gate-custom-theta').style.display = (g === 'CUSTOM') ? 'block' : 'none';
+            renderGateInputs();
+            renderGate();
+        }
+
+        function renderGateInputs() {
+            const def = GATE_DEFS[currentGate];
+            const wrap = document.getElementById('gate-inputs');
+            wrap.innerHTML = '';
+            def.inputs.forEach(name => {
+                const b = document.createElement('button');
+                const isVeto = def.veto.includes(name);
+                b.className = 'btn' + (gateState[name] ? (isVeto ? ' danger' : ' primary') : '');
+                b.textContent = name + ' = ' + gateState[name] + (isVeto ? ' (inhibitory)' : '');
+                b.onclick = () => { gateState[name] = gateState[name] ? 0 : 1; renderGateInputs(); renderGate(); };
+                wrap.appendChild(b);
+            });
+        }
+
+        function mcpFire(sum, theta, vetoActive) {
+            if (vetoActive) return 0;
+            return sum >= theta ? 1 : 0;
+        }
+
+        function renderGate() {
+            const def = GATE_DEFS[currentGate];
+            const diagram = document.getElementById('gate-diagram');
+            const info = document.getElementById('gate-info');
+            const truthEl = document.getElementById('gate-truth');
+            let theta = def.theta;
+            if (currentGate === 'CUSTOM') theta = parseInt(document.getElementById('theta-input').value) || 0;
+
+            let sum = 0, vetoActive = false, y = 0, lines = [];
+
+            if (currentGate === 'NOT') {
+                const S = (def.bias || 0);
+                vetoActive = gateState.A === 1;
+                y = mcpFire(S, theta, vetoActive);
+                lines.push(`bias b = 1 (excitatory)`, `A = ${gateState.A} ${vetoActive ? '⛔ VETO ACTIVE' : '(no veto)'}`, `S = ${S} ≥ θ=${theta}? ${S>=theta?'yes':'no'}`, `y = ${y}`);
+            } else if (currentGate === 'NAND') {
+                sum = gateState.x1 + gateState.x2;
+                const andOut = sum >= 2 ? 1 : 0;
+                y = 1 - andOut;
+                lines.push(`Neuron 1 (AND, θ=2): S=${sum} → AND=${andOut}`, `Neuron 2 (NOT, θ=0): bias=1, inhibited by AND=${andOut} → y=${y}`);
+            } else if (currentGate === 'XOR') {
+                const orOut = (gateState.x1 + gateState.x2) >= 1 ? 1 : 0;
+                const andOut = (gateState.x1 + gateState.x2) >= 2 ? 1 : 0;
+                vetoActive = andOut === 1;
+                y = mcpFire(orOut, 1, vetoActive);
+                lines.push(`Hidden OR (θ=1): S=${gateState.x1+gateState.x2} → OR=${orOut}`, `Hidden AND (θ=2): S=${gateState.x1+gateState.x2} → AND=${andOut} ${vetoActive?'⛔ vetoes output':''}`, `Output neuron (θ=1): excite=OR=${orOut}, veto=AND=${andOut} → y=${y}`);
+            } else {
+                sum = def.inputs.reduce((a, n) => a + gateState[n], 0);
+                y = mcpFire(sum, theta, false);
+                lines.push(`Inputs: ${def.inputs.map(n => n + '=' + gateState[n]).join(', ')}`, `S = Σxᵢ = ${sum}`, `S ≥ θ=${theta}? ${sum>=theta?'yes':'no'}`, `y = ${y}`);
+            }
+
+            diagram.innerHTML = `<div style="margin-bottom:6px;color:var(--text3);font-size:11px;">${def.desc}</div>` + lines.map(l => `<div>${l}</div>`).join('');
+            info.textContent = `Output y = ${y}` + (vetoActive ? '  (forced by inhibitory veto)' : '');
+            info.className = 'info-line ' + (y === 1 ? 'green' : (vetoActive ? 'red' : 'amber'));
+
+            // Truth table
+            const inputNames = currentGate === 'NOT' ? ['A'] : (currentGate === 'CUSTOM' ? def.inputs : ['x1', 'x2']);
+            const n = inputNames.length;
+            let rows = '<table style="width:100%;border-collapse:collapse;font-family:var(--mono);font-size:12px;"><tr style="border-bottom:1px solid var(--border2);color:var(--text3);">';
+            inputNames.forEach(nm => rows += `<td style="padding:4px 8px;">${nm}</td>`);
+            rows += '<td style="padding:4px 8px;">y</td></tr>';
+            for (let i = 0; i < (1 << n); i++) {
+                let combo = {};
+                inputNames.forEach((nm, idx) => combo[nm] = (i >> (n - 1 - idx)) & 1);
+                let rowY;
+                if (currentGate === 'NOT') {
+                    rowY = combo.A ? 0 : 1;
+                } else if (currentGate === 'NAND') {
+                    rowY = (combo.x1 + combo.x2 >= 2) ? 0 : 1;
+                } else if (currentGate === 'XOR') {
+                    const o = (combo.x1 + combo.x2 >= 1) ? 1 : 0;
+                    const a = (combo.x1 + combo.x2 >= 2) ? 1 : 0;
+                    rowY = a ? 0 : o;
+                } else {
+                    const s = Object.values(combo).reduce((a, b) => a + b, 0);
+                    rowY = s >= theta ? 1 : 0;
+                }
+                const isCurrent = inputNames.every(nm => combo[nm] === gateState[nm]);
+                rows += `<tr style="${isCurrent ? 'background:rgba(79,142,247,0.12);' : ''}border-bottom:1px solid var(--border);">`;
+                inputNames.forEach(nm => rows += `<td style="padding:4px 8px;">${combo[nm]}</td>`);
+                rows += `<td style="padding:4px 8px;font-weight:700;color:${rowY ? 'var(--green)' : 'var(--text3)'};">${rowY}</td></tr>`;
+            }
+            rows += '</table>';
+            truthEl.innerHTML = rows;
+        }
+
+        renderGateInputs();
+        renderGate();
+    </script>
+</body>
+</html>

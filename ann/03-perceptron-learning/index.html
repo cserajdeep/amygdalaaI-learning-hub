@@ -1,0 +1,1257 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perceptron Learning</title>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700;9..144,900&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        /* ─── THEME TOKENS ─── */
+        :root[data-theme="dark"] {
+            --bg: #0c0e14;
+            --bg2: #13161f;
+            --bg3: #1a1e2b;
+            --bg4: #222637;
+            --surface: #1c2030;
+            --border: rgba(255, 255, 255, 0.07);
+            --border2: rgba(255, 255, 255, 0.13);
+            --text: #e8eaf2;
+            --text2: #9ba5c0;
+            --text3: #5a6280;
+            --accent: #4f8ef7;
+            --accent2: #7c5ff5;
+            --green: #34d399;
+            --amber: #fbbf24;
+            --red: #f87171;
+            --teal: #22d3ee;
+            --pink: #f472b6;
+            --orange: #fb923c;
+            --shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
+            --card-bg: #1c2030;
+            --mono: 'IBM Plex Mono', monospace;
+        }
+        :root[data-theme="light"] {
+            --bg: #f6f7fb;
+            --bg2: #ffffff;
+            --bg3: #eef0f7;
+            --bg4: #e2e5f0;
+            --surface: #ffffff;
+            --border: rgba(0, 0, 0, 0.08);
+            --border2: rgba(0, 0, 0, 0.14);
+            --text: #1a1d2e;
+            --text2: #4a5170;
+            --text3: #8b93b0;
+            --accent: #2563eb;
+            --accent2: #7c3aed;
+            --green: #059669;
+            --amber: #d97706;
+            --red: #dc2626;
+            --teal: #0891b2;
+            --pink: #db2777;
+            --orange: #ea580c;
+            --shadow: 0 4px 24px rgba(0, 0, 0, 0.10);
+            --card-bg: #ffffff;
+            --mono: 'IBM Plex Mono', monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        /* ─── HERO ─── */
+        .hero {
+            background: var(--bg2);
+            border-bottom: 1px solid var(--border);
+            padding: 2rem 2rem 1.6rem;
+            position: relative;
+            overflow: hidden;
+        }
+        [data-theme="dark"] .hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse 60% 80% at 80% 50%, rgba(79, 142, 247, 0.07) 0%, transparent 70%),
+                radial-gradient(ellipse 40% 60% at 10% 20%, rgba(124, 95, 245, 0.05) 0%, transparent 60%);
+            pointer-events: none;
+        }
+        .hero-inner {
+            max-width: 1100px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            flex-wrap: wrap;
+            position: relative;
+            z-index: 1;
+        }
+        .hero-tag {
+            display: inline-block;
+            background: rgba(79, 142, 247, 0.12);
+            border: 1px solid rgba(79, 142, 247, 0.3);
+            color: var(--accent);
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px;
+            padding: 4px 12px;
+            border-radius: 100px;
+            letter-spacing: 0.08em;
+            margin-bottom: 0.6rem;
+        }
+        .hero h1 {
+            font-family: 'Fraunces', serif;
+            font-size: clamp(1.7rem, 4vw, 2.6rem);
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 0.4rem;
+            color: var(--text);
+        }
+        .hero h1 span {
+            color: var(--accent);
+        }
+        .hero p {
+            color: var(--text2);
+            font-size: 0.92rem;
+            max-width: 520px;
+            line-height: 1.6;
+        }
+        .hero-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-shrink: 0;
+        }
+
+        .theme-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--bg3);
+            border: 1px solid var(--border2);
+            border-radius: 100px;
+            padding: 6px 16px;
+            cursor: pointer;
+            font-size: 13px;
+            color: var(--text2);
+            font-family: 'DM Sans', sans-serif;
+            transition: all 0.2s;
+        }
+        .theme-toggle:hover {
+            border-color: var(--accent);
+            color: var(--text);
+        }
+        .toggle-icon {
+            font-size: 16px;
+        }
+
+        /* ─── NAV ─── */
+        .nav-bar {
+            background: var(--bg2);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            overflow-x: auto;
+            scrollbar-width: none;
+        }
+        .nav-bar::-webkit-scrollbar {
+            display: none;
+        }
+        .nav-inner {
+            max-width: 1100px;
+            margin: 0 auto;
+            display: flex;
+            padding: 0 1.2rem;
+        }
+        .nav-btn {
+            font-family: 'DM Sans', sans-serif;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text3);
+            background: none;
+            border: none;
+            border-bottom: 2px solid transparent;
+            padding: 12px 14px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: color 0.2s, border-color 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .nav-btn:hover {
+            color: var(--text);
+        }
+        .nav-btn.active {
+            color: var(--accent);
+            border-bottom-color: var(--accent);
+        }
+
+        /* ─── LAYOUT ─── */
+        .main {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 1.8rem 1.4rem;
+        }
+        .section {
+            display: none;
+        }
+        .section.active {
+            display: block;
+            animation: fadeUp 0.3s ease;
+        }
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .section-head {
+            margin-bottom: 1.8rem;
+        }
+        .section-title {
+            font-family: 'Fraunces', serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.3rem;
+            color: var(--text);
+        }
+        .section-sub {
+            color: var(--text2);
+            font-size: 0.9rem;
+            line-height: 1.65;
+        }
+
+        /* ─── CARDS ─── */
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 1.2rem 1.4rem;
+            margin-bottom: 1.2rem;
+            box-shadow: var(--shadow);
+        }
+        .card-title {
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.97rem;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 100px;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+        }
+        .badge-blue {
+            background: rgba(79, 142, 247, 0.15);
+            color: var(--accent);
+            border: 1px solid rgba(79, 142, 247, 0.25);
+        }
+        .badge-green {
+            background: rgba(52, 211, 153, 0.12);
+            color: var(--green);
+            border: 1px solid rgba(52, 211, 153, 0.2);
+        }
+        .badge-amber {
+            background: rgba(251, 191, 36, 0.12);
+            color: var(--amber);
+            border: 1px solid rgba(251, 191, 36, 0.2);
+        }
+        .badge-red {
+            background: rgba(248, 113, 113, 0.12);
+            color: var(--red);
+            border: 1px solid rgba(248, 113, 113, 0.2);
+        }
+        .badge-teal {
+            background: rgba(34, 211, 238, 0.12);
+            color: var(--teal);
+            border: 1px solid rgba(34, 211, 238, 0.2);
+        }
+        .badge-purple {
+            background: rgba(124, 95, 245, 0.12);
+            color: var(--accent2);
+            border: 1px solid rgba(124, 95, 245, 0.2);
+        }
+        .badge-orange {
+            background: rgba(251, 146, 60, 0.12);
+            color: var(--orange);
+            border: 1px solid rgba(251, 146, 60, 0.2);
+        }
+        .badge-pink {
+            background: rgba(244, 114, 182, 0.12);
+            color: var(--pink);
+            border: 1px solid rgba(244, 114, 182, 0.2);
+        }
+
+        .card p {
+            color: var(--text2);
+            font-size: 0.875rem;
+            line-height: 1.7;
+            margin-bottom: 0.6rem;
+        }
+        .card p:last-child {
+            margin-bottom: 0;
+        }
+
+        /* ─── CODE BLOCKS ─── */
+        .code-block {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.9rem 1.2rem;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 12.5px;
+            line-height: 1.75;
+            color: var(--text);
+            overflow-x: auto;
+            margin: 0.6rem 0;
+            position: relative;
+        }
+        [data-theme="light"] .code-block {
+            background: #f0f2fa;
+        }
+        .kw {
+            color: #c084fc;
+        }
+        .fn {
+            color: #60a5fa;
+        }
+        .str {
+            color: #86efac;
+        }
+        .num {
+            color: #fb923c;
+        }
+        .cmt {
+            color: var(--text3);
+            font-style: italic;
+        }
+        .ty {
+            color: #67e8f9;
+        }
+        .op {
+            color: #fcd34d;
+        }
+        .pp {
+            color: #f9a8d4;
+        }
+        [data-theme="light"] .kw {
+            color: #7c3aed;
+        }
+        [data-theme="light"] .fn {
+            color: #1d4ed8;
+        }
+        [data-theme="light"] .str {
+            color: #15803d;
+        }
+        [data-theme="light"] .num {
+            color: #c2410c;
+        }
+        [data-theme="light"] .ty {
+            color: #0891b2;
+        }
+        [data-theme="light"] .op {
+            color: #92400e;
+        }
+        [data-theme="light"] .pp {
+            color: #db2777;
+        }
+
+        /* ─── VIZ AREA ─── */
+        .viz-area {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1rem;
+            margin: 0.6rem 0;
+            min-height: 70px;
+        }
+        [data-theme="light"] .viz-area {
+            background: #f0f2fa;
+        }
+        .viz-label {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 10px;
+            color: var(--text3);
+            margin-bottom: 0.6rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        /* ─── CONTROLS ─── */
+        .controls {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin: 0.6rem 0;
+            align-items: center;
+        }
+        .btn {
+            font-family: 'DM Sans', sans-serif;
+            font-size: 13px;
+            font-weight: 500;
+            padding: 6px 14px;
+            border-radius: 8px;
+            border: 1px solid var(--border2);
+            background: var(--bg3);
+            color: var(--text2);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn:hover {
+            background: var(--bg4);
+            color: var(--text);
+        }
+        .btn.primary {
+            background: rgba(79, 142, 247, 0.15);
+            color: var(--accent);
+            border-color: rgba(79, 142, 247, 0.3);
+        }
+        .btn.primary:hover {
+            background: rgba(79, 142, 247, 0.28);
+        }
+        .btn.danger {
+            background: rgba(248, 113, 113, 0.12);
+            color: var(--red);
+            border-color: rgba(248, 113, 113, 0.25);
+        }
+        .btn.danger:hover {
+            background: rgba(248, 113, 113, 0.22);
+        }
+        .btn.success {
+            background: rgba(52, 211, 153, 0.12);
+            color: var(--green);
+            border-color: rgba(52, 211, 153, 0.25);
+        }
+        .btn.success:hover {
+            background: rgba(52, 211, 153, 0.22);
+        }
+        .btn.amber {
+            background: rgba(251, 191, 36, 0.12);
+            color: var(--amber);
+            border-color: rgba(251, 191, 36, 0.25);
+        }
+        .btn.amber:hover {
+            background: rgba(251, 191, 36, 0.22);
+        }
+        .btn.green {
+            background: rgba(52, 211, 153, 0.12);
+            color: var(--green);
+            border-color: rgba(52, 211, 153, 0.25);
+        }
+        .btn.green:hover {
+            background: rgba(52, 211, 153, 0.22);
+        }
+        .btn.red {
+            background: rgba(248, 113, 113, 0.12);
+            color: var(--red);
+            border-color: rgba(248, 113, 113, 0.25);
+        }
+        .btn.red:hover {
+            background: rgba(248, 113, 113, 0.22);
+        }
+
+        input[type="range"] {
+            accent-color: var(--accent);
+            width: 100%;
+        }
+        input[type="text"],
+        input[type="number"],
+        select {
+            background: var(--bg3);
+            border: 1px solid var(--border2);
+            border-radius: 6px;
+            color: var(--text);
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 12px;
+            padding: 6px 10px;
+            outline: none;
+        }
+        input[type="text"]:focus,
+        input[type="number"]:focus,
+        select:focus {
+            border-color: var(--accent);
+        }
+        select option {
+            background: var(--bg3);
+        }
+
+        /* ─── 1D ARRAY CELLS ─── */
+        .arr-wrap {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            align-items: flex-end;
+            padding: 6px 0;
+        }
+        .arr-cell {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+        }
+        .arr-box {
+            width: 52px;
+            height: 44px;
+            background: var(--bg3);
+            border: 1.5px solid var(--border2);
+            border-radius: 7px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text);
+            transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .arr-box.hi {
+            background: rgba(79, 142, 247, 0.18);
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+        .arr-box.found {
+            background: rgba(52, 211, 153, 0.18);
+            border-color: var(--green);
+            color: var(--green);
+        }
+        .arr-box.scan {
+            background: rgba(251, 191, 36, 0.15);
+            border-color: var(--amber);
+            color: var(--amber);
+        }
+        .arr-box.teal {
+            background: rgba(34, 211, 238, 0.15);
+            border-color: var(--teal);
+            color: var(--teal);
+        }
+        .arr-box.red {
+            background: rgba(248, 113, 113, 0.15);
+            border-color: var(--red);
+            color: var(--red);
+        }
+        .arr-box.amber {
+            background: rgba(251, 191, 36, 0.15);
+            border-color: var(--amber);
+            color: var(--amber);
+        }
+        .arr-box.purple {
+            background: rgba(124, 95, 245, 0.15);
+            border-color: var(--accent2);
+            color: var(--accent2);
+        }
+        .arr-box.green {
+            background: rgba(52, 211, 153, 0.15);
+            border-color: var(--green);
+            color: var(--green);
+        }
+        .arr-box.blue {
+            background: rgba(79, 142, 247, 0.15);
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .arr-lbl {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 9.5px;
+            color: var(--text3);
+        }
+        .arr-addr {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 8.5px;
+            color: var(--text3);
+            opacity: 0.7;
+        }
+
+        /* ─── 2D MATRIX CELLS ─── */
+        .matrix-row {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 4px;
+            flex-wrap: wrap;
+        }
+        .mat-cell {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+        }
+        .mat-box {
+            width: 48px;
+            height: 40px;
+            background: var(--bg3);
+            border: 1.5px solid var(--border2);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text);
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .mat-box.hi {
+            background: rgba(79, 142, 247, 0.18);
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+        .mat-box.found {
+            background: rgba(52, 211, 153, 0.18);
+            border-color: var(--green);
+            color: var(--green);
+        }
+        .mat-box.scan {
+            background: rgba(251, 191, 36, 0.15);
+            border-color: var(--amber);
+            color: var(--amber);
+        }
+        .mat-box.teal {
+            background: rgba(34, 211, 238, 0.15);
+            border-color: var(--teal);
+            color: var(--teal);
+        }
+        .mat-box.red {
+            background: rgba(248, 113, 113, 0.15);
+            border-color: var(--red);
+            color: var(--red);
+        }
+        .mat-box.amber {
+            background: rgba(251, 191, 36, 0.15);
+            border-color: var(--amber);
+            color: var(--amber);
+        }
+        .mat-box.purple {
+            background: rgba(124, 95, 245, 0.15);
+            border-color: var(--accent2);
+            color: var(--accent2);
+        }
+        .mat-box.green {
+            background: rgba(52, 211, 153, 0.15);
+            border-color: var(--green);
+            color: var(--green);
+        }
+        .mat-box.blue {
+            background: rgba(79, 142, 247, 0.15);
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .mat-lbl {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 8.5px;
+            color: var(--text3);
+        }
+
+        /* ─── FLAT MEMORY STRIP ─── */
+        .flat-strip {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 3px;
+            padding: 4px 0;
+        }
+        .flat-cell {
+            background: var(--bg3);
+            border: 1px solid var(--border2);
+            border-radius: 4px;
+            padding: 6px 10px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px;
+            color: var(--text2);
+            transition: all 0.3s;
+            min-width: 32px;
+            text-align: center;
+        }
+        .flat-cell.hi {
+            background: rgba(79, 142, 247, 0.18);
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        /* ─── INFO LINE ─── */
+        .info-line {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 12px;
+            color: var(--text2);
+            padding: 6px 12px;
+            background: var(--bg);
+            border-left: 3px solid var(--accent);
+            border-radius: 0 6px 6px 0;
+            margin: 0.4rem 0;
+            transition: border-color 0.3s, background 0.3s;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        [data-theme="light"] .info-line {
+            background: #f0f2fa;
+        }
+        .info-line.green {
+            border-left-color: var(--green);
+        }
+        .info-line.amber {
+            border-left-color: var(--amber);
+        }
+        .info-line.red {
+            border-left-color: var(--red);
+        }
+        .info-line.teal {
+            border-left-color: var(--teal);
+        }
+
+        /* ─── SUB TABS ─── */
+        .sub-tabs {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+            margin-bottom: 0.8rem;
+        }
+        .sub-tab {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px;
+            padding: 4px 12px;
+            border-radius: 100px;
+            border: 1px solid var(--border);
+            background: var(--bg2);
+            color: var(--text3);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .sub-tab:hover {
+            border-color: var(--border2);
+            color: var(--text2);
+        }
+        .sub-tab.active {
+            background: rgba(79, 142, 247, 0.12);
+            border-color: rgba(79, 142, 247, 0.35);
+            color: var(--accent);
+        }
+
+        /* ─── CONCEPT BOX ─── */
+        .concept-box {
+            background: rgba(79, 142, 247, 0.06);
+            border: 1px solid rgba(79, 142, 247, 0.12);
+            border-radius: 8px;
+            padding: 0.7rem 1rem;
+            font-size: 13px;
+            line-height: 1.8;
+            color: var(--text2);
+            margin: 0.5rem 0;
+        }
+        .concept-box.green {
+            background: rgba(52, 211, 153, 0.06);
+            border-color: rgba(52, 211, 153, 0.12);
+        }
+        .concept-box.amber {
+            background: rgba(251, 191, 36, 0.06);
+            border-color: rgba(251, 191, 36, 0.12);
+        }
+        .concept-box strong {
+            color: var(--text);
+        }
+
+        /* ─── FORMULA ─── */
+        .formula {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 12px;
+            color: var(--teal);
+            padding: 6px 12px;
+            background: rgba(34, 211, 238, 0.06);
+            border-radius: 6px;
+            border: 1px solid rgba(34, 211, 238, 0.12);
+            margin: 0.4rem 0;
+        }
+
+        /* ─── TWO / THREE COL ─── */
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        .three-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 1rem;
+        }
+        @media(max-width: 680px) {
+            .two-col,
+            .three-col {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* ─── BARS (sorting) ─── */
+        .bar-wrap {
+            display: flex;
+            gap: 8px;
+            align-items: flex-end;
+            justify-content: center;
+            padding: 12px 0;
+            min-height: 150px;
+            flex-wrap: wrap;
+        }
+        .bar {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+        .bar-body {
+            width: 36px;
+            border-radius: 4px 4px 0 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px;
+            font-weight: 600;
+            color: #0d0f14;
+            transition: height 0.3s ease, background 0.3s;
+            min-height: 20px;
+            padding: 2px 0;
+        }
+        .bar-lbl {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 8.5px;
+            color: var(--text3);
+        }
+
+        /* ─── INPUT GRID ─── */
+        .input-grid {
+            display: grid;
+            gap: 4px;
+            margin: 4px 0;
+        }
+
+        /* ─── TERMINAL ─── */
+        .terminal {
+            background: #080a0f;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.9rem;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 12.5px;
+            color: #a3e635;
+            min-height: 60px;
+            white-space: pre-wrap;
+            line-height: 1.65;
+        }
+        [data-theme="light"] .terminal {
+            background: #1a1d2e;
+        }
+        .terminal .prompt {
+            color: var(--text3);
+        }
+
+        /* ─── SCROLLBAR ─── */
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--bg4);
+            border-radius: 3px;
+        }
+
+        /* ─── RESPONSIVE TWEAKS ─── */
+        @media(max-width: 600px) {
+            .hero {
+                padding: 1.2rem 1rem;
+            }
+            .main {
+                padding: 1rem 0.8rem;
+            }
+            .card {
+                padding: 1rem;
+            }
+            .arr-box {
+                width: 40px;
+                height: 36px;
+                font-size: 11px;
+            }
+            .mat-box {
+                width: 38px;
+                height: 34px;
+                font-size: 11px;
+            }
+            .controls {
+                gap: 4px;
+            }
+            .btn {
+                font-size: 12px;
+                padding: 4px 10px;
+            }
+            .nav-btn {
+                font-size: 11px;
+                padding: 8px 10px;
+            }
+            .flat-cell {
+                padding: 4px 6px;
+                font-size: 9px;
+                min-width: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- ====== HUB NAVIGATION ====== -->
+    <nav style="position:sticky;top:0;z-index:1000;background:rgba(20,20,35,0.92);backdrop-filter:blur(10px);padding:10px 16px;display:flex;align-items:center;justify-content:center;gap:18px;flex-wrap:wrap;font-family:'Inter',sans-serif;font-size:0.85rem;border-bottom:1px solid rgba(255,255,255,0.08);">
+        <a href="../02-activation-functions/index.html" style="color:#4285F4;font-weight:600;text-decoration:none;">← Activation Functions</a>
+        <a href="../../index.html" style="color:#fff;font-weight:700;text-decoration:none;padding:4px 12px;border:1px solid rgba(255,255,255,0.25);border-radius:20px;">🏠 Hub Home</a>
+    </nav>
+
+    <div class="hero">
+        <div class="hero-inner">
+            <div>
+                <div class="hero-tag">✦ ANN Module 02 · CI (CS-3030)</div>
+                <h1>Perceptron Learning<br><span>From Fixed Weights to Learned Weights</span></h1>
+                <p>Supervised training, the Perceptron Learning Rule, and hidden layers with backpropagation — plus a step-by-step interactive OR-classifier trainer.</p>
+            </div>
+            <div class="hero-controls">
+                <button class="theme-toggle" onclick="toggleTheme()" id="theme-btn">
+                    <span class="toggle-icon" id="theme-icon">🌙</span>
+                    <span id="theme-label">Dark Mode</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <nav class="nav-bar">
+        <div class="nav-inner">
+            <button class="nav-btn active" onclick="showSection('concept',this)">💡 Recap</button>
+            <button class="nav-btn" onclick="showSection('models',this)">🏗️ ANN Models</button>
+            <button class="nav-btn" onclick="showSection('rule',this)">📏 Learning Rule</button>
+            <button class="nav-btn" onclick="showSection('trainer',this)">🎯 OR Trainer Lab</button>
+            <button class="nav-btn" onclick="showSection('python',this)">🐍 Python Example</button>
+        </div>
+    </nav>
+
+    <div class="main">
+
+        <!-- ═══════════════════════ RECAP ═══════════════════════ -->
+        <div class="section active" id="sec-concept">
+            <div class="section-title">Quick Recap — The Perceptron</div>
+            <div class="section-sub">A perceptron sums weighted inputs plus a bias, then applies a threshold activation to produce a binary output.</div>
+
+            <div class="card">
+                <div class="card-title">Perceptron Structure <span class="badge badge-blue">RECAP</span></div>
+                <div class="formula">Σ = Σᵢ (wᵢ xᵢ) + bias &nbsp;→&nbsp; f(x) = 1 if Σ ≥ 0, else 0 &nbsp;→&nbsp; ŷ</div>
+                <p>Unlike the classical MCP neuron (equal weights, hand-set threshold), a perceptron's weights are <strong>learned</strong> from labeled training data via an iterative update rule.</p>
+            </div>
+
+            <div class="card">
+                <div class="card-title">Single-Layer vs. Hidden-Layer Perceptron <span class="badge badge-purple">ARCHITECTURE</span></div>
+                <p><strong>Single-Layer:</strong> input layer connects directly to a single output neuron — can only realize linearly separable functions (AND, OR, NOT).</p>
+                <p><strong>Multi-Layer (with Hidden Layer):</strong> inputs connect to a hidden layer of neurons, which connect to the output — can realize non-linearly-separable functions like XOR.</p>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════ ANN MODELS / BACKPROP ═══════════════════════ -->
+        <div class="section" id="sec-models">
+            <div class="section-title">ANN Working Models & Backpropagation</div>
+
+            <div class="card">
+                <div class="card-title">Breakthrough: Multi-Layer Perceptron (1986) <span class="badge badge-amber">HISTORY</span></div>
+                <p>Geoffrey Hinton, David Rumelhart, and Ronald Williams published "Learning representations by back-propagating errors," introducing two key ideas:</p>
+                <div class="concept-box">1. <strong>Backpropagation</strong> — a procedure to repeatedly adjust weights so as to minimize the difference between actual output and desired output.<br>2. <strong>Hidden Layers</strong> — neuron nodes stacked between inputs and outputs, letting the network learn more complex features (such as XOR logic).</div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">Why Sigmoid, Not Step, for Learning <span class="badge badge-teal">MOTIVATION</span></div>
+                <p>With a hard step activation, a tiny change in any weight w can make the output jump suddenly from 0 to 1. We want <em>gradual</em> changes in weights to produce gradual changes in output — this is exactly what the smooth sigmoid enables.</p>
+                <div class="formula">z = Σᵢ wᵢxᵢ + bias, &nbsp; σ(z) = 1 / (1 + e^(−z))</div>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════ LEARNING RULE ═══════════════════════ -->
+        <div class="section" id="sec-rule">
+            <div class="section-title">The Perceptron Learning Rule</div>
+
+            <div class="two-col">
+                <div class="card">
+                    <div class="card-title">Supervised Training <span class="badge badge-blue">PSEUDOCODE</span></div>
+                    <div class="code-block">1. Generate a training pair:
+   input <span class="ty">x</span> = [x1 x2 ... xn]
+   target output y_target
+2. Present x to network,
+   generate output y
+3. Compare y with y_target
+   to compute error
+4. Adjust weights w to
+   reduce error
+5. Repeat 2-4 until done</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">Perceptron Learning Rule <span class="badge badge-green">FORMULA</span></div>
+                    <div class="code-block">1. Initialize weights at random
+2. For each pair (x, y_target):
+   - compute output y
+   - error δ = (y_target − y)
+   - update: w_new = w_old
+             + η·δ·x
+     where η = learning rate
+3. Repeat until δ = 0
+   (convergence)</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">The Rule, Formally <span class="badge badge-purple">KEY EQUATION</span></div>
+                <div class="formula">δ = (y_target − y)</div>
+                <div class="formula">w_new = w_old + η · δ · x</div>
+                <p>η (the <strong>learning rate</strong> or step size) determines how smoothly the learning process proceeds — too large and training oscillates, too small and it converges slowly.</p>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════ OR TRAINER LAB ═══════════════════════ -->
+        <div class="section" id="sec-trainer">
+            <div class="section-title">Interactive Lab — Train an OR Perceptron</div>
+            <div class="section-sub">Step through the Perceptron Learning Rule epoch by epoch on the OR truth table, and watch the weights converge to a linear decision boundary.</div>
+
+            <div class="card">
+                <div class="card-title">OR Truth Table & Decision Boundary <span class="badge badge-blue">TARGET</span></div>
+                <table style="width:100%;border-collapse:collapse;font-family:var(--mono);font-size:12px;">
+                    <tr style="border-bottom:1px solid var(--border2);color:var(--text3);"><td style="padding:4px 8px;">x</td><td style="padding:4px 8px;">y</td><td style="padding:4px 8px;">out</td></tr>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:4px 8px;">0</td><td style="padding:4px 8px;">0</td><td style="padding:4px 8px;">0</td></tr>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:4px 8px;">0</td><td style="padding:4px 8px;">1</td><td style="padding:4px 8px;">1</td></tr>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:4px 8px;">1</td><td style="padding:4px 8px;">0</td><td style="padding:4px 8px;">1</td></tr>
+                    <tr><td style="padding:4px 8px;">1</td><td style="padding:4px 8px;">1</td><td style="padding:4px 8px;">1</td></tr>
+                </table>
+            </div>
+
+            <div class="card">
+                <div class="card-title">Trainer <span class="badge badge-teal">LIVE</span></div>
+                <div class="controls">
+                    <label style="font-family:var(--mono);font-size:11px;color:var(--text3);">Learning rate η:
+                        <input type="text" id="pt-lr" value="0.1" style="width:60px;margin-left:6px;" oninput="ptReset()">
+                    </label>
+                    <button class="btn primary" onclick="ptStep()">▶ Step</button>
+                    <button class="btn success" onclick="ptRunEpoch()">⏩ Run 1 Epoch</button>
+                    <button class="btn" onclick="ptReset()">⟲ Reset</button>
+                </div>
+
+                <div class="viz-area">
+                    <div class="viz-label">CURRENT STATE</div>
+                    <div id="pt-state" style="font-family:var(--mono);font-size:13px;line-height:2;color:var(--text2);"></div>
+                </div>
+                <div id="pt-info" class="info-line"></div>
+
+                <div class="viz-area">
+                    <div class="viz-label">DECISION BOUNDARY (w₁x + w₂y + b = 0)</div>
+                    <svg id="pt-svg" width="100%" height="220" viewBox="0 0 220 220" style="overflow:visible;"></svg>
+                </div>
+
+                <div class="viz-area">
+                    <div class="viz-label">TRAINING LOG</div>
+                    <div id="pt-log" class="terminal"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════ PYTHON EXAMPLE ═══════════════════════ -->
+        <div class="section" id="sec-python">
+            <div class="section-title">Python 3.6 Example — OR Perceptron</div>
+            <div class="section-sub">A minimal implementation of the perceptron learning rule matching the trainer lab above.</div>
+
+            <div class="card">
+                <div class="card-title">perceptron_or.py <span class="badge badge-green">RUNNABLE</span></div>
+                <div class="code-block"><span class="kw">import</span> numpy <span class="kw">as</span> np
+
+<span class="cmt"># OR truth table</span>
+X = np.array([[0,0],[0,1],[1,0],[1,1]])
+y = np.array([0,1,1,1])
+
+w = np.zeros(2)
+b = 0.0
+eta = <span class="num">0.1</span>
+
+<span class="kw">def</span> <span class="fn">step</span>(z):
+    <span class="kw">return</span> <span class="num">1</span> <span class="kw">if</span> z >= <span class="num">0</span> <span class="kw">else</span> <span class="num">0</span>
+
+<span class="kw">for</span> epoch <span class="kw">in</span> <span class="fn">range</span>(<span class="num">10</span>):
+    errors = <span class="num">0</span>
+    <span class="kw">for</span> xi, target <span class="kw">in</span> <span class="fn">zip</span>(X, y):
+        z = np.dot(w, xi) + b
+        out = step(z)
+        delta = target - out
+        w += eta * delta * xi
+        b += eta * delta
+        errors += <span class="fn">int</span>(delta != <span class="num">0</span>)
+    <span class="fn">print</span>(<span class="str">f"epoch {epoch}: w={w}, b={b}, errors={errors}"</span>)
+    <span class="kw">if</span> errors == <span class="num">0</span>:
+        <span class="kw">break</span></div>
+                <div class="concept-box green">📌 Run this and you'll see the perceptron converge in just a few epochs — OR is linearly separable, so convergence is guaranteed by the Perceptron Convergence Theorem.</div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">Why This Wouldn't Work for XOR <span class="badge badge-red">LIMITATION</span></div>
+                <p>XOR is not linearly separable — no single straight line (in 2D) can divide its four points into the correct classes. A single-layer perceptron will never converge on XOR; a hidden layer (Multi-Layer Perceptron) is required, trained via backpropagation.</p>
+            </div>
+        </div>
+
+    </div>
+    <!-- end .main -->
+
+    <script>
+        // ════════════════════════════════════
+        //  NAVIGATION
+        // ════════════════════════════════════
+        function showSection(id, btn) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            const el = document.getElementById('sec-' + id);
+            if (el) el.classList.add('active');
+            if (btn) btn.classList.add('active');
+            if (id === 'trainer') ptDraw();
+        }
+
+        // ════════════════════════════════════
+        //  THEME TOGGLE
+        // ════════════════════════════════════
+        function toggleTheme() {
+            const root = document.documentElement;
+            const current = root.getAttribute('data-theme');
+            const next = current === 'dark' ? 'light' : 'dark';
+            root.setAttribute('data-theme', next);
+            const icon = document.getElementById('theme-icon');
+            const label = document.getElementById('theme-label');
+            if (icon) icon.textContent = next === 'dark' ? '🌙' : '☀️';
+            if (label) label.textContent = next === 'dark' ? 'Dark Mode' : 'Light Mode';
+            try { localStorage.setItem('ann-theme', next); } catch (e) {}
+            ptDraw();
+        }
+        (function () {
+            try {
+                const saved = localStorage.getItem('ann-theme');
+                if (saved) {
+                    document.documentElement.setAttribute('data-theme', saved);
+                    window.addEventListener('DOMContentLoaded', () => {
+                        const icon = document.getElementById('theme-icon');
+                        const label = document.getElementById('theme-label');
+                        if (icon) icon.textContent = saved === 'dark' ? '🌙' : '☀️';
+                        if (label) label.textContent = saved === 'dark' ? 'Dark Mode' : 'Light Mode';
+                    });
+                }
+            } catch (e) {}
+        })();
+
+        // ════════════════════════════════════
+        //  OR PERCEPTRON TRAINER
+        // ════════════════════════════════════
+        const OR_X = [[0,0],[0,1],[1,0],[1,1]];
+        const OR_Y = [0,1,1,1];
+        let pt = { w: [0,0], b: 0, idx: 0, epoch: 0, log: [] };
+
+        function ptStepFn(z) { return z >= 0 ? 1 : 0; }
+
+        function ptReset() {
+            pt = { w: [0,0], b: 0, idx: 0, epoch: 0, log: [] };
+            ptLog('Reset. w=[0,0], b=0');
+            ptRender();
+        }
+
+        function ptLog(msg) {
+            pt.log.push(msg);
+            if (pt.log.length > 40) pt.log.shift();
+            document.getElementById('pt-log').textContent = pt.log.join('\n');
+            const term = document.getElementById('pt-log');
+            term.scrollTop = term.scrollHeight;
+        }
+
+        function ptStep() {
+            const eta = parseFloat(document.getElementById('pt-lr').value) || 0.1;
+            const xi = OR_X[pt.idx];
+            const target = OR_Y[pt.idx];
+            const z = pt.w[0]*xi[0] + pt.w[1]*xi[1] + pt.b;
+            const out = ptStepFn(z);
+            const delta = target - out;
+            pt.w[0] += eta * delta * xi[0];
+            pt.w[1] += eta * delta * xi[1];
+            pt.b += eta * delta;
+            ptLog(`x=[${xi}] target=${target} out=${out} δ=${delta} → w=[${pt.w[0].toFixed(2)},${pt.w[1].toFixed(2)}] b=${pt.b.toFixed(2)}`);
+            pt.idx = (pt.idx + 1) % OR_X.length;
+            if (pt.idx === 0) pt.epoch++;
+            ptRender();
+        }
+
+        function ptRunEpoch() {
+            for (let i = 0; i < OR_X.length; i++) ptStep();
+        }
+
+        function ptRender() {
+            const xi = OR_X[pt.idx];
+            const z = pt.w[0]*xi[0] + pt.w[1]*xi[1] + pt.b;
+            document.getElementById('pt-state').innerHTML =
+                `Epoch: ${pt.epoch} &nbsp; Next sample: x=[${xi}]<br>` +
+                `w = [${pt.w[0].toFixed(3)}, ${pt.w[1].toFixed(3)}] &nbsp; b = ${pt.b.toFixed(3)}<br>` +
+                `predicted z = ${z.toFixed(3)} → ŷ = ${ptStepFn(z)}`;
+            let allCorrect = OR_X.every((xi2, i) => ptStepFn(pt.w[0]*xi2[0]+pt.w[1]*xi2[1]+pt.b) === OR_Y[i]);
+            const info = document.getElementById('pt-info');
+            info.textContent = allCorrect ? '✓ Converged — all 4 OR patterns correctly classified!' : 'Training in progress — click Step or Run 1 Epoch.';
+            info.className = 'info-line ' + (allCorrect ? 'green' : 'amber');
+            ptDraw();
+        }
+
+        function ptDraw() {
+            const svg = document.getElementById('pt-svg');
+            if (!svg) return;
+            const size = 220, pad = 30;
+            const style = getComputedStyle(document.documentElement);
+            const accent = style.getPropertyValue('--accent').trim() || '#4f8ef7';
+            const green = style.getPropertyValue('--green').trim() || '#34d399';
+            const red = style.getPropertyValue('--red').trim() || '#f87171';
+            const text3 = style.getPropertyValue('--text3').trim() || '#5a6280';
+            const toPx = (v) => pad + v * (size - 2*pad);
+            const toPy = (v) => (size - pad) - v * (size - 2*pad);
+
+            let els = `<line x1="${toPx(0)}" y1="${toPy(0)}" x2="${toPx(1.3)}" y2="${toPy(0)}" stroke="${text3}" stroke-width="1"/>
+                       <line x1="${toPx(0)}" y1="${toPy(0)}" x2="${toPx(0)}" y2="${toPy(1.3)}" stroke="${text3}" stroke-width="1"/>`;
+
+            // decision boundary: w0*x + w1*y + b = 0  →  y = -(w0*x+b)/w1
+            if (Math.abs(pt.w[1]) > 1e-6) {
+                const y0 = -(pt.w[0]*(-0.3) + pt.b) / pt.w[1];
+                const y1 = -(pt.w[0]*1.3 + pt.b) / pt.w[1];
+                els += `<line x1="${toPx(-0.3)}" y1="${toPy(y0)}" x2="${toPx(1.3)}" y2="${toPy(y1)}" stroke="${accent}" stroke-width="2" stroke-dasharray="4,3"/>`;
+            } else if (Math.abs(pt.w[0]) > 1e-6) {
+                const x0 = -pt.b / pt.w[0];
+                els += `<line x1="${toPx(x0)}" y1="${toPy(-0.3)}" x2="${toPx(x0)}" y2="${toPy(1.3)}" stroke="${accent}" stroke-width="2" stroke-dasharray="4,3"/>`;
+            }
+
+            OR_X.forEach((xi, i) => {
+                const c = OR_Y[i] === 1 ? green : red;
+                els += `<circle cx="${toPx(xi[0])}" cy="${toPy(xi[1])}" r="7" fill="${c}" stroke="#fff" stroke-width="1.5"/>
+                        <text x="${toPx(xi[0])+10}" y="${toPy(xi[1])+4}" font-family="IBM Plex Mono, monospace" font-size="10" fill="${text3}">(${xi[0]},${xi[1]})→${OR_Y[i]}</text>`;
+            });
+
+            svg.innerHTML = els;
+        }
+
+        ptReset();
+    </script>
+</body>
+</html>

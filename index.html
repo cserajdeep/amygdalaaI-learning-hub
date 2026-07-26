@@ -53,7 +53,30 @@
   .hero h1 { font-size: clamp(2.2rem, 6vw, 3.6rem); font-weight: 800; margin-bottom: 16px; }
   .hero p { font-size: clamp(1rem, 2vw, 1.3rem); opacity: 0.95; max-width: 620px; margin: 0 auto; }
   .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
-  .modules { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; margin: 56px auto; }
+
+  /* ─── TOP-LEVEL TRACK TABS ─── */
+  .track-tabs {
+    display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;
+    margin: -34px auto 0; position: relative; z-index: 10; padding: 0 24px;
+  }
+  .track-tab {
+    font-family: 'Inter', sans-serif; font-weight: 700; font-size: 0.95rem;
+    padding: 14px 28px; border-radius: 100px; cursor: pointer;
+    border: 1px solid var(--border); background: var(--bg); color: var(--text-secondary);
+    box-shadow: var(--shadow); transition: all 0.25s; display: flex; align-items: center; gap: 8px;
+  }
+  .track-tab:hover { color: var(--text); transform: translateY(-2px); }
+  .track-tab.active { color: #fff; border-color: transparent; }
+  .track-tab[data-track="dsa"].active { background: linear-gradient(135deg, #4285F4, #34A853); }
+  .track-tab[data-track="ann"].active { background: linear-gradient(135deg, #EA4335, #FBBC05); }
+
+  .track-panel { display: none; }
+  .track-panel.active { display: block; animation: fadeUp 0.35s ease; }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(10px);} to{opacity:1;transform:translateY(0);} }
+
+  .track-blurb { text-align:center; max-width:680px; margin: 46px auto 0; color: var(--text-secondary); font-size: 0.98rem; }
+
+  .modules { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; margin: 32px auto 56px; }
   .card {
     background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius);
     padding: 28px; box-shadow: var(--shadow); transition: transform 0.25s;
@@ -61,6 +84,7 @@
   }
   .card:hover { transform: translateY(-6px); }
   .card .num { font-size: 0.85rem; font-weight: 700; color: var(--accent); letter-spacing: 0.05em; }
+  .track-panel[data-panel="ann"] .card .num { color: var(--accent3); }
   .card h3 { font-size: 1.4rem; font-weight: 700; }
   .card p { color: var(--text-secondary); font-size: 0.95rem; flex-grow: 1; }
   .card .go { font-weight: 600; }
@@ -77,33 +101,73 @@
     <p>A curated, interactive course by Dr. Rajdeep Chatterjee — from DSA foundations to applied AI.</p>
   </section>
 
+  <div class="track-tabs">
+    <button class="track-tab active" data-track="dsa" onclick="showTrack('dsa', this)">
+      <i class="fas fa-diagram-project"></i> DSA & C
+    </button>
+    <button class="track-tab" data-track="ann" onclick="showTrack('ann', this)">
+      <i class="fas fa-brain"></i> ANN
+    </button>
+  </div>
+
   <div class="container">
-    <div class="modules">
-      <div class="card">
-        <div class="num">MODULE 00</div>
-        <h3>Why DSA?</h3>
-        <p>Understand why Data Structures & Algorithms matter for real-world software and AI systems, with context on India's tech ecosystem.</p>
-        <a class="go" href="01-why-dsa/index.html">Start Module →</a>
-      </div>
-      <div class="card">
-        <div class="num">MODULE 01</div>
-        <h3>C Prerequisites for Data Structures</h3>
-        <p>Core C programming concepts — pointers, memory, and structures — needed before diving into data structures.</p>
-        <a class="go" href="02-c-prerequisites/index.html">Start Module →</a>
-      </div>
-      <div class="card">
-        <div class="num">MODULE 02</div>
-        <h3>Arrays in C</h3>
-        <p>Deep dive into arrays: memory layout, operations, and interactive visualizations of sorting algorithms.</p>
-        <a class="go" href="03-arrays-in-c/index.html">Start Module →</a>
-      </div>
-      <div class="card">
-        <div class="num">MODULE 03</div>
-        <h3>Introduction to Data Structures</h3>
-        <p>Definitions, ADTs, applications, types of DS mapped to real apps/OS you use daily, and Big-O/Θ/Ω complexity with animated growth-rate visualizations.</p>
-        <a class="go" href="04-intro-to-ds/index.html">Start Module →</a>
+
+    <!-- ══════════ DSA & C TRACK ══════════ -->
+    <div class="track-panel active" data-panel="dsa" id="panel-dsa">
+      <p class="track-blurb">Core Data Structures & Algorithms track — build a solid foundation in C, memory, and classic data structures before moving to applied AI.</p>
+      <div class="modules">
+        <div class="card">
+          <div class="num">MODULE 00</div>
+          <h3>Why DSA?</h3>
+          <p>Understand why Data Structures & Algorithms matter for real-world software and AI systems, with context on India's tech ecosystem.</p>
+          <a class="go" href="dsa_w_c/01-why-dsa/index.html">Start Module →</a>
+        </div>
+        <div class="card">
+          <div class="num">MODULE 01</div>
+          <h3>C Prerequisites for Data Structures</h3>
+          <p>Core C programming concepts — pointers, memory, and structures — needed before diving into data structures.</p>
+          <a class="go" href="dsa_w_c/02-c-prerequisites/index.html">Start Module →</a>
+        </div>
+        <div class="card">
+          <div class="num">MODULE 02</div>
+          <h3>Arrays in C</h3>
+          <p>Deep dive into arrays: memory layout, operations, and interactive visualizations of sorting algorithms.</p>
+          <a class="go" href="dsa_w_c/03-arrays-in-c/index.html">Start Module →</a>
+        </div>
+        <div class="card">
+          <div class="num">MODULE 03</div>
+          <h3>Introduction to Data Structures</h3>
+          <p>Definitions, ADTs, applications, types of DS mapped to real apps/OS you use daily, and Big-O/Θ/Ω complexity with animated growth-rate visualizations.</p>
+          <a class="go" href="dsa_w_c/04-intro-to-ds/index.html">Start Module →</a>
+        </div>
       </div>
     </div>
+
+    <!-- ══════════ ANN TRACK ══════════ -->
+    <div class="track-panel" data-panel="ann" id="panel-ann">
+      <p class="track-blurb">Artificial Neural Networks track — from the 1943 McCulloch–Pitts neuron to activation functions and the learning Perceptron, with interactive simulators for every concept.</p>
+      <div class="modules">
+        <div class="card">
+          <div class="num">MODULE 00</div>
+          <h3>McCulloch–Pitts Neuron</h3>
+          <p>The 1943 origin of neural computation: threshold logic, the inhibitory veto principle, and interactive AND/OR/NOT/NAND/XOR gate builders.</p>
+          <a class="go" href="ann/01-mcculloch-pitts-neuron/index.html">Start Module →</a>
+        </div>
+        <div class="card">
+          <div class="num">MODULE 01</div>
+          <h3>Activation Functions</h3>
+          <p>Step, sigmoid, bipolar sigmoid, hard-limit and more — an interactive calculator/plotter plus worked numerical examples.</p>
+          <a class="go" href="ann/02-activation-functions/index.html">Start Module →</a>
+        </div>
+        <div class="card">
+          <div class="num">MODULE 02</div>
+          <h3>Perceptron Learning</h3>
+          <p>Supervised training, the perceptron learning rule, and a step-by-step interactive OR-classifier trainer.</p>
+          <a class="go" href="ann/03-perceptron-learning/index.html">Start Module →</a>
+        </div>
+      </div>
+    </div>
+
   </div>
 
   <footer>
@@ -133,6 +197,20 @@
       else if (saved === 'light') setTheme(false);
       else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) setTheme(true);
       btn.addEventListener('click', () => setTheme(!document.body.classList.contains('dark')));
+    })();
+
+    function showTrack(track, btn){
+      document.querySelectorAll('.track-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.track-panel').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('panel-' + track).classList.add('active');
+      try { localStorage.setItem('hub-track', track); } catch(e){}
+    }
+    (function(){
+      try {
+        const saved = localStorage.getItem('hub-track');
+        if (saved === 'ann') showTrack('ann', document.querySelector('.track-tab[data-track="ann"]'));
+      } catch(e){}
     })();
   </script>
 </body>

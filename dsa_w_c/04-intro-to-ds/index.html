@@ -1,0 +1,1694 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Introduction to Data Structures</title>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700;9..144,900&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        /* ─── THEME TOKENS ─── */
+        :root[data-theme="dark"] {
+            --bg: #0c0e14;
+            --bg2: #13161f;
+            --bg3: #1a1e2b;
+            --bg4: #222637;
+            --surface: #1c2030;
+            --border: rgba(255, 255, 255, 0.07);
+            --border2: rgba(255, 255, 255, 0.13);
+            --text: #e8eaf2;
+            --text2: #9ba5c0;
+            --text3: #5a6280;
+            --accent: #4f8ef7;
+            --accent2: #7c5ff5;
+            --green: #34d399;
+            --amber: #fbbf24;
+            --red: #f87171;
+            --teal: #22d3ee;
+            --pink: #f472b6;
+            --orange: #fb923c;
+            --shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
+            --card-bg: #1c2030;
+            --mono: 'IBM Plex Mono', monospace;
+        }
+        :root[data-theme="light"] {
+            --bg: #f6f7fb;
+            --bg2: #ffffff;
+            --bg3: #eef0f7;
+            --bg4: #e2e5f0;
+            --surface: #ffffff;
+            --border: rgba(0, 0, 0, 0.08);
+            --border2: rgba(0, 0, 0, 0.14);
+            --text: #1a1d2e;
+            --text2: #4a5170;
+            --text3: #8b93b0;
+            --accent: #2563eb;
+            --accent2: #7c3aed;
+            --green: #059669;
+            --amber: #d97706;
+            --red: #dc2626;
+            --teal: #0891b2;
+            --pink: #db2777;
+            --orange: #ea580c;
+            --shadow: 0 4px 24px rgba(0, 0, 0, 0.10);
+            --card-bg: #ffffff;
+            --mono: 'IBM Plex Mono', monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        /* ─── HERO ─── */
+        .hero {
+            background: var(--bg2);
+            border-bottom: 1px solid var(--border);
+            padding: 2rem 2rem 1.6rem;
+            position: relative;
+            overflow: hidden;
+        }
+        [data-theme="dark"] .hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse 60% 80% at 80% 50%, rgba(79, 142, 247, 0.07) 0%, transparent 70%),
+                radial-gradient(ellipse 40% 60% at 10% 20%, rgba(124, 95, 245, 0.05) 0%, transparent 60%);
+            pointer-events: none;
+        }
+        .hero-inner {
+            max-width: 1100px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            flex-wrap: wrap;
+            position: relative;
+            z-index: 1;
+        }
+        .hero-tag {
+            display: inline-block;
+            background: rgba(79, 142, 247, 0.12);
+            border: 1px solid rgba(79, 142, 247, 0.3);
+            color: var(--accent);
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px;
+            padding: 4px 12px;
+            border-radius: 100px;
+            letter-spacing: 0.08em;
+            margin-bottom: 0.6rem;
+        }
+        .hero h1 {
+            font-family: 'Fraunces', serif;
+            font-size: clamp(1.7rem, 4vw, 2.6rem);
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 0.4rem;
+            color: var(--text);
+        }
+        .hero h1 span {
+            color: var(--accent);
+        }
+        .hero p {
+            color: var(--text2);
+            font-size: 0.92rem;
+            max-width: 520px;
+            line-height: 1.6;
+        }
+        .hero-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-shrink: 0;
+        }
+
+        .theme-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--bg3);
+            border: 1px solid var(--border2);
+            border-radius: 100px;
+            padding: 6px 16px;
+            cursor: pointer;
+            font-size: 13px;
+            color: var(--text2);
+            font-family: 'DM Sans', sans-serif;
+            transition: all 0.2s;
+        }
+        .theme-toggle:hover {
+            border-color: var(--accent);
+            color: var(--text);
+        }
+        .toggle-icon {
+            font-size: 16px;
+        }
+
+        /* ─── NAV ─── */
+        .nav-bar {
+            background: var(--bg2);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            overflow-x: auto;
+            scrollbar-width: none;
+        }
+        .nav-bar::-webkit-scrollbar {
+            display: none;
+        }
+        .nav-inner {
+            max-width: 1100px;
+            margin: 0 auto;
+            display: flex;
+            padding: 0 1.2rem;
+        }
+        .nav-btn {
+            font-family: 'DM Sans', sans-serif;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text3);
+            background: none;
+            border: none;
+            border-bottom: 2px solid transparent;
+            padding: 12px 14px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: color 0.2s, border-color 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .nav-btn:hover {
+            color: var(--text);
+        }
+        .nav-btn.active {
+            color: var(--accent);
+            border-bottom-color: var(--accent);
+        }
+
+        /* ─── LAYOUT ─── */
+        .main {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 1.8rem 1.4rem;
+        }
+        .section {
+            display: none;
+        }
+        .section.active {
+            display: block;
+            animation: fadeUp 0.3s ease;
+        }
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .section-head {
+            margin-bottom: 1.8rem;
+        }
+        .section-title {
+            font-family: 'Fraunces', serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.3rem;
+            color: var(--text);
+        }
+        .section-sub {
+            color: var(--text2);
+            font-size: 0.9rem;
+            line-height: 1.65;
+        }
+
+        /* ─── CARDS ─── */
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 1.2rem 1.4rem;
+            margin-bottom: 1.2rem;
+            box-shadow: var(--shadow);
+        }
+        .card-title {
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.97rem;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 100px;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+        }
+        .badge-blue {
+            background: rgba(79, 142, 247, 0.15);
+            color: var(--accent);
+            border: 1px solid rgba(79, 142, 247, 0.25);
+        }
+        .badge-green {
+            background: rgba(52, 211, 153, 0.12);
+            color: var(--green);
+            border: 1px solid rgba(52, 211, 153, 0.2);
+        }
+        .badge-amber {
+            background: rgba(251, 191, 36, 0.12);
+            color: var(--amber);
+            border: 1px solid rgba(251, 191, 36, 0.2);
+        }
+        .badge-red {
+            background: rgba(248, 113, 113, 0.12);
+            color: var(--red);
+            border: 1px solid rgba(248, 113, 113, 0.2);
+        }
+        .badge-teal {
+            background: rgba(34, 211, 238, 0.12);
+            color: var(--teal);
+            border: 1px solid rgba(34, 211, 238, 0.2);
+        }
+        .badge-purple {
+            background: rgba(124, 95, 245, 0.12);
+            color: var(--accent2);
+            border: 1px solid rgba(124, 95, 245, 0.2);
+        }
+        .badge-orange {
+            background: rgba(251, 146, 60, 0.12);
+            color: var(--orange);
+            border: 1px solid rgba(251, 146, 60, 0.2);
+        }
+        .badge-pink {
+            background: rgba(244, 114, 182, 0.12);
+            color: var(--pink);
+            border: 1px solid rgba(244, 114, 182, 0.2);
+        }
+
+        .card p {
+            color: var(--text2);
+            font-size: 0.875rem;
+            line-height: 1.7;
+            margin-bottom: 0.6rem;
+        }
+        .card p:last-child {
+            margin-bottom: 0;
+        }
+
+        /* ─── CODE BLOCKS ─── */
+        .code-block {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.9rem 1.2rem;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 12.5px;
+            line-height: 1.75;
+            color: var(--text);
+            overflow-x: auto;
+            margin: 0.6rem 0;
+            position: relative;
+        }
+        [data-theme="light"] .code-block {
+            background: #f0f2fa;
+        }
+        .kw {
+            color: #c084fc;
+        }
+        .fn {
+            color: #60a5fa;
+        }
+        .str {
+            color: #86efac;
+        }
+        .num {
+            color: #fb923c;
+        }
+        .cmt {
+            color: var(--text3);
+            font-style: italic;
+        }
+        .ty {
+            color: #67e8f9;
+        }
+        .op {
+            color: #fcd34d;
+        }
+        .pp {
+            color: #f9a8d4;
+        }
+        [data-theme="light"] .kw {
+            color: #7c3aed;
+        }
+        [data-theme="light"] .fn {
+            color: #1d4ed8;
+        }
+        [data-theme="light"] .str {
+            color: #15803d;
+        }
+        [data-theme="light"] .num {
+            color: #c2410c;
+        }
+        [data-theme="light"] .ty {
+            color: #0891b2;
+        }
+        [data-theme="light"] .op {
+            color: #92400e;
+        }
+        [data-theme="light"] .pp {
+            color: #db2777;
+        }
+
+        /* ─── VIZ AREA ─── */
+        .viz-area {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1rem;
+            margin: 0.6rem 0;
+            min-height: 70px;
+        }
+        [data-theme="light"] .viz-area {
+            background: #f0f2fa;
+        }
+        .viz-label {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 10px;
+            color: var(--text3);
+            margin-bottom: 0.6rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        /* ─── CONTROLS ─── */
+        .controls {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin: 0.6rem 0;
+            align-items: center;
+        }
+        .btn {
+            font-family: 'DM Sans', sans-serif;
+            font-size: 13px;
+            font-weight: 500;
+            padding: 6px 14px;
+            border-radius: 8px;
+            border: 1px solid var(--border2);
+            background: var(--bg3);
+            color: var(--text2);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn:hover {
+            background: var(--bg4);
+            color: var(--text);
+        }
+        .btn.primary {
+            background: rgba(79, 142, 247, 0.15);
+            color: var(--accent);
+            border-color: rgba(79, 142, 247, 0.3);
+        }
+        .btn.primary:hover {
+            background: rgba(79, 142, 247, 0.28);
+        }
+        .btn.danger {
+            background: rgba(248, 113, 113, 0.12);
+            color: var(--red);
+            border-color: rgba(248, 113, 113, 0.25);
+        }
+        .btn.danger:hover {
+            background: rgba(248, 113, 113, 0.22);
+        }
+        .btn.success {
+            background: rgba(52, 211, 153, 0.12);
+            color: var(--green);
+            border-color: rgba(52, 211, 153, 0.25);
+        }
+        .btn.success:hover {
+            background: rgba(52, 211, 153, 0.22);
+        }
+        .btn.amber {
+            background: rgba(251, 191, 36, 0.12);
+            color: var(--amber);
+            border-color: rgba(251, 191, 36, 0.25);
+        }
+        .btn.amber:hover {
+            background: rgba(251, 191, 36, 0.22);
+        }
+        .btn.green {
+            background: rgba(52, 211, 153, 0.12);
+            color: var(--green);
+            border-color: rgba(52, 211, 153, 0.25);
+        }
+        .btn.green:hover {
+            background: rgba(52, 211, 153, 0.22);
+        }
+        .btn.red {
+            background: rgba(248, 113, 113, 0.12);
+            color: var(--red);
+            border-color: rgba(248, 113, 113, 0.25);
+        }
+        .btn.red:hover {
+            background: rgba(248, 113, 113, 0.22);
+        }
+
+        input[type="range"] {
+            accent-color: var(--accent);
+            width: 100%;
+        }
+        input[type="text"],
+        input[type="number"],
+        select {
+            background: var(--bg3);
+            border: 1px solid var(--border2);
+            border-radius: 6px;
+            color: var(--text);
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 12px;
+            padding: 6px 10px;
+            outline: none;
+        }
+        input[type="text"]:focus,
+        input[type="number"]:focus,
+        select:focus {
+            border-color: var(--accent);
+        }
+        select option {
+            background: var(--bg3);
+        }
+
+        /* ─── 1D ARRAY CELLS ─── */
+        .arr-wrap {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            align-items: flex-end;
+            padding: 6px 0;
+        }
+        .arr-cell {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+        }
+        .arr-box {
+            width: 52px;
+            height: 44px;
+            background: var(--bg3);
+            border: 1.5px solid var(--border2);
+            border-radius: 7px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text);
+            transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .arr-box.hi {
+            background: rgba(79, 142, 247, 0.18);
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+        .arr-box.found {
+            background: rgba(52, 211, 153, 0.18);
+            border-color: var(--green);
+            color: var(--green);
+        }
+        .arr-box.scan {
+            background: rgba(251, 191, 36, 0.15);
+            border-color: var(--amber);
+            color: var(--amber);
+        }
+        .arr-box.teal {
+            background: rgba(34, 211, 238, 0.15);
+            border-color: var(--teal);
+            color: var(--teal);
+        }
+        .arr-box.red {
+            background: rgba(248, 113, 113, 0.15);
+            border-color: var(--red);
+            color: var(--red);
+        }
+        .arr-box.amber {
+            background: rgba(251, 191, 36, 0.15);
+            border-color: var(--amber);
+            color: var(--amber);
+        }
+        .arr-box.purple {
+            background: rgba(124, 95, 245, 0.15);
+            border-color: var(--accent2);
+            color: var(--accent2);
+        }
+        .arr-box.green {
+            background: rgba(52, 211, 153, 0.15);
+            border-color: var(--green);
+            color: var(--green);
+        }
+        .arr-box.blue {
+            background: rgba(79, 142, 247, 0.15);
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .arr-lbl {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 9.5px;
+            color: var(--text3);
+        }
+        .arr-addr {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 8.5px;
+            color: var(--text3);
+            opacity: 0.7;
+        }
+
+        /* ─── 2D MATRIX CELLS ─── */
+        .matrix-row {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 4px;
+            flex-wrap: wrap;
+        }
+        .mat-cell {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+        }
+        .mat-box {
+            width: 48px;
+            height: 40px;
+            background: var(--bg3);
+            border: 1.5px solid var(--border2);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text);
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .mat-box.hi {
+            background: rgba(79, 142, 247, 0.18);
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+        .mat-box.found {
+            background: rgba(52, 211, 153, 0.18);
+            border-color: var(--green);
+            color: var(--green);
+        }
+        .mat-box.scan {
+            background: rgba(251, 191, 36, 0.15);
+            border-color: var(--amber);
+            color: var(--amber);
+        }
+        .mat-box.teal {
+            background: rgba(34, 211, 238, 0.15);
+            border-color: var(--teal);
+            color: var(--teal);
+        }
+        .mat-box.red {
+            background: rgba(248, 113, 113, 0.15);
+            border-color: var(--red);
+            color: var(--red);
+        }
+        .mat-box.amber {
+            background: rgba(251, 191, 36, 0.15);
+            border-color: var(--amber);
+            color: var(--amber);
+        }
+        .mat-box.purple {
+            background: rgba(124, 95, 245, 0.15);
+            border-color: var(--accent2);
+            color: var(--accent2);
+        }
+        .mat-box.green {
+            background: rgba(52, 211, 153, 0.15);
+            border-color: var(--green);
+            color: var(--green);
+        }
+        .mat-box.blue {
+            background: rgba(79, 142, 247, 0.15);
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .mat-lbl {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 8.5px;
+            color: var(--text3);
+        }
+
+        /* ─── FLAT MEMORY STRIP ─── */
+        .flat-strip {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 3px;
+            padding: 4px 0;
+        }
+        .flat-cell {
+            background: var(--bg3);
+            border: 1px solid var(--border2);
+            border-radius: 4px;
+            padding: 6px 10px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px;
+            color: var(--text2);
+            transition: all 0.3s;
+            min-width: 32px;
+            text-align: center;
+        }
+        .flat-cell.hi {
+            background: rgba(79, 142, 247, 0.18);
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        /* ─── INFO LINE ─── */
+        .info-line {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 12px;
+            color: var(--text2);
+            padding: 6px 12px;
+            background: var(--bg);
+            border-left: 3px solid var(--accent);
+            border-radius: 0 6px 6px 0;
+            margin: 0.4rem 0;
+            transition: border-color 0.3s, background 0.3s;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        [data-theme="light"] .info-line {
+            background: #f0f2fa;
+        }
+        .info-line.green {
+            border-left-color: var(--green);
+        }
+        .info-line.amber {
+            border-left-color: var(--amber);
+        }
+        .info-line.red {
+            border-left-color: var(--red);
+        }
+        .info-line.teal {
+            border-left-color: var(--teal);
+        }
+
+        /* ─── SUB TABS ─── */
+        .sub-tabs {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+            margin-bottom: 0.8rem;
+        }
+        .sub-tab {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px;
+            padding: 4px 12px;
+            border-radius: 100px;
+            border: 1px solid var(--border);
+            background: var(--bg2);
+            color: var(--text3);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .sub-tab:hover {
+            border-color: var(--border2);
+            color: var(--text2);
+        }
+        .sub-tab.active {
+            background: rgba(79, 142, 247, 0.12);
+            border-color: rgba(79, 142, 247, 0.35);
+            color: var(--accent);
+        }
+
+        /* ─── CONCEPT BOX ─── */
+        .concept-box {
+            background: rgba(79, 142, 247, 0.06);
+            border: 1px solid rgba(79, 142, 247, 0.12);
+            border-radius: 8px;
+            padding: 0.7rem 1rem;
+            font-size: 13px;
+            line-height: 1.8;
+            color: var(--text2);
+            margin: 0.5rem 0;
+        }
+        .concept-box.green {
+            background: rgba(52, 211, 153, 0.06);
+            border-color: rgba(52, 211, 153, 0.12);
+        }
+        .concept-box.amber {
+            background: rgba(251, 191, 36, 0.06);
+            border-color: rgba(251, 191, 36, 0.12);
+        }
+        .concept-box strong {
+            color: var(--text);
+        }
+
+        /* ─── FORMULA ─── */
+        .formula {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 12px;
+            color: var(--teal);
+            padding: 6px 12px;
+            background: rgba(34, 211, 238, 0.06);
+            border-radius: 6px;
+            border: 1px solid rgba(34, 211, 238, 0.12);
+            margin: 0.4rem 0;
+        }
+
+        /* ─── TWO / THREE COL ─── */
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        .three-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 1rem;
+        }
+        @media(max-width: 680px) {
+            .two-col,
+            .three-col {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* ─── BARS (sorting) ─── */
+        .bar-wrap {
+            display: flex;
+            gap: 8px;
+            align-items: flex-end;
+            justify-content: center;
+            padding: 12px 0;
+            min-height: 150px;
+            flex-wrap: wrap;
+        }
+        .bar {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+        .bar-body {
+            width: 36px;
+            border-radius: 4px 4px 0 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px;
+            font-weight: 600;
+            color: #0d0f14;
+            transition: height 0.3s ease, background 0.3s;
+            min-height: 20px;
+            padding: 2px 0;
+        }
+        .bar-lbl {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 8.5px;
+            color: var(--text3);
+        }
+
+        /* ─── INPUT GRID ─── */
+        .input-grid {
+            display: grid;
+            gap: 4px;
+            margin: 4px 0;
+        }
+
+        /* ─── TERMINAL ─── */
+        .terminal {
+            background: #080a0f;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.9rem;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 12.5px;
+            color: #a3e635;
+            min-height: 60px;
+            white-space: pre-wrap;
+            line-height: 1.65;
+        }
+        [data-theme="light"] .terminal {
+            background: #1a1d2e;
+        }
+        .terminal .prompt {
+            color: var(--text3);
+        }
+
+        /* ─── SCROLLBAR ─── */
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--bg4);
+            border-radius: 3px;
+        }
+
+        /* ─── RESPONSIVE TWEAKS ─── */
+        @media(max-width: 600px) {
+            .hero {
+                padding: 1.2rem 1rem;
+            }
+            .main {
+                padding: 1rem 0.8rem;
+            }
+            .card {
+                padding: 1rem;
+            }
+            .arr-box {
+                width: 40px;
+                height: 36px;
+                font-size: 11px;
+            }
+            .mat-box {
+                width: 38px;
+                height: 34px;
+                font-size: 11px;
+            }
+            .controls {
+                gap: 4px;
+            }
+            .btn {
+                font-size: 12px;
+                padding: 4px 10px;
+            }
+            .nav-btn {
+                font-size: 11px;
+                padding: 8px 10px;
+            }
+            .flat-cell {
+                padding: 4px 6px;
+                font-size: 9px;
+                min-width: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- ====== HUB NAVIGATION ====== -->
+    <nav style="position:sticky;top:0;z-index:1000;background:rgba(20,20,35,0.92);backdrop-filter:blur(10px);padding:10px 16px;display:flex;align-items:center;justify-content:center;gap:18px;flex-wrap:wrap;font-family:'Inter',sans-serif;font-size:0.85rem;border-bottom:1px solid rgba(255,255,255,0.08);">
+        <a href="../03-arrays-in-c/index.html" style="color:#4285F4;font-weight:600;text-decoration:none;">← Arrays in C</a>
+        <a href="../../index.html" style="color:#fff;font-weight:700;text-decoration:none;padding:4px 12px;border:1px solid rgba(255,255,255,0.25);border-radius:20px;">🏠 Hub Home</a>
+        
+    </nav>
+
+
+    <div class="hero">
+        <div class="hero-inner">
+            <div>
+                <div class="hero-tag">✦ Powered by AmygdalaAI India</div>
+                <h1>Introduction to Data Structures<br><span>Definitions, ADTs & Complexity — Visually</span></h1>
+                <p>What a data structure really is, the abstract data types behind it, where each type shows up in the apps and OS you use every day, and Big-O / Big-Θ / Big-Ω explained like you're 10 — with animated growth-rate races.</p>
+            </div>
+            <div class="hero-controls">
+                <button class="theme-toggle" onclick="toggleTheme()" id="theme-btn">
+                    <span class="toggle-icon" id="theme-icon">🌙</span>
+                    <span id="theme-label">Dark Mode</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <nav class="nav-bar">
+        <div class="nav-inner">
+            <button class="nav-btn active" onclick="showSection('definition',this)">📖 Definition</button>
+            <button class="nav-btn" onclick="showSection('adt',this)">🧩 ADT</button>
+            <button class="nav-btn" onclick="showSection('applications',this)">🚀 Applications</button>
+            <button class="nav-btn" onclick="showSection('types',this)">🗂️ Types of DS</button>
+            <button class="nav-btn" onclick="showSection('mapping',this)">🌐 Real-World Mapping</button>
+            <button class="nav-btn" onclick="showSection('complexity',this)">📈 Time &amp; Space Complexity</button>
+        </div>
+    </nav>
+
+    <div class="main">
+        <!-- ═══════════════════════════════ DEFINITION ═══════════════════════════════ -->
+        <div class="section active" id="sec-definition">
+            <div class="section-title">What is a Data Structure?</div>
+            <div class="section-sub">Before touching any code, get the mental model right: a data structure is simply a deliberate way to arrange data in memory so that specific operations become fast, correct, and easy to reason about.</div>
+
+            <div class="card">
+                <div class="card-title">Formal Definition <span class="badge badge-blue">CONCEPT</span></div>
+                <p><strong>A data structure (DS)</strong> is a specialized format for organizing, storing, retrieving, and managing data in a computer so that it can be used efficiently. It defines the relationship between data elements and the operations (insert, delete, search, traverse…) that can be performed on them.</p>
+                <div class="concept-box">
+                    📌 In one line: <strong>Data Structure = Data Organization + Allowed Operations + Relationships between elements.</strong><br>
+                    It is NOT just "storage" — a shelf full of random boxes isn't a data structure. A labeled, alphabetically-sorted bookshelf <em>is</em>, because the arrangement makes "find book X" fast.
+                </div>
+            </div>
+
+            <div class="two-col">
+                <div class="card">
+                    <div class="card-title">Why We Need Data Structures <span class="badge badge-amber">WHY</span></div>
+                    <p>Same data, different arrangement → wildly different performance. Choosing the right DS is often the difference between an app that responds instantly and one that times out.</p>
+                    <div class="concept-box">
+                        • <strong>Efficiency</strong> — the right DS turns an O(n) search into O(1) or O(log n)<br>
+                        • <strong>Reusability</strong> — DS + algorithms are the reusable building blocks of all software<br>
+                        • <strong>Scalability</strong> — apps serving millions of users live or die by DS choice<br>
+                        • <strong>Abstraction</strong> — DS hide low-level memory details behind clean operations
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-title">Data Structure vs Algorithm <span class="badge badge-teal">COMPARISON</span></div>
+                    <p>These two are always paired but are not the same thing:</p>
+                    <div class="concept-box">
+                        <strong>Data Structure</strong> = the "noun" — how data is arranged (Array, Tree, Graph…)<br><br>
+                        <strong>Algorithm</strong> = the "verb" — the step-by-step procedure operating on that arrangement (Binary Search, DFS, Merge Sort…)<br><br>
+                        Program = Data Structures + Algorithms <span style="color:var(--text3)">(Niklaus Wirth, 1976)</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">Core Characteristics of Any Data Structure <span class="badge badge-purple">PROPERTIES</span></div>
+                <div class="three-col">
+                    <div class="concept-box">
+                        <strong>1. Correctness</strong><br>Operations must produce the right result for every valid input, including edge cases (empty, full, single element).
+                    </div>
+                    <div class="concept-box green">
+                        <strong>2. Time Complexity</strong><br>How the operation's runtime scales as the number of elements (n) grows — measured with Big-O.
+                    </div>
+                    <div class="concept-box amber">
+                        <strong>3. Space Complexity</strong><br>How much extra memory is needed beyond the input itself, as n grows.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════════════ ADT ═══════════════════════════════ -->
+        <div class="section" id="sec-adt">
+            <div class="section-title">Abstract Data Types (ADT)</div>
+            <div class="section-sub">An ADT is a mathematical/logical model — <em>what</em> operations are available and <em>what</em> they promise to do — completely separate from <em>how</em> they're implemented in memory.</div>
+
+            <div class="card">
+                <div class="card-title">Definition <span class="badge badge-blue">CONCEPT</span></div>
+                <p>An <strong>Abstract Data Type</strong> is defined only by its behavior (the operations you can call and the contract each one honors), not by its internal representation. The same ADT can have multiple valid implementations.</p>
+                <div class="concept-box">
+                    📌 Example: A <strong>Stack ADT</strong> just promises <code>push</code>, <code>pop</code>, <code>peek</code>, <code>isEmpty</code> with LIFO order.
+                    You could implement it using an array <em>or</em> a linked list — the user of the Stack never needs to know which. That hidden choice is the "concrete data structure"; the promise is the "abstract data type."
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">Common ADT Examples &amp; Their Contracts <span class="badge badge-green">EXAMPLES</span></div>
+                <div style="overflow-x:auto;">
+                <table style="width:100%;border-collapse:collapse;font-size:13px;">
+                    <thead>
+                        <tr style="border-bottom:1.5px solid var(--border2);">
+                            <th style="text-align:left;padding:8px 10px;color:var(--text);font-family:var(--mono);font-size:11px;">ADT</th>
+                            <th style="text-align:left;padding:8px 10px;color:var(--text);font-family:var(--mono);font-size:11px;">Core Operations</th>
+                            <th style="text-align:left;padding:8px 10px;color:var(--text);font-family:var(--mono);font-size:11px;">Order Guarantee</th>
+                            <th style="text-align:left;padding:8px 10px;color:var(--text);font-family:var(--mono);font-size:11px;">Typical Implementation</th>
+                        </tr>
+                    </thead>
+                    <tbody id="adt-table-body"></tbody>
+                </table>
+                </div>
+            </div>
+
+            <div class="two-col">
+                <div class="card">
+                    <div class="card-title">List ADT <span class="badge badge-teal">DETAIL</span></div>
+                    <div class="code-block">
+                        <span class="cmt">// List ADT — ordered, allows duplicates</span>
+                        <span class="fn">insert</span>(pos, val)
+                        <span class="fn">remove</span>(pos)
+                        <span class="fn">get</span>(pos)
+                        <span class="fn">size</span>()
+                    </div>
+                    <p>Implemented via Array (fast random access) or Linked List (fast insert/delete at known position).</p>
+                </div>
+                <div class="card">
+                    <div class="card-title">Map / Dictionary ADT <span class="badge badge-pink">DETAIL</span></div>
+                    <div class="code-block">
+                        <span class="cmt">// Map ADT — key → value, unique keys</span>
+                        <span class="fn">put</span>(key, val)
+                        <span class="fn">get</span>(key)
+                        <span class="fn">remove</span>(key)
+                        <span class="fn">containsKey</span>(key)
+                    </div>
+                    <p>Implemented via Hash Table (average O(1)) or balanced Tree (guaranteed O(log n), sorted keys).</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════════════ APPLICATIONS ═══════════════════════════════ -->
+        <div class="section" id="sec-applications">
+            <div class="section-title">Applications of Data Structures</div>
+            <div class="section-sub">Every piece of software you touch is, underneath, a pile of data structures wired together with algorithms. A few concrete, high-impact examples:</div>
+
+            <div class="three-col">
+                <div class="card">
+                    <div class="card-title">🔍 Search Engines <span class="badge badge-blue">APP</span></div>
+                    <p>Inverted indexes (hash maps + sorted lists) map every word to the documents containing it. Tries speed up autocomplete. Graphs model the web itself for PageRank.</p>
+                </div>
+                <div class="card">
+                    <div class="card-title">🗺️ Maps &amp; Navigation <span class="badge badge-green">APP</span></div>
+                    <p>Road networks are graphs; Dijkstra's / A* algorithms run over adjacency lists to find shortest routes in milliseconds.</p>
+                </div>
+                <div class="card">
+                    <div class="card-title">🧾 Databases <span class="badge badge-amber">APP</span></div>
+                    <p>B-Trees / B+Trees index rows on disk for O(log n) lookups. Hash indexes give O(1) equality lookups. Query planners use graphs of operations.</p>
+                </div>
+                <div class="card">
+                    <div class="card-title">↩️ Undo/Redo &amp; Compilers <span class="badge badge-purple">APP</span></div>
+                    <p>Stacks track undo history, function call frames, and expression parsing (e.g. converting infix → postfix, balancing brackets).</p>
+                </div>
+                <div class="card">
+                    <div class="card-title">⏱️ OS Scheduling <span class="badge badge-teal">APP</span></div>
+                    <p>Queues manage processes waiting for CPU time; priority queues (heaps) implement priority-based and shortest-job-next scheduling.</p>
+                </div>
+                <div class="card">
+                    <div class="card-title">🧠 Machine Learning <span class="badge badge-pink">APP</span></div>
+                    <p>Tensors (multi-dim arrays) hold weights/activations; k-d trees and graphs power nearest-neighbor search and GNNs.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════════════ TYPES OF DS ═══════════════════════════════ -->
+        <div class="section" id="sec-types">
+            <div class="section-title">Types of Data Structures</div>
+            <div class="section-sub">The first split is <strong>Linear</strong> (elements form a sequence) vs <strong>Non-Linear</strong> (elements branch or connect in a network). Click a card to jump straight to that module when it's ready.</div>
+
+            <div class="card">
+                <div class="card-title">The Full Taxonomy <span class="badge badge-blue">MAP</span></div>
+                <div class="viz-area">
+                    <div style="font-family:var(--mono);font-size:12px;line-height:2.1;color:var(--text2);">
+Data Structures
+├── <span style="color:var(--accent);font-weight:600;">Linear</span> <span style="color:var(--text3);">(sequential access, one after another)</span>
+│    ├── Array &nbsp;&nbsp;<span style="color:var(--text3);">— fixed-size, contiguous, random access O(1)</span>
+│    ├── Linked List &nbsp;<span style="color:var(--text3);">— nodes + pointers, dynamic size</span>
+│    ├── Stack &nbsp;<span style="color:var(--text3);">— LIFO (Last-In-First-Out)</span>
+│    └── Queue &nbsp;<span style="color:var(--text3);">— FIFO (First-In-First-Out) / Deque / Priority Queue</span>
+│
+└── <span style="color:var(--green);font-weight:600;">Non-Linear</span> <span style="color:var(--text3);">(hierarchical / networked access)</span>
+     ├── Tree &nbsp;<span style="color:var(--text3);">— hierarchical, one parent → many children (BST, AVL, B-Tree, Trie, Heap)</span>
+     ├── Graph &nbsp;<span style="color:var(--text3);">— nodes + edges, arbitrary many-to-many connections</span>
+     └── Hash Table &nbsp;<span style="color:var(--text3);">— key → bucket via hash function, average O(1)</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">Type-by-Type Cheat Sheet <span class="badge badge-green">REFERENCE</span></div>
+                <div style="overflow-x:auto;">
+                <table style="width:100%;border-collapse:collapse;font-size:12.5px;">
+                    <thead>
+                        <tr style="border-bottom:1.5px solid var(--border2);">
+                            <th style="text-align:left;padding:7px 9px;font-family:var(--mono);font-size:10.5px;color:var(--text);">Type</th>
+                            <th style="text-align:left;padding:7px 9px;font-family:var(--mono);font-size:10.5px;color:var(--text);">Category</th>
+                            <th style="text-align:left;padding:7px 9px;font-family:var(--mono);font-size:10.5px;color:var(--text);">Access</th>
+                            <th style="text-align:left;padding:7px 9px;font-family:var(--mono);font-size:10.5px;color:var(--text);">Search</th>
+                            <th style="text-align:left;padding:7px 9px;font-family:var(--mono);font-size:10.5px;color:var(--text);">Insert</th>
+                            <th style="text-align:left;padding:7px 9px;font-family:var(--mono);font-size:10.5px;color:var(--text);">Delete</th>
+                        </tr>
+                    </thead>
+                    <tbody id="types-table-body"></tbody>
+                </table>
+                </div>
+                <div class="info-line amber" style="margin-top:0.6rem;">💡 These are typical / average-case complexities — exact numbers depend on the implementation (e.g. balanced vs unbalanced tree).</div>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════════════ MAPPING ═══════════════════════════════ -->
+        <div class="section" id="sec-mapping">
+            <div class="section-title">Data Structures ↔ The Apps You Use Every Day</div>
+            <div class="section-sub">The best way to make a DS "click" is to see it powering something you already use. Click any row's app name for a one-line explanation of exactly how.</div>
+
+            <div class="card">
+                <div class="card-title">Interactive Mapping Table <span class="badge badge-amber">CLICK TO EXPLORE</span></div>
+                <div id="mapping-cards" class="three-col" style="gap:0.8rem;"></div>
+                <div id="mapping-info" class="info-line teal" style="margin-top:0.8rem;display:none;"></div>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════════════ COMPLEXITY ═══════════════════════════════ -->
+        <div class="section" id="sec-complexity">
+            <div class="section-title">Time &amp; Space Complexity — Explained Like You're 10</div>
+            <div class="section-sub">Forget the scary Greek letters for a second. This is just a way to answer one kid-simple question: <strong>"If I give the computer twice as much stuff, does it take twice as long — or way, way longer?"</strong></div>
+
+            <div class="card">
+                <div class="card-title">The Kid-Friendly Explanation <span class="badge badge-blue">START HERE</span></div>
+                <p>Imagine you have a box of toys and you want to find your favorite one.</p>
+                <div class="concept-box">
+                    🧸 <strong>O(1) — Constant:</strong> Your favorite toy is always in the same top drawer. Doesn't matter if the box has 10 toys or 10 million — you grab it instantly.<br><br>
+                    📚 <strong>O(log n) — Logarithmic:</strong> Your toys are sorted by size. You check the middle, decide "bigger or smaller", and throw away half the box each time. A million toys? Still done in ~20 checks!<br><br>
+                    🔎 <strong>O(n) — Linear:</strong> Toys are dumped in a pile, unsorted. You must look at every single one until you find it. 2× the toys = 2× the time.<br><br>
+                    🧮 <strong>O(n log n):</strong> You first sort the pile (like organizing by size in groups), then search. Slightly more work than O(n), but WAY better than checking every pair.<br><br>
+                    🐢 <strong>O(n²) — Quadratic:</strong> For every toy, you compare it against every other toy (like checking if any two toys match). 2× the toys = 4× the time!<br><br>
+                    🐌 <strong>O(2ⁿ) — Exponential:</strong> For every new toy you add, the work DOUBLES. Just 30 toys can already take longer than the age of the universe to fully check every combination.
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">Big-O (O), Big-Omega (Ω), Big-Theta (Θ) — The Real Math <span class="badge badge-purple">FORMAL</span></div>
+                <p>These three describe the <em>growth rate</em> of a function f(n) (your algorithm's runtime) by comparing it to a simpler reference function g(n), for large enough n.</p>
+                <div class="two-col">
+                    <div>
+                        <div class="formula">O(g(n)):  f(n) ≤ c·g(n)  for all n ≥ n₀</div>
+                        <div class="concept-box">
+                            <strong>Big-O = Upper Bound ("worst case ceiling")</strong><br>
+                            "My algorithm will <em>never</em> be slower than this, once n is big enough." It's a promise about the ceiling, not the exact speed.
+                        </div>
+                        <div class="formula">Ω(g(n)):  f(n) ≥ c·g(n)  for all n ≥ n₀</div>
+                        <div class="concept-box green">
+                            <strong>Big-Ω = Lower Bound ("best case floor")</strong><br>
+                            "My algorithm can <em>never</em> be faster than this." It's a guarantee about the floor.
+                        </div>
+                    </div>
+                    <div>
+                        <div class="formula">Θ(g(n)):  c₁·g(n) ≤ f(n) ≤ c₂·g(n)  for all n ≥ n₀</div>
+                        <div class="concept-box amber">
+                            <strong>Big-Θ = Tight Bound ("the real growth rate")</strong><br>
+                            f(n) is <em>sandwiched</em> between two constant multiples of g(n) — meaning f(n) grows <em>exactly like</em> g(n), not faster, not slower. This is the most informative of the three.
+                        </div>
+                        <div class="concept-box">
+                            🥪 Kid version: O is "at most this messy", Ω is "at least this messy", and Θ is "exactly THIS messy — no more, no less."
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">🏁 Growth-Rate Race — Pick Your Curves, Pick Your n <span class="badge badge-red">ANIMATED · YOUR INPUT</span></div>
+                <p>Choose which complexity classes to race, drag n, then hit Animate. Watch how fast the "runners" separate — that gap IS what Big-O is trying to describe.</p>
+                <div class="controls" style="margin-bottom:0.3rem;">
+                    <label style="display:flex;align-items:center;gap:4px;font-family:var(--mono);font-size:12px;color:var(--accent);"><input type="checkbox" id="gc-o1" checked> O(1)</label>
+                    <label style="display:flex;align-items:center;gap:4px;font-family:var(--mono);font-size:12px;color:var(--green);"><input type="checkbox" id="gc-olog" checked> O(log n)</label>
+                    <label style="display:flex;align-items:center;gap:4px;font-family:var(--mono);font-size:12px;color:var(--teal);"><input type="checkbox" id="gc-on" checked> O(n)</label>
+                    <label style="display:flex;align-items:center;gap:4px;font-family:var(--mono);font-size:12px;color:var(--amber);"><input type="checkbox" id="gc-onlogn" checked> O(n log n)</label>
+                    <label style="display:flex;align-items:center;gap:4px;font-family:var(--mono);font-size:12px;color:var(--orange);"><input type="checkbox" id="gc-on2" checked> O(n²)</label>
+                    <label style="display:flex;align-items:center;gap:4px;font-family:var(--mono);font-size:12px;color:var(--red);"><input type="checkbox" id="gc-o2n" checked> O(2ⁿ)</label>
+                </div>
+                <div class="controls">
+                    <label style="font-family:var(--mono);font-size:12px;color:var(--text2);">n =</label>
+                    <input type="range" id="gc-n" min="1" max="25" value="10" style="max-width:260px;" oninput="updateGrowthChart(false)">
+                    <span id="gc-n-label" style="font-family:var(--mono);font-size:13px;color:var(--accent);font-weight:600;min-width:28px;">10</span>
+                    <button class="btn primary" onclick="animateGrowthRace()">▶ Animate Race (n: 1→25)</button>
+                    <button class="btn" onclick="resetGrowthChart()">Reset</button>
+                </div>
+                <div class="viz-area">
+                    <canvas id="growth-canvas" width="900" height="360" style="width:100%;max-width:900px;display:block;"></canvas>
+                </div>
+                <div id="growth-info" class="info-line" style="white-space:normal;"></div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">📐 Prove It Yourself: Is f(n) = Θ(n²)? <span class="badge badge-teal">YOUR INPUT · LIVE CHECK</span></div>
+                <p>Take <code>f(n) = 3n² + 2n + 5</code>. We claim f(n) = Θ(n²). Adjust <strong>c₁</strong>, <strong>c₂</strong> and <strong>n₀</strong> below and watch whether the sandwich bound <code>c₁·n² ≤ f(n) ≤ c₂·n²</code> actually holds for every n ≥ n₀.</p>
+                <div class="controls">
+                    <label style="font-family:var(--mono);font-size:12px;color:var(--text2);">c₁ =</label>
+                    <input type="number" id="bd-c1" value="1" min="0.1" max="20" step="0.5" style="width:60px" oninput="updateBoundChart()">
+                    <label style="font-family:var(--mono);font-size:12px;color:var(--text2);">c₂ =</label>
+                    <input type="number" id="bd-c2" value="6" min="0.1" max="30" step="0.5" style="width:60px" oninput="updateBoundChart()">
+                    <label style="font-family:var(--mono);font-size:12px;color:var(--text2);">n₀ =</label>
+                    <input type="number" id="bd-n0" value="3" min="1" max="20" style="width:55px" oninput="updateBoundChart()">
+                    <button class="btn" onclick="document.getElementById('bd-c1').value=1;document.getElementById('bd-c2').value=6;document.getElementById('bd-n0').value=3;updateBoundChart();">Reset to working values</button>
+                </div>
+                <div class="viz-area">
+                    <canvas id="bound-canvas" width="900" height="340" style="width:100%;max-width:900px;display:block;"></canvas>
+                </div>
+                <div id="bound-info" class="info-line" style="white-space:normal;"></div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">Space Complexity — Same Idea, But for Memory <span class="badge badge-orange">CONCEPT</span></div>
+                <p>Space complexity asks the same "how does it scale?" question, but for <strong>extra memory used</strong> (beyond the input itself) as n grows.</p>
+                <div class="concept-box">
+                    • <strong>O(1) space</strong> — swapping two variables, in-place reversal: uses a fixed handful of extra variables no matter how big n is.<br>
+                    • <strong>O(n) space</strong> — copying an array, building a hash map of n items, recursion with n stack frames.<br>
+                    • <strong>O(n²) space</strong> — storing a full adjacency matrix for a graph, a 2D DP table.
+                </div>
+                <div class="info-line amber">⚖️ Time-space tradeoff: you can often trade memory for speed (e.g. memoization/caching uses O(n) extra space to turn an O(2ⁿ) recursive solution into O(n) time) — and vice versa.</div>
+            </div>
+        </div>
+
+    </div>
+    <!-- end .main -->
+
+    <script>
+        // ════════════════════════════════════
+        //  NAVIGATION
+        // ════════════════════════════════════
+        function showSection(id, btn) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            const el = document.getElementById('sec-' + id);
+            if (el) el.classList.add('active');
+            if (btn) btn.classList.add('active');
+        }
+
+        // ════════════════════════════════════
+        //  THEME TOGGLE (fixed)
+        // ════════════════════════════════════
+        function toggleTheme() {
+            const root = document.documentElement;
+            const current = root.getAttribute('data-theme');
+            const next = current === 'dark' ? 'light' : 'dark';
+            root.setAttribute('data-theme', next);
+            const icon = document.getElementById('theme-icon');
+            const label = document.getElementById('theme-label');
+            if (icon) icon.textContent = next === 'dark' ? '🌙' : '☀️';
+            if (label) label.textContent = next === 'dark' ? 'Dark Mode' : 'Light Mode';
+            try { localStorage.setItem('arrays-theme', next); } catch (e) {}
+        }
+
+        // Restore saved theme
+        (function() {
+            try {
+                const saved = localStorage.getItem('arrays-theme');
+                if (saved) {
+                    document.documentElement.setAttribute('data-theme', saved);
+                    const icon = document.getElementById('theme-icon');
+                    const label = document.getElementById('theme-label');
+                    if (icon) icon.textContent = saved === 'dark' ? '🌙' : '☀️';
+                    if (label) label.textContent = saved === 'dark' ? 'Dark Mode' : 'Light Mode';
+                }
+            } catch (e) {}
+        })();
+
+        // ════════════════════════════════════
+        //  ADT TABLE
+        // ════════════════════════════════════
+        const adtData = [
+            ['List', 'insert, remove, get, size', 'Sequential (ordered)', 'Array or Linked List'],
+            ['Stack', 'push, pop, peek, isEmpty', 'LIFO', 'Array or Linked List'],
+            ['Queue', 'enqueue, dequeue, front, isEmpty', 'FIFO', 'Array (circular) or Linked List'],
+            ['Priority Queue', 'insert, extractMin/Max, peek', 'By priority, not insertion order', 'Binary Heap'],
+            ['Map / Dictionary', 'put, get, remove, containsKey', 'Unique keys, no fixed order (or sorted)', 'Hash Table or Balanced BST'],
+            ['Set', 'add, remove, contains, union, intersect', 'Unique elements, no fixed order', 'Hash Table or Balanced BST'],
+            ['Graph', 'addVertex, addEdge, neighbors, BFS/DFS', 'Network (no inherent order)', 'Adjacency List or Matrix'],
+        ];
+
+        function renderAdtTable() {
+            const tbody = document.getElementById('adt-table-body');
+            if (!tbody) return;
+            tbody.innerHTML = adtData.map(row => `
+                <tr style="border-bottom:1px solid var(--border);">
+                    <td style="padding:7px 10px;font-weight:600;color:var(--accent);">${row[0]}</td>
+                    <td style="padding:7px 10px;font-family:var(--mono);font-size:11.5px;color:var(--text2);">${row[1]}</td>
+                    <td style="padding:7px 10px;color:var(--text2);">${row[2]}</td>
+                    <td style="padding:7px 10px;color:var(--text2);">${row[3]}</td>
+                </tr>`).join('');
+        }
+
+        // ════════════════════════════════════
+        //  TYPES CHEAT SHEET TABLE
+        // ════════════════════════════════════
+        const typesData = [
+            ['Array', 'Linear', 'O(1)', 'O(n)', 'O(n)', 'O(n)'],
+            ['Linked List', 'Linear', 'O(n)', 'O(n)', 'O(1)*', 'O(1)*'],
+            ['Stack', 'Linear', 'O(n)', 'O(n)', 'O(1)', 'O(1)'],
+            ['Queue', 'Linear', 'O(n)', 'O(n)', 'O(1)', 'O(1)'],
+            ['Hash Table', 'Non-Linear', '—', 'O(1) avg', 'O(1) avg', 'O(1) avg'],
+            ['Binary Search Tree', 'Non-Linear', 'O(log n) avg', 'O(log n) avg', 'O(log n) avg', 'O(log n) avg'],
+            ['Heap', 'Non-Linear', '—', 'O(n)', 'O(log n)', 'O(log n)'],
+            ['Graph (adj. list)', 'Non-Linear', '—', 'O(V+E)', 'O(1)', 'O(V+E)'],
+        ];
+
+        function renderTypesTable() {
+            const tbody = document.getElementById('types-table-body');
+            if (!tbody) return;
+            tbody.innerHTML = typesData.map(row => `
+                <tr style="border-bottom:1px solid var(--border);">
+                    <td style="padding:6px 9px;font-weight:600;color:var(--text);">${row[0]}</td>
+                    <td style="padding:6px 9px;color:var(--text2);">${row[1]}</td>
+                    <td style="padding:6px 9px;font-family:var(--mono);color:var(--teal);">${row[2]}</td>
+                    <td style="padding:6px 9px;font-family:var(--mono);color:var(--amber);">${row[3]}</td>
+                    <td style="padding:6px 9px;font-family:var(--mono);color:var(--green);">${row[4]}</td>
+                    <td style="padding:6px 9px;font-family:var(--mono);color:var(--red);">${row[5]}</td>
+                </tr>`).join('');
+        }
+
+        // ════════════════════════════════════
+        //  REAL-WORLD MAPPING CARDS
+        // ════════════════════════════════════
+        const mappingData = [
+            { ds: 'Array', icon: '🧱', color: 'var(--accent)', apps: 'Excel/Sheets grid, image pixels, RGB buffers', detail: 'A spreadsheet is literally a 2D array — rows and columns of contiguous cells. Every image on screen is a 2D (or 3D with color channels) array of pixel values.' },
+            { ds: 'Linked List', icon: '🔗', color: 'var(--green)', apps: 'Music/video playlists, browser history, undo chains', detail: 'A playlist "next song" pointer is exactly a singly linked list. Browser back/forward history is often a doubly linked list so you can move either direction.' },
+            { ds: 'Stack', icon: '📚', color: 'var(--accent2)', apps: 'Ctrl+Z undo, browser back button, function call stack', detail: 'Every function call in every program pushes a frame onto the call stack. Undo history in editors like Word/Photoshop/VS Code is a stack of past states.' },
+            { ds: 'Queue', icon: '🎫', color: 'var(--teal)', apps: 'Printer spooler, OS task scheduler, WhatsApp message queue', detail: 'Print jobs are handled FIFO — first submitted, first printed. Messaging apps queue outgoing messages when you\'re offline and send them in order once reconnected.' },
+            { ds: 'Tree', icon: '🌳', color: 'var(--amber)', apps: 'File systems, HTML DOM, database B-Tree indexes', detail: 'Your folders/subfolders form a tree. The DOM that renders every webpage is a tree of nested HTML elements. Database indexes use B-Trees for fast range queries.' },
+            { ds: 'Graph', icon: '🕸️', color: 'var(--red)', apps: 'Google Maps routes, social networks, recommendation engines', detail: 'Roads + intersections = a graph; Dijkstra/A* find shortest paths over it. Facebook/LinkedIn "friends of friends" and Netflix/YouTube recommendations are graph traversals.' },
+            { ds: 'Hash Table', icon: '🔑', color: 'var(--pink)', apps: 'Database indexing, caches (Redis), compiler symbol tables', detail: 'Redis and memcached are, at their core, giant distributed hash tables mapping keys to values in ~O(1). Compilers use hash tables to look up variable/function names instantly.' },
+            { ds: 'Heap', icon: '⛰️', color: 'var(--orange)', apps: 'OS process priority scheduling, Dijkstra\'s algorithm, load balancers', detail: 'The OS scheduler often uses a priority queue (heap) to always run the highest-priority ready process next. Dijkstra\'s shortest-path algorithm uses a min-heap to always expand the closest unvisited node.' },
+            { ds: 'Trie', icon: '🔤', color: 'var(--accent)', apps: 'Search-bar autocomplete, spell checkers, IP routing tables', detail: 'Google\'s search suggestions, your phone keyboard\'s autocomplete, and spell-checkers all walk a trie character-by-character to find matching words instantly.' },
+        ];
+
+        function renderMappingCards() {
+            const container = document.getElementById('mapping-cards');
+            if (!container) return;
+            container.innerHTML = mappingData.map((m, idx) => `
+                <div class="concept-box" style="cursor:pointer;border-left:3px solid ${m.color};" onclick="showMappingDetail(${idx})">
+                    <div style="font-size:1.3rem;margin-bottom:4px;">${m.icon}</div>
+                    <strong style="color:var(--text);">${m.ds}</strong><br>
+                    <span style="font-size:12px;">${m.apps}</span>
+                </div>`).join('');
+        }
+
+        function showMappingDetail(idx) {
+            const m = mappingData[idx];
+            const info = document.getElementById('mapping-info');
+            info.style.display = 'block';
+            info.innerHTML = `<strong>${m.icon} ${m.ds}:</strong> ${m.detail}`;
+        }
+
+        // ════════════════════════════════════
+        //  GROWTH-RATE RACE (Big-O curves, canvas)
+        // ════════════════════════════════════
+        const growthFuncs = [
+            { id: 'gc-o1', name: 'O(1)', color: '#4f8ef7', f: n => 1 },
+            { id: 'gc-olog', name: 'O(log n)', color: '#34d399', f: n => n <= 1 ? 0.001 : Math.log2(n) },
+            { id: 'gc-on', name: 'O(n)', color: '#22d3ee', f: n => n },
+            { id: 'gc-onlogn', name: 'O(n log n)', color: '#fbbf24', f: n => n <= 1 ? n : n * Math.log2(n) },
+            { id: 'gc-on2', name: 'O(n²)', color: '#fb923c', f: n => n * n },
+            { id: 'gc-o2n', name: 'O(2ⁿ)', color: '#f87171', f: n => Math.pow(2, n) },
+        ];
+        const GC_NMAX = 25;
+        let growthAnimTimer = null;
+
+        function fmtBig(v) {
+            if (v < 1000) return v.toFixed(v < 10 ? 2 : 0);
+            if (v < 1e6) return Math.round(v).toLocaleString();
+            return v.toExponential(2);
+        }
+
+        function drawGrowthCanvas(currentN) {
+            const canvas = document.getElementById('growth-canvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const W = canvas.width,
+                H = canvas.height;
+            ctx.clearRect(0, 0, W, H);
+
+            const padL = 46,
+                padB = 30,
+                padT = 14,
+                padR = 14;
+            const plotW = W - padL - padR,
+                plotH = H - padT - padB;
+
+            // log scale: y in [0, log10(2^GC_NMAX)]
+            const maxLog = Math.log10(Math.pow(2, GC_NMAX) + 1);
+            const styles = getComputedStyle(document.documentElement);
+            const gridColor = styles.getPropertyValue('--border2').trim() || 'rgba(255,255,255,0.13)';
+            const textColor = styles.getPropertyValue('--text3').trim() || '#5a6280';
+
+            // axes
+            ctx.strokeStyle = gridColor;
+            ctx.lineWidth = 1;
+            ctx.font = '10px IBM Plex Mono, monospace';
+            ctx.fillStyle = textColor;
+            // horizontal grid (log decades)
+            for (let p = 0; p <= Math.ceil(maxLog); p++) {
+                const y = padT + plotH - (p / maxLog) * plotH;
+                ctx.beginPath();
+                ctx.moveTo(padL, y);
+                ctx.lineTo(W - padR, y);
+                ctx.stroke();
+                ctx.fillText('10^' + p, 4, y + 3);
+            }
+            // vertical grid (every 5 on n axis)
+            for (let n = 0; n <= GC_NMAX; n += 5) {
+                const x = padL + (n / GC_NMAX) * plotW;
+                ctx.beginPath();
+                ctx.moveTo(x, padT);
+                ctx.lineTo(x, padT + plotH);
+                ctx.stroke();
+                ctx.fillText('n=' + n, x - 8, H - 8);
+            }
+
+            const toXY = (n, val) => {
+                const x = padL + (n / GC_NMAX) * plotW;
+                const logv = Math.log10(Math.max(val, 0.001) + 1);
+                const y = padT + plotH - (logv / maxLog) * plotH;
+                return [x, y];
+            };
+
+            // curves
+            growthFuncs.forEach(gf => {
+                const cb = document.getElementById(gf.id);
+                if (!cb || !cb.checked) return;
+                ctx.beginPath();
+                ctx.strokeStyle = gf.color;
+                ctx.lineWidth = 2;
+                for (let n = 1; n <= GC_NMAX; n += 0.25) {
+                    const [x, y] = toXY(n, gf.f(n));
+                    if (n === 1) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                }
+                ctx.stroke();
+
+                // marker dot at currentN
+                const [mx, my] = toXY(currentN, gf.f(currentN));
+                ctx.beginPath();
+                ctx.fillStyle = gf.color;
+                ctx.arc(mx, my, 4.5, 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            // vertical marker line at currentN
+            const markerX = padL + (currentN / GC_NMAX) * plotW;
+            ctx.strokeStyle = textColor;
+            ctx.setLineDash([4, 4]);
+            ctx.beginPath();
+            ctx.moveTo(markerX, padT);
+            ctx.lineTo(markerX, padT + plotH);
+            ctx.stroke();
+            ctx.setLineDash([]);
+        }
+
+        function updateGrowthChart() {
+            const n = parseInt(document.getElementById('gc-n').value) || 1;
+            document.getElementById('gc-n-label').textContent = n;
+            drawGrowthCanvas(n);
+
+            const info = document.getElementById('growth-info');
+            const parts = growthFuncs
+                .filter(gf => document.getElementById(gf.id) && document.getElementById(gf.id).checked)
+                .map(gf => `<span style="color:${gf.color};font-weight:600;">${gf.name}</span> = ${fmtBig(gf.f(n))}`);
+            info.innerHTML = `At <strong>n = ${n}</strong>:  ` + parts.join('  ·  ');
+        }
+
+        function animateGrowthRace() {
+            if (growthAnimTimer) return;
+            const slider = document.getElementById('gc-n');
+            slider.value = 1;
+            updateGrowthChart();
+            let n = 1;
+            growthAnimTimer = setInterval(() => {
+                n++;
+                if (n > GC_NMAX) { clearInterval(growthAnimTimer);
+                    growthAnimTimer = null; return; }
+                slider.value = n;
+                updateGrowthChart();
+            }, 320);
+        }
+
+        function resetGrowthChart() {
+            if (growthAnimTimer) { clearInterval(growthAnimTimer);
+                growthAnimTimer = null; }
+            document.getElementById('gc-n').value = 10;
+            updateGrowthChart();
+        }
+
+        // ════════════════════════════════════
+        //  BIG-THETA BOUND VISUALIZER
+        // ════════════════════════════════════
+        const BD_NMAX = 20;
+
+        function fOfN(n) { return 3 * n * n + 2 * n + 5; } // f(n)
+        function gOfN(n) { return n * n; } // g(n) = n^2
+
+        function drawBoundCanvas() {
+            const canvas = document.getElementById('bound-canvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const W = canvas.width,
+                H = canvas.height;
+            ctx.clearRect(0, 0, W, H);
+
+            const c1 = parseFloat(document.getElementById('bd-c1').value) || 0.1;
+            const c2 = parseFloat(document.getElementById('bd-c2').value) || 1;
+            const n0 = parseInt(document.getElementById('bd-n0').value) || 1;
+
+            const padL = 50,
+                padB = 30,
+                padT = 14,
+                padR = 14;
+            const plotW = W - padL - padR,
+                plotH = H - padT - padB;
+
+            // check validity across a wide range beyond n0
+            const CHECK_MAX = 60;
+            let valid = true;
+            for (let n = n0; n <= CHECK_MAX; n++) {
+                const f = fOfN(n),
+                    lo = c1 * gOfN(n),
+                    hi = c2 * gOfN(n);
+                if (f < lo - 1e-9 || f > hi + 1e-9) { valid = false; break; }
+            }
+
+            const maxVal = Math.max(fOfN(BD_NMAX), c2 * gOfN(BD_NMAX)) * 1.05;
+            const toXY = (n, val) => {
+                const x = padL + (n / BD_NMAX) * plotW;
+                const y = padT + plotH - (val / maxVal) * plotH;
+                return [x, y];
+            };
+
+            const styles = getComputedStyle(document.documentElement);
+            const gridColor = styles.getPropertyValue('--border2').trim() || 'rgba(255,255,255,0.13)';
+            const textColor = styles.getPropertyValue('--text3').trim() || '#5a6280';
+
+            // grid
+            ctx.strokeStyle = gridColor;
+            ctx.font = '10px IBM Plex Mono, monospace';
+            ctx.fillStyle = textColor;
+            for (let g = 0; g <= 5; g++) {
+                const val = (maxVal / 5) * g;
+                const [, y] = toXY(0, val);
+                ctx.beginPath();
+                ctx.moveTo(padL, y);
+                ctx.lineTo(W - padR, y);
+                ctx.stroke();
+                ctx.fillText(Math.round(val), 4, y + 3);
+            }
+            for (let n = 0; n <= BD_NMAX; n += 5) {
+                const [x] = toXY(n, 0);
+                ctx.fillText('n=' + n, x - 8, H - 8);
+            }
+
+            // shaded envelope between c1*g(n) and c2*g(n), for n >= n0
+            ctx.beginPath();
+            const fillColor = valid ? 'rgba(52,211,153,0.16)' : 'rgba(248,113,113,0.14)';
+            ctx.fillStyle = fillColor;
+            for (let n = n0; n <= BD_NMAX; n++) {
+                const [x, y] = toXY(n, c2 * gOfN(n));
+                if (n === n0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            }
+            for (let n = BD_NMAX; n >= n0; n--) {
+                const [x, y] = toXY(n, c1 * gOfN(n));
+                ctx.lineTo(x, y);
+            }
+            ctx.closePath();
+            ctx.fill();
+
+            // c2*g(n) upper curve
+            ctx.beginPath();
+            ctx.strokeStyle = 'var(--amber)'.startsWith('var') ? '#fbbf24' : '#fbbf24';
+            ctx.lineWidth = 1.5;
+            ctx.setLineDash([5, 3]);
+            for (let n = 0; n <= BD_NMAX; n += 0.5) {
+                const [x, y] = toXY(n, c2 * gOfN(n));
+                if (n === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+
+            // c1*g(n) lower curve
+            ctx.beginPath();
+            ctx.strokeStyle = '#22d3ee';
+            for (let n = 0; n <= BD_NMAX; n += 0.5) {
+                const [x, y] = toXY(n, c1 * gOfN(n));
+                if (n === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // f(n) curve
+            ctx.beginPath();
+            ctx.strokeStyle = valid ? '#34d399' : '#f87171';
+            ctx.lineWidth = 2.5;
+            for (let n = 0; n <= BD_NMAX; n += 0.5) {
+                const [x, y] = toXY(n, fOfN(n));
+                if (n === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+
+            // n0 marker
+            const [n0x] = toXY(n0, 0);
+            ctx.strokeStyle = textColor;
+            ctx.setLineDash([3, 3]);
+            ctx.beginPath();
+            ctx.moveTo(n0x, padT);
+            ctx.lineTo(n0x, padT + plotH);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.fillStyle = textColor;
+            ctx.fillText('n₀=' + n0, n0x + 3, padT + 10);
+
+            return { valid, c1, c2, n0 };
+        }
+
+        function updateBoundChart() {
+            const result = drawBoundCanvas();
+            const info = document.getElementById('bound-info');
+            const c1 = result.c1,
+                c2 = result.c2,
+                n0 = result.n0;
+            const sampleN = n0 + 5;
+            const f = fOfN(sampleN),
+                lo = c1 * gOfN(sampleN),
+                hi = c2 * gOfN(sampleN);
+            if (result.valid) {
+                info.className = 'info-line green';
+                info.innerHTML = `✓ <strong>Bound holds!</strong> For every n ≥ ${n0}, ${c1}·n² ≤ f(n) ≤ ${c2}·n². Check at n=${sampleN}: ${lo.toFixed(1)} ≤ ${f} ≤ ${hi.toFixed(1)} ✓ &nbsp;→&nbsp; f(n) is <strong>Θ(n²)</strong> with these constants.`;
+            } else {
+                info.className = 'info-line red';
+                info.innerHTML = `✗ <strong>Bound fails</strong> somewhere at n ≥ ${n0} with c₁=${c1}, c₂=${c2}. Try raising c₂ (if f(n) pokes above the shaded band) or lowering c₁ (if f(n) dips below it).`;
+            }
+        }
+
+        // ════════════════════════════════════
+        //  INIT
+        // ════════════════════════════════════
+        function initModule04() {
+            renderAdtTable();
+            renderTypesTable();
+            renderMappingCards();
+            growthFuncs.forEach(gf => {
+                const cb = document.getElementById(gf.id);
+                if (cb) cb.addEventListener('change', updateGrowthChart);
+            });
+            updateGrowthChart();
+            updateBoundChart();
+        }
+        setTimeout(initModule04, 50);
+    </script>
+</body>
+</html>

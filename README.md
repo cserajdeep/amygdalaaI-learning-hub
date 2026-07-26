@@ -4,16 +4,32 @@ Interactive learning modules by **Dr. Rajdeep Chatterjee** ([@cserajdeep](https:
 
 ## Structure
 
+The hub landing page (`index.html`) now has two top-level tabs — **DSA & C** and **ANN** —
+switched entirely client-side (no page reload). Each tab lists its own module cards.
+
 ```
 dsa-learning-hub/
-├── index.html                     ← Hub landing page (module list)
-├── 01-why-dsa/
-│   └── index.html                 ← Why DSA matters
-├── 02-c-prerequisites/
-│   └── index.html                 ← C prerequisites for DSA
-└── 03-arrays-in-c/
-    └── index.html                 ← Arrays in C + visualizers
+├── index.html                     ← Hub landing page (DSA & C / ANN tabs)
+├── dsa_w_c/
+│   ├── 01-why-dsa/
+│   │   └── index.html             ← [DSA & C] Why DSA matters
+│   ├── 02-c-prerequisites/
+│   │   └── index.html             ← [DSA & C] C prerequisites for DSA
+│   ├── 03-arrays-in-c/
+│   │   └── index.html             ← [DSA & C] Arrays in C + visualizers
+│   └── 04-intro-to-ds/
+│       └── index.html             ← [DSA & C] Intro to Data Structures
+└── ann/
+    ├── 01-mcculloch-pitts-neuron/
+    │   └── index.html             ← [ANN] McCulloch–Pitts Neuron + logic gates lab
+    ├── 02-activation-functions/
+    │   └── index.html             ← [ANN] Activation functions + interactive calculator
+    └── 03-perceptron-learning/
+        └── index.html             ← [ANN] Perceptron learning rule + OR trainer lab
 ```
+
+All module pages share the same dark/light design system, sticky section nav-bar, and
+card/badge/formula components (see `dsa_w_c/03-arrays-in-c/index.html` for the canonical template).
 
 ## Deploying to GitHub Pages
 
@@ -33,16 +49,30 @@ dsa-learning-hub/
    `https://cserajdeep.github.io/dsa-learning-hub/`
 
 Individual module URLs:
-- `https://cserajdeep.github.io/dsa-learning-hub/01-why-dsa/`
-- `https://cserajdeep.github.io/dsa-learning-hub/02-c-prerequisites/`
-- `https://cserajdeep.github.io/dsa-learning-hub/03-arrays-in-c/`
+- `https://cserajdeep.github.io/dsa-learning-hub/dsa_w_c/01-why-dsa/`
+- `https://cserajdeep.github.io/dsa-learning-hub/dsa_w_c/02-c-prerequisites/`
+- `https://cserajdeep.github.io/dsa-learning-hub/dsa_w_c/03-arrays-in-c/`
+- `https://cserajdeep.github.io/dsa-learning-hub/dsa_w_c/04-intro-to-ds/`
+- `https://cserajdeep.github.io/dsa-learning-hub/ann/01-mcculloch-pitts-neuron/`
+- `https://cserajdeep.github.io/dsa-learning-hub/ann/02-activation-functions/`
+- `https://cserajdeep.github.io/dsa-learning-hub/ann/03-perceptron-learning/`
 
 ## Adding more modules later
 
-1. Create a new folder, e.g. `04-linked-lists/`, with an `index.html` inside.
-2. Add a new card to the `.modules` grid in the root `index.html`.
-3. Update the sticky nav bar's "Next"/"Prev" links in `03-arrays-in-c/index.html`
-   and the new module page to keep the sequence connected.
+**DSA & C track:**
+1. Create a new folder under `dsa_w_c/`, e.g. `dsa_w_c/05-linked-lists/`, with an `index.html` inside.
+2. Add a new card to the `#panel-dsa .modules` grid in the root `index.html`, linking to
+   `dsa_w_c/05-linked-lists/index.html`.
+3. Update the sticky nav bar's "Next"/"Prev" links in the last DSA module page
+   and the new module page to keep the sequence connected (note: "Hub Home" from inside
+   `dsa_w_c/*/` uses `../../index.html`, while sibling module links use `../`).
+
+**ANN track:**
+1. Create a new folder under `ann/`, e.g. `ann/04-multilayer-perceptron/`, with an `index.html` inside.
+2. Add a new card to the `#panel-ann .modules` grid in the root `index.html`.
+3. Update the sticky nav bar's "Next"/"Prev" links in `ann/03-perceptron-learning/index.html`
+   and the new module page (note the `../../index.html` relative path back to hub home
+   from inside `ann/*/`).
 
 ## Linking from your Google Site
 
