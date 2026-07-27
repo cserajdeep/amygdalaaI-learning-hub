@@ -962,12 +962,86 @@
                 <div class="card-title">Perceptron Structure <span class="badge badge-blue">RECAP</span></div>
                 <div class="formula">Σ = Σᵢ (wᵢ xᵢ) + bias &nbsp;→&nbsp; f(x) = 1 if Σ ≥ 0, else 0 &nbsp;→&nbsp; ŷ</div>
                 <p>Unlike the classical MCP neuron (equal weights, hand-set threshold), a perceptron's weights are <strong>learned</strong> from labeled training data via an iterative update rule.</p>
+                <div class="viz-area">
+                    <div class="viz-label">DIAGRAM — PERCEPTRON STRUCTURE</div>
+                    <svg width="100%" height="190" viewBox="0 0 560 190" style="overflow:visible;">
+                        <circle cx="45" cy="30" r="15" fill="none" stroke="var(--accent)" stroke-width="2"/><text x="45" y="34" text-anchor="middle" font-family="var(--mono)" font-size="10" fill="var(--accent)">x₁</text>
+                        <circle cx="45" cy="80" r="15" fill="none" stroke="var(--accent)" stroke-width="2"/><text x="45" y="84" text-anchor="middle" font-family="var(--mono)" font-size="10" fill="var(--accent)">x₂</text>
+                        <text x="45" y="120" text-anchor="middle" font-family="var(--mono)" font-size="11" fill="var(--text3)">⋮</text>
+                        <circle cx="45" cy="150" r="15" fill="none" stroke="var(--accent)" stroke-width="2"/><text x="45" y="154" text-anchor="middle" font-family="var(--mono)" font-size="10" fill="var(--accent)">xₘ</text>
+
+                        <line x1="60" y1="30" x2="180" y2="80" stroke="var(--accent)" stroke-width="1.5"/>
+                        <line x1="60" y1="80" x2="180" y2="85" stroke="var(--accent)" stroke-width="1.5"/>
+                        <line x1="60" y1="150" x2="180" y2="95" stroke="var(--accent)" stroke-width="1.5"/>
+                        <text x="105" y="45" font-family="var(--mono)" font-size="9" fill="var(--text3)">w₁</text>
+                        <text x="105" y="75" font-family="var(--mono)" font-size="9" fill="var(--text3)">w₂</text>
+                        <text x="105" y="130" font-family="var(--mono)" font-size="9" fill="var(--text3)">wₘ</text>
+
+                        <circle cx="205" cy="88" r="30" fill="none" stroke="var(--border2)" stroke-width="1.5"/>
+                        <text x="205" y="93" text-anchor="middle" font-family="var(--mono)" font-size="13" fill="var(--text)">Σ+b</text>
+
+                        <line x1="235" y1="88" x2="300" y2="88" stroke="var(--text3)" stroke-width="1.5" marker-end="url(#arrowPl)"/>
+                        <defs><marker id="arrowPl" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="var(--text3)"/></marker></defs>
+
+                        <rect x="300" y="63" width="80" height="50" rx="8" fill="none" stroke="var(--green)" stroke-width="1.5"/>
+                        <text x="340" y="93" text-anchor="middle" font-family="var(--mono)" font-size="10" fill="var(--green)">step f(x)</text>
+
+                        <line x1="380" y1="88" x2="440" y2="88" stroke="var(--text3)" stroke-width="1.5" marker-end="url(#arrowPl)"/>
+                        <circle cx="460" cy="88" r="16" fill="none" stroke="var(--amber)" stroke-width="2"/>
+                        <text x="460" y="92" text-anchor="middle" font-family="var(--mono)" font-size="10" fill="var(--amber)">ŷ</text>
+
+                        <text x="45" y="180" text-anchor="middle" font-family="var(--mono)" font-size="9" fill="var(--text3)">inputs</text>
+                        <text x="205" y="180" text-anchor="middle" font-family="var(--mono)" font-size="9" fill="var(--text3)">summation + bias</text>
+                        <text x="340" y="130" text-anchor="middle" font-family="var(--mono)" font-size="9" fill="var(--text3)">activation</text>
+                        <text x="460" y="180" text-anchor="middle" font-family="var(--mono)" font-size="9" fill="var(--text3)">output</text>
+                    </svg>
+                </div>
             </div>
 
             <div class="card">
                 <div class="card-title">Single-Layer vs. Hidden-Layer Perceptron <span class="badge badge-purple">ARCHITECTURE</span></div>
                 <p><strong>Single-Layer:</strong> input layer connects directly to a single output neuron — can only realize linearly separable functions (AND, OR, NOT).</p>
                 <p><strong>Multi-Layer (with Hidden Layer):</strong> inputs connect to a hidden layer of neurons, which connect to the output — can realize non-linearly-separable functions like XOR.</p>
+                <div class="viz-area">
+                    <div class="viz-label">DIAGRAM — SINGLE-LAYER vs. HIDDEN-LAYER</div>
+                    <svg width="100%" height="200" viewBox="0 0 560 200" style="overflow:visible;">
+                        <text x="110" y="18" text-anchor="middle" font-family="var(--mono)" font-size="10" fill="var(--text3)">SINGLE-LAYER</text>
+                        <circle cx="40" cy="45" r="10" fill="none" stroke="var(--accent)" stroke-width="2"/>
+                        <circle cx="40" cy="80" r="10" fill="none" stroke="var(--accent)" stroke-width="2"/>
+                        <circle cx="40" cy="115" r="10" fill="none" stroke="var(--accent)" stroke-width="2"/>
+                        <circle cx="40" cy="150" r="10" fill="none" stroke="var(--accent)" stroke-width="2"/>
+                        <circle cx="180" cy="97" r="14" fill="none" stroke="var(--amber)" stroke-width="2"/>
+                        <text x="180" y="101" text-anchor="middle" font-family="var(--mono)" font-size="9" fill="var(--amber)">out</text>
+                        <g stroke="var(--accent)" stroke-width="1.2" opacity="0.7">
+                            <line x1="50" y1="45" x2="168" y2="97"/><line x1="50" y1="80" x2="168" y2="97"/>
+                            <line x1="50" y1="115" x2="168" y2="97"/><line x1="50" y1="150" x2="168" y2="97"/>
+                        </g>
+
+                        <line x1="260" y1="10" x2="260" y2="190" stroke="var(--border)" stroke-width="1" stroke-dasharray="2,3"/>
+
+                        <text x="420" y="18" text-anchor="middle" font-family="var(--mono)" font-size="10" fill="var(--text3)">WITH HIDDEN LAYER</text>
+                        <circle cx="300" cy="45" r="9" fill="none" stroke="var(--accent)" stroke-width="2"/>
+                        <circle cx="300" cy="80" r="9" fill="none" stroke="var(--accent)" stroke-width="2"/>
+                        <circle cx="300" cy="115" r="9" fill="none" stroke="var(--accent)" stroke-width="2"/>
+                        <circle cx="300" cy="150" r="9" fill="none" stroke="var(--accent)" stroke-width="2"/>
+                        <circle cx="410" cy="60" r="11" fill="none" stroke="var(--green)" stroke-width="2"/>
+                        <circle cx="410" cy="97" r="11" fill="none" stroke="var(--green)" stroke-width="2"/>
+                        <circle cx="410" cy="134" r="11" fill="none" stroke="var(--green)" stroke-width="2"/>
+                        <circle cx="500" cy="97" r="13" fill="none" stroke="var(--amber)" stroke-width="2"/>
+                        <text x="500" y="101" text-anchor="middle" font-family="var(--mono)" font-size="9" fill="var(--amber)">out</text>
+                        <g stroke="var(--accent)" stroke-width="1" opacity="0.5">
+                            <line x1="309" y1="45" x2="399" y2="60"/><line x1="309" y1="45" x2="399" y2="97"/><line x1="309" y1="45" x2="399" y2="134"/>
+                            <line x1="309" y1="80" x2="399" y2="60"/><line x1="309" y1="80" x2="399" y2="97"/><line x1="309" y1="80" x2="399" y2="134"/>
+                            <line x1="309" y1="115" x2="399" y2="60"/><line x1="309" y1="115" x2="399" y2="97"/><line x1="309" y1="115" x2="399" y2="134"/>
+                            <line x1="309" y1="150" x2="399" y2="60"/><line x1="309" y1="150" x2="399" y2="97"/><line x1="309" y1="150" x2="399" y2="134"/>
+                        </g>
+                        <g stroke="var(--green)" stroke-width="1.3" opacity="0.8">
+                            <line x1="421" y1="60" x2="488" y2="97"/><line x1="421" y1="97" x2="488" y2="97"/><line x1="421" y1="134" x2="488" y2="97"/>
+                        </g>
+                        <text x="110" y="185" text-anchor="middle" font-family="var(--mono)" font-size="9" fill="var(--text3)">input → output (linear only)</text>
+                        <text x="405" y="185" text-anchor="middle" font-family="var(--mono)" font-size="9" fill="var(--text3)">input → hidden → output (XOR-capable)</text>
+                    </svg>
+                </div>
             </div>
         </div>
 

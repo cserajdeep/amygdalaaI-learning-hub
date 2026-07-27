@@ -964,6 +964,42 @@
                 <div class="formula">u_k = Σⱼ xⱼ w_kj  &nbsp;→&nbsp;  v_k = u_k + b_k  &nbsp;→&nbsp;  y_k = f(v_k)</div>
                 <p>Where <strong>w_kj</strong> is the connection weight from neuron j to neuron k, <strong>b_k</strong> is the bias, and <strong>f(·)</strong> is the activation (transfer) function — the subject of this module.</p>
                 <div class="concept-box">📌 For a single-input, single-output neuron in the simplified form: a = f(w·p + b), where p is the input, w the weight, b the bias.</div>
+                <div class="viz-area">
+                    <div class="viz-label">DIAGRAM — MULTI-INPUT NEURON K</div>
+                    <svg width="100%" height="200" viewBox="0 0 640 200" style="overflow:visible;">
+                        <text x="40" y="35" font-family="var(--mono)" font-size="10" fill="var(--accent)">1</text>
+                        <text x="40" y="70" font-family="var(--mono)" font-size="10" fill="var(--accent)">2</text>
+                        <text x="40" y="100" font-family="var(--mono)" font-size="10" fill="var(--text3)">⋮</text>
+                        <text x="40" y="130" font-family="var(--mono)" font-size="10" fill="var(--accent)">N</text>
+                        <line x1="55" y1="32" x2="180" y2="90" stroke="var(--accent)" stroke-width="1.5"/>
+                        <line x1="55" y1="67" x2="180" y2="95" stroke="var(--accent)" stroke-width="1.5"/>
+                        <line x1="55" y1="127" x2="180" y2="105" stroke="var(--accent)" stroke-width="1.5"/>
+                        <text x="95" y="55" font-family="var(--mono)" font-size="9" fill="var(--text3)">w_k1</text>
+                        <text x="95" y="82" font-family="var(--mono)" font-size="9" fill="var(--text3)">w_k2</text>
+                        <text x="95" y="120" font-family="var(--mono)" font-size="9" fill="var(--text3)">w_kN</text>
+
+                        <text x="200" y="20" text-anchor="middle" font-family="var(--mono)" font-size="9" fill="var(--amber)">b_k</text>
+                        <line x1="200" y1="26" x2="200" y2="75" stroke="var(--amber)" stroke-width="1.5"/>
+
+                        <circle cx="205" cy="100" r="30" fill="none" stroke="var(--border2)" stroke-width="1.5"/>
+                        <text x="205" y="105" text-anchor="middle" font-family="var(--mono)" font-size="14" fill="var(--text)">Σ</text>
+
+                        <line x1="235" y1="100" x2="300" y2="100" stroke="var(--text3)" stroke-width="1.5" marker-end="url(#arrowAf)"/>
+                        <defs><marker id="arrowAf" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="var(--text3)"/></marker></defs>
+                        <text x="265" y="90" text-anchor="middle" font-family="var(--mono)" font-size="9" fill="var(--text3)">v_k</text>
+
+                        <rect x="300" y="75" width="70" height="50" rx="8" fill="none" stroke="var(--green)" stroke-width="1.5"/>
+                        <text x="335" y="105" text-anchor="middle" font-family="var(--mono)" font-size="11" fill="var(--green)">f(·)</text>
+
+                        <line x1="370" y1="100" x2="430" y2="100" stroke="var(--text3)" stroke-width="1.5" marker-end="url(#arrowAf)"/>
+                        <circle cx="450" cy="100" r="14" fill="none" stroke="var(--accent)" stroke-width="2"/>
+                        <text x="450" y="104" text-anchor="middle" font-family="var(--mono)" font-size="10" fill="var(--accent)">y_k</text>
+                        <text x="450" y="130" text-anchor="middle" font-family="var(--mono)" font-size="8" fill="var(--text3)">(1/0)</text>
+
+                        <text x="205" y="150" text-anchor="middle" font-family="var(--mono)" font-size="9" fill="var(--text3)">summation unit</text>
+                        <text x="335" y="145" text-anchor="middle" font-family="var(--mono)" font-size="9" fill="var(--text3)">activation function</text>
+                    </svg>
+                </div>
             </div>
         </div>
 
@@ -990,6 +1026,10 @@
             <div class="card">
                 <div class="card-title">The Logistic (Sigmoid) Function Family <span class="badge badge-teal">S-CURVE</span></div>
                 <p>The slope parameter <strong>s</strong> controls steepness: s=0 gives a flat line at 0.5, while larger s pushes the curve toward a hard step. This is why the sigmoid is often called a "smoothed" binary step function — it enables gradual weight updates, unlike the discontinuous step function.</p>
+                <div class="viz-area">
+                    <div class="viz-label">LOGISTIC ACTIVATION FUNCTION FOR VARYING SLOPE s</div>
+                    <svg id="sigmoid-family-svg" width="100%" height="240" viewBox="0 0 560 240" style="overflow:visible;"></svg>
+                </div>
             </div>
         </div>
 
@@ -1091,6 +1131,43 @@
             <div class="section-sub">Unlike the equal-weight MCP neuron, a sigmoid neuron uses large signed weights and a bias to push sum_k far into the saturated region — approximating a hard decision boundary.</div>
 
             <div class="card">
+                <div class="card-title">Simplified 2-Input Neuron with Bias <span class="badge badge-purple">DIAGRAM</span></div>
+                <div class="viz-area">
+                    <div class="viz-label">SIMPLIFIED FORM — x₀ (BIAS) + x₁, x₂</div>
+                    <svg width="100%" height="180" viewBox="0 0 500 180" style="overflow:visible;">
+                        <circle cx="60" cy="30" r="14" fill="none" stroke="var(--amber)" stroke-width="2"/>
+                        <text x="60" y="34" text-anchor="middle" font-family="var(--mono)" font-size="10" fill="var(--amber)">+1</text>
+                        <text x="30" y="20" font-family="var(--mono)" font-size="9" fill="var(--amber)">x₀ bias</text>
+                        <circle cx="60" cy="90" r="14" fill="none" stroke="var(--accent)" stroke-width="2"/>
+                        <text x="60" y="94" text-anchor="middle" font-family="var(--mono)" font-size="10" fill="var(--accent)">x₁</text>
+                        <circle cx="60" cy="150" r="14" fill="none" stroke="var(--accent)" stroke-width="2"/>
+                        <text x="60" y="154" text-anchor="middle" font-family="var(--mono)" font-size="10" fill="var(--accent)">x₂</text>
+
+                        <line x1="74" y1="35" x2="180" y2="85" stroke="var(--amber)" stroke-width="1.5"/>
+                        <line x1="74" y1="90" x2="180" y2="90" stroke="var(--accent)" stroke-width="1.5"/>
+                        <line x1="74" y1="145" x2="180" y2="95" stroke="var(--accent)" stroke-width="1.5"/>
+                        <text x="115" y="55" font-family="var(--mono)" font-size="9" fill="var(--text3)">w₀</text>
+                        <text x="115" y="82" font-family="var(--mono)" font-size="9" fill="var(--text3)">w₁</text>
+                        <text x="115" y="128" font-family="var(--mono)" font-size="9" fill="var(--text3)">w₂</text>
+
+                        <circle cx="205" cy="90" r="26" fill="none" stroke="var(--border2)" stroke-width="1.5"/>
+                        <text x="205" y="94" text-anchor="middle" font-family="var(--mono)" font-size="12" fill="var(--text)">Σ</text>
+                        <text x="205" y="130" text-anchor="middle" font-family="var(--mono)" font-size="9" fill="var(--text3)">sum_k</text>
+
+                        <line x1="231" y1="90" x2="280" y2="90" stroke="var(--text3)" stroke-width="1.5" marker-end="url(#arrowAo)"/>
+                        <defs><marker id="arrowAo" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="var(--text3)"/></marker></defs>
+
+                        <rect x="280" y="65" width="70" height="50" rx="8" fill="none" stroke="var(--green)" stroke-width="1.5"/>
+                        <text x="315" y="95" text-anchor="middle" font-family="var(--mono)" font-size="11" fill="var(--green)">f(·)</text>
+
+                        <line x1="350" y1="90" x2="400" y2="90" stroke="var(--text3)" stroke-width="1.5" marker-end="url(#arrowAo)"/>
+                        <circle cx="420" cy="90" r="14" fill="none" stroke="var(--accent)" stroke-width="2"/>
+                        <text x="420" y="94" text-anchor="middle" font-family="var(--mono)" font-size="10" fill="var(--accent)">h(x)</text>
+                    </svg>
+                </div>
+            </div>
+
+            <div class="card">
                 <div class="card-title">AND Network <span class="badge badge-green">w₀=−30, w₁=w₂=20</span></div>
                 <div class="formula">h_AND(x) = f(−30 + 20x₁ + 20x₂), &nbsp; f = sigmoid</div>
                 <table style="width:100%;border-collapse:collapse;font-family:var(--mono);font-size:12px;">
@@ -1145,6 +1222,7 @@
             if (label) label.textContent = next === 'dark' ? 'Dark Mode' : 'Light Mode';
             try { localStorage.setItem('ann-theme', next); } catch (e) {}
             renderCalc();
+            drawSigmoidFamily();
         }
         (function () {
             try {
@@ -1251,7 +1329,49 @@
             `;
         }
 
+        // ════════════════════════════════════
+        //  STATIC SIGMOID-FAMILY PLOT (S=0,2,4,8)
+        // ════════════════════════════════════
+        function drawSigmoidFamily() {
+            const svg = document.getElementById('sigmoid-family-svg');
+            if (!svg) return;
+            const w = 560, h = 240, padL = 40, padR = 20, padT = 20, padB = 30;
+            const style = getComputedStyle(document.documentElement);
+            const text3 = style.getPropertyValue('--text3').trim() || '#5a6280';
+            const colors = { 0: style.getPropertyValue('--text3').trim(), 2: style.getPropertyValue('--accent').trim(), 4: style.getPropertyValue('--green').trim(), 8: style.getPropertyValue('--red').trim() };
+            const xMin = -1, xMax = 1, yMin = 0, yMax = 1;
+            const toX = (x) => padL + ((x - xMin) / (xMax - xMin)) * (w - padL - padR);
+            const toY = (y) => (h - padB) - ((y - yMin) / (yMax - yMin)) * (h - padT - padB);
+            const sig = (s, x) => 1 / (1 + Math.exp(-s * x));
+
+            let els = `<line x1="${toX(xMin)}" y1="${toY(0)}" x2="${toX(xMax)}" y2="${toY(0)}" stroke="${text3}" stroke-width="1"/>
+                       <line x1="${toX(0)}" y1="${toY(yMin)}" x2="${toX(0)}" y2="${toY(yMax)}" stroke="${text3}" stroke-width="1" opacity="0.4"/>
+                       <line x1="${toX(xMin)}" y1="${toY(0.5)}" x2="${toX(xMax)}" y2="${toY(0.5)}" stroke="${text3}" stroke-width="1" stroke-dasharray="3,3" opacity="0.4"/>`;
+
+            [0, 2, 4, 8].forEach(s => {
+                let path = '';
+                for (let px = 0; px <= (w - padL - padR); px += 2) {
+                    const x = xMin + (px / (w - padL - padR)) * (xMax - xMin);
+                    const y = s === 0 ? 0.5 : sig(s, x);
+                    path += (px === 0 ? 'M' : 'L') + toX(x) + ',' + toY(y) + ' ';
+                }
+                els += `<path d="${path}" fill="none" stroke="${colors[s]}" stroke-width="2.5"/>`;
+            });
+
+            els += `<text x="${toX(-0.55)}" y="${toY(sig(8,-0.55))-6}" font-family="IBM Plex Mono, monospace" font-size="10" fill="${colors[8]}">S=8</text>
+                    <text x="${toX(-0.62)}" y="${toY(sig(4,-0.62))-6}" font-family="IBM Plex Mono, monospace" font-size="10" fill="${colors[4]}">S=4</text>
+                    <text x="${toX(-0.75)}" y="${toY(sig(2,-0.75))-6}" font-family="IBM Plex Mono, monospace" font-size="10" fill="${colors[2]}">S=2</text>
+                    <text x="${toX(-0.9)}" y="${toY(0.5)-8}" font-family="IBM Plex Mono, monospace" font-size="10" fill="${colors[0]}">S=0</text>
+                    <text x="${toX(0)-10}" y="${h-8}" font-family="IBM Plex Mono, monospace" font-size="10" fill="${text3}">sum_k</text>
+                    <text x="4" y="${toY(1)+4}" font-family="IBM Plex Mono, monospace" font-size="10" fill="${text3}">1.0</text>
+                    <text x="4" y="${toY(0.5)+4}" font-family="IBM Plex Mono, monospace" font-size="10" fill="${text3}">0.5</text>
+                    <text x="4" y="${toY(0)+4}" font-family="IBM Plex Mono, monospace" font-size="10" fill="${text3}">0.0</text>`;
+
+            svg.innerHTML = els;
+        }
+
         renderCalc();
+        drawSigmoidFamily();
     </script>
 </body>
 </html>
