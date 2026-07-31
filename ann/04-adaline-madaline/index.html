@@ -1,0 +1,1389 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ADALINE & MADALINE</title>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700;9..144,900&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        /* ─── THEME TOKENS ─── */
+        :root[data-theme="dark"] {
+            --bg: #0c0e14;
+            --bg2: #13161f;
+            --bg3: #1a1e2b;
+            --bg4: #222637;
+            --surface: #1c2030;
+            --border: rgba(255, 255, 255, 0.07);
+            --border2: rgba(255, 255, 255, 0.13);
+            --text: #e8eaf2;
+            --text2: #9ba5c0;
+            --text3: #5a6280;
+            --accent: #4f8ef7;
+            --accent2: #7c5ff5;
+            --green: #34d399;
+            --amber: #fbbf24;
+            --red: #f87171;
+            --teal: #22d3ee;
+            --pink: #f472b6;
+            --orange: #fb923c;
+            --shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
+            --card-bg: #1c2030;
+            --mono: 'IBM Plex Mono', monospace;
+        }
+        :root[data-theme="light"] {
+            --bg: #f6f7fb;
+            --bg2: #ffffff;
+            --bg3: #eef0f7;
+            --bg4: #e2e5f0;
+            --surface: #ffffff;
+            --border: rgba(0, 0, 0, 0.08);
+            --border2: rgba(0, 0, 0, 0.14);
+            --text: #1a1d2e;
+            --text2: #4a5170;
+            --text3: #8b93b0;
+            --accent: #2563eb;
+            --accent2: #7c3aed;
+            --green: #059669;
+            --amber: #d97706;
+            --red: #dc2626;
+            --teal: #0891b2;
+            --pink: #db2777;
+            --orange: #ea580c;
+            --shadow: 0 4px 24px rgba(0, 0, 0, 0.10);
+            --card-bg: #ffffff;
+            --mono: 'IBM Plex Mono', monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        /* ─── HERO ─── */
+        .hero {
+            background: var(--bg2);
+            border-bottom: 1px solid var(--border);
+            padding: 2rem 2rem 1.6rem;
+            position: relative;
+            overflow: hidden;
+        }
+        [data-theme="dark"] .hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse 60% 80% at 80% 50%, rgba(79, 142, 247, 0.07) 0%, transparent 70%),
+                radial-gradient(ellipse 40% 60% at 10% 20%, rgba(124, 95, 245, 0.05) 0%, transparent 60%);
+            pointer-events: none;
+        }
+        .hero-inner {
+            max-width: 1100px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            flex-wrap: wrap;
+            position: relative;
+            z-index: 1;
+        }
+        .hero-tag {
+            display: inline-block;
+            background: rgba(79, 142, 247, 0.12);
+            border: 1px solid rgba(79, 142, 247, 0.3);
+            color: var(--accent);
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px;
+            padding: 4px 12px;
+            border-radius: 100px;
+            letter-spacing: 0.08em;
+            margin-bottom: 0.6rem;
+        }
+        .hero h1 {
+            font-family: 'Fraunces', serif;
+            font-size: clamp(1.7rem, 4vw, 2.6rem);
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 0.4rem;
+            color: var(--text);
+        }
+        .hero h1 span {
+            color: var(--accent);
+        }
+        .hero p {
+            color: var(--text2);
+            font-size: 0.92rem;
+            max-width: 520px;
+            line-height: 1.6;
+        }
+        .hero-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-shrink: 0;
+        }
+
+        .theme-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--bg3);
+            border: 1px solid var(--border2);
+            border-radius: 100px;
+            padding: 6px 16px;
+            cursor: pointer;
+            font-size: 13px;
+            color: var(--text2);
+            font-family: 'DM Sans', sans-serif;
+            transition: all 0.2s;
+        }
+        .theme-toggle:hover {
+            border-color: var(--accent);
+            color: var(--text);
+        }
+        .toggle-icon {
+            font-size: 16px;
+        }
+
+        /* ─── NAV ─── */
+        .nav-bar {
+            background: var(--bg2);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            overflow-x: auto;
+            scrollbar-width: none;
+        }
+        .nav-bar::-webkit-scrollbar {
+            display: none;
+        }
+        .nav-inner {
+            max-width: 1100px;
+            margin: 0 auto;
+            display: flex;
+            padding: 0 1.2rem;
+        }
+        .nav-btn {
+            font-family: 'DM Sans', sans-serif;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text3);
+            background: none;
+            border: none;
+            border-bottom: 2px solid transparent;
+            padding: 12px 14px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: color 0.2s, border-color 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .nav-btn:hover {
+            color: var(--text);
+        }
+        .nav-btn.active {
+            color: var(--accent);
+            border-bottom-color: var(--accent);
+        }
+
+        /* ─── LAYOUT ─── */
+        .main {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 1.8rem 1.4rem;
+        }
+        .section {
+            display: none;
+        }
+        .section.active {
+            display: block;
+            animation: fadeUp 0.3s ease;
+        }
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .section-head {
+            margin-bottom: 1.8rem;
+        }
+        .section-title {
+            font-family: 'Fraunces', serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.3rem;
+            color: var(--text);
+        }
+        .section-sub {
+            color: var(--text2);
+            font-size: 0.9rem;
+            line-height: 1.65;
+        }
+
+        /* ─── CARDS ─── */
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 1.2rem 1.4rem;
+            margin-bottom: 1.2rem;
+            box-shadow: var(--shadow);
+        }
+        .card-title {
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.97rem;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 100px;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+        }
+        .badge-blue {
+            background: rgba(79, 142, 247, 0.15);
+            color: var(--accent);
+            border: 1px solid rgba(79, 142, 247, 0.25);
+        }
+        .badge-green {
+            background: rgba(52, 211, 153, 0.12);
+            color: var(--green);
+            border: 1px solid rgba(52, 211, 153, 0.2);
+        }
+        .badge-amber {
+            background: rgba(251, 191, 36, 0.12);
+            color: var(--amber);
+            border: 1px solid rgba(251, 191, 36, 0.2);
+        }
+        .badge-red {
+            background: rgba(248, 113, 113, 0.12);
+            color: var(--red);
+            border: 1px solid rgba(248, 113, 113, 0.2);
+        }
+        .badge-teal {
+            background: rgba(34, 211, 238, 0.12);
+            color: var(--teal);
+            border: 1px solid rgba(34, 211, 238, 0.2);
+        }
+        .badge-purple {
+            background: rgba(124, 95, 245, 0.12);
+            color: var(--accent2);
+            border: 1px solid rgba(124, 95, 245, 0.2);
+        }
+        .badge-orange {
+            background: rgba(251, 146, 60, 0.12);
+            color: var(--orange);
+            border: 1px solid rgba(251, 146, 60, 0.2);
+        }
+        .badge-pink {
+            background: rgba(244, 114, 182, 0.12);
+            color: var(--pink);
+            border: 1px solid rgba(244, 114, 182, 0.2);
+        }
+
+        .card p {
+            color: var(--text2);
+            font-size: 0.875rem;
+            line-height: 1.7;
+            margin-bottom: 0.6rem;
+        }
+        .card p:last-child {
+            margin-bottom: 0;
+        }
+
+        /* ─── CODE BLOCKS ─── */
+        .code-block {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.9rem 1.2rem;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 12.5px;
+            line-height: 1.75;
+            color: var(--text);
+            overflow-x: auto;
+            margin: 0.6rem 0;
+            position: relative;
+        }
+        [data-theme="light"] .code-block {
+            background: #f0f2fa;
+        }
+        .kw {
+            color: #c084fc;
+        }
+        .fn {
+            color: #60a5fa;
+        }
+        .str {
+            color: #86efac;
+        }
+        .num {
+            color: #fb923c;
+        }
+        .cmt {
+            color: var(--text3);
+            font-style: italic;
+        }
+        .ty {
+            color: #67e8f9;
+        }
+        .op {
+            color: #fcd34d;
+        }
+        .pp {
+            color: #f9a8d4;
+        }
+        [data-theme="light"] .kw {
+            color: #7c3aed;
+        }
+        [data-theme="light"] .fn {
+            color: #1d4ed8;
+        }
+        [data-theme="light"] .str {
+            color: #15803d;
+        }
+        [data-theme="light"] .num {
+            color: #c2410c;
+        }
+        [data-theme="light"] .ty {
+            color: #0891b2;
+        }
+        [data-theme="light"] .op {
+            color: #92400e;
+        }
+        [data-theme="light"] .pp {
+            color: #db2777;
+        }
+
+        /* ─── VIZ AREA ─── */
+        .viz-area {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1rem;
+            margin: 0.6rem 0;
+            min-height: 70px;
+        }
+        [data-theme="light"] .viz-area {
+            background: #f0f2fa;
+        }
+        .viz-label {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 10px;
+            color: var(--text3);
+            margin-bottom: 0.6rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        /* ─── CONTROLS ─── */
+        .controls {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin: 0.6rem 0;
+            align-items: center;
+        }
+        .btn {
+            font-family: 'DM Sans', sans-serif;
+            font-size: 13px;
+            font-weight: 500;
+            padding: 6px 14px;
+            border-radius: 8px;
+            border: 1px solid var(--border2);
+            background: var(--bg3);
+            color: var(--text2);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn:hover {
+            background: var(--bg4);
+            color: var(--text);
+        }
+        .btn.primary {
+            background: rgba(79, 142, 247, 0.15);
+            color: var(--accent);
+            border-color: rgba(79, 142, 247, 0.3);
+        }
+        .btn.primary:hover {
+            background: rgba(79, 142, 247, 0.28);
+        }
+        .btn.danger {
+            background: rgba(248, 113, 113, 0.12);
+            color: var(--red);
+            border-color: rgba(248, 113, 113, 0.25);
+        }
+        .btn.danger:hover {
+            background: rgba(248, 113, 113, 0.22);
+        }
+        .btn.success {
+            background: rgba(52, 211, 153, 0.12);
+            color: var(--green);
+            border-color: rgba(52, 211, 153, 0.25);
+        }
+        .btn.success:hover {
+            background: rgba(52, 211, 153, 0.22);
+        }
+        .btn.amber {
+            background: rgba(251, 191, 36, 0.12);
+            color: var(--amber);
+            border-color: rgba(251, 191, 36, 0.25);
+        }
+        .btn.amber:hover {
+            background: rgba(251, 191, 36, 0.22);
+        }
+        .btn.green {
+            background: rgba(52, 211, 153, 0.12);
+            color: var(--green);
+            border-color: rgba(52, 211, 153, 0.25);
+        }
+        .btn.green:hover {
+            background: rgba(52, 211, 153, 0.22);
+        }
+        .btn.red {
+            background: rgba(248, 113, 113, 0.12);
+            color: var(--red);
+            border-color: rgba(248, 113, 113, 0.25);
+        }
+        .btn.red:hover {
+            background: rgba(248, 113, 113, 0.22);
+        }
+
+        input[type="range"] {
+            accent-color: var(--accent);
+            width: 100%;
+        }
+        input[type="text"],
+        input[type="number"],
+        select {
+            background: var(--bg3);
+            border: 1px solid var(--border2);
+            border-radius: 6px;
+            color: var(--text);
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 12px;
+            padding: 6px 10px;
+            outline: none;
+        }
+        input[type="text"]:focus,
+        input[type="number"]:focus,
+        select:focus {
+            border-color: var(--accent);
+        }
+        select option {
+            background: var(--bg3);
+        }
+
+        /* ─── 1D ARRAY CELLS ─── */
+        .arr-wrap {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            align-items: flex-end;
+            padding: 6px 0;
+        }
+        .arr-cell {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+        }
+        .arr-box {
+            width: 52px;
+            height: 44px;
+            background: var(--bg3);
+            border: 1.5px solid var(--border2);
+            border-radius: 7px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text);
+            transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .arr-box.hi {
+            background: rgba(79, 142, 247, 0.18);
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+        .arr-box.found {
+            background: rgba(52, 211, 153, 0.18);
+            border-color: var(--green);
+            color: var(--green);
+        }
+        .arr-box.scan {
+            background: rgba(251, 191, 36, 0.15);
+            border-color: var(--amber);
+            color: var(--amber);
+        }
+        .arr-box.teal {
+            background: rgba(34, 211, 238, 0.15);
+            border-color: var(--teal);
+            color: var(--teal);
+        }
+        .arr-box.red {
+            background: rgba(248, 113, 113, 0.15);
+            border-color: var(--red);
+            color: var(--red);
+        }
+        .arr-box.amber {
+            background: rgba(251, 191, 36, 0.15);
+            border-color: var(--amber);
+            color: var(--amber);
+        }
+        .arr-box.purple {
+            background: rgba(124, 95, 245, 0.15);
+            border-color: var(--accent2);
+            color: var(--accent2);
+        }
+        .arr-box.green {
+            background: rgba(52, 211, 153, 0.15);
+            border-color: var(--green);
+            color: var(--green);
+        }
+        .arr-box.blue {
+            background: rgba(79, 142, 247, 0.15);
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .arr-lbl {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 9.5px;
+            color: var(--text3);
+        }
+        .arr-addr {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 8.5px;
+            color: var(--text3);
+            opacity: 0.7;
+        }
+
+        /* ─── 2D MATRIX CELLS ─── */
+        .matrix-row {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 4px;
+            flex-wrap: wrap;
+        }
+        .mat-cell {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+        }
+        .mat-box {
+            width: 48px;
+            height: 40px;
+            background: var(--bg3);
+            border: 1.5px solid var(--border2);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text);
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .mat-box.hi {
+            background: rgba(79, 142, 247, 0.18);
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+        .mat-box.found {
+            background: rgba(52, 211, 153, 0.18);
+            border-color: var(--green);
+            color: var(--green);
+        }
+        .mat-box.scan {
+            background: rgba(251, 191, 36, 0.15);
+            border-color: var(--amber);
+            color: var(--amber);
+        }
+        .mat-box.teal {
+            background: rgba(34, 211, 238, 0.15);
+            border-color: var(--teal);
+            color: var(--teal);
+        }
+        .mat-box.red {
+            background: rgba(248, 113, 113, 0.15);
+            border-color: var(--red);
+            color: var(--red);
+        }
+        .mat-box.amber {
+            background: rgba(251, 191, 36, 0.15);
+            border-color: var(--amber);
+            color: var(--amber);
+        }
+        .mat-box.purple {
+            background: rgba(124, 95, 245, 0.15);
+            border-color: var(--accent2);
+            color: var(--accent2);
+        }
+        .mat-box.green {
+            background: rgba(52, 211, 153, 0.15);
+            border-color: var(--green);
+            color: var(--green);
+        }
+        .mat-box.blue {
+            background: rgba(79, 142, 247, 0.15);
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .mat-lbl {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 8.5px;
+            color: var(--text3);
+        }
+
+        /* ─── FLAT MEMORY STRIP ─── */
+        .flat-strip {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 3px;
+            padding: 4px 0;
+        }
+        .flat-cell {
+            background: var(--bg3);
+            border: 1px solid var(--border2);
+            border-radius: 4px;
+            padding: 6px 10px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px;
+            color: var(--text2);
+            transition: all 0.3s;
+            min-width: 32px;
+            text-align: center;
+        }
+        .flat-cell.hi {
+            background: rgba(79, 142, 247, 0.18);
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        /* ─── INFO LINE ─── */
+        .info-line {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 12px;
+            color: var(--text2);
+            padding: 6px 12px;
+            background: var(--bg);
+            border-left: 3px solid var(--accent);
+            border-radius: 0 6px 6px 0;
+            margin: 0.4rem 0;
+            transition: border-color 0.3s, background 0.3s;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        [data-theme="light"] .info-line {
+            background: #f0f2fa;
+        }
+        .info-line.green {
+            border-left-color: var(--green);
+        }
+        .info-line.amber {
+            border-left-color: var(--amber);
+        }
+        .info-line.red {
+            border-left-color: var(--red);
+        }
+        .info-line.teal {
+            border-left-color: var(--teal);
+        }
+
+        /* ─── SUB TABS ─── */
+        .sub-tabs {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+            margin-bottom: 0.8rem;
+        }
+        .sub-tab {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px;
+            padding: 4px 12px;
+            border-radius: 100px;
+            border: 1px solid var(--border);
+            background: var(--bg2);
+            color: var(--text3);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .sub-tab:hover {
+            border-color: var(--border2);
+            color: var(--text2);
+        }
+        .sub-tab.active {
+            background: rgba(79, 142, 247, 0.12);
+            border-color: rgba(79, 142, 247, 0.35);
+            color: var(--accent);
+        }
+
+        /* ─── CONCEPT BOX ─── */
+        .concept-box {
+            background: rgba(79, 142, 247, 0.06);
+            border: 1px solid rgba(79, 142, 247, 0.12);
+            border-radius: 8px;
+            padding: 0.7rem 1rem;
+            font-size: 13px;
+            line-height: 1.8;
+            color: var(--text2);
+            margin: 0.5rem 0;
+        }
+        .concept-box.green {
+            background: rgba(52, 211, 153, 0.06);
+            border-color: rgba(52, 211, 153, 0.12);
+        }
+        .concept-box.amber {
+            background: rgba(251, 191, 36, 0.06);
+            border-color: rgba(251, 191, 36, 0.12);
+        }
+        .concept-box strong {
+            color: var(--text);
+        }
+
+        /* ─── FORMULA ─── */
+        .formula {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 12px;
+            color: var(--teal);
+            padding: 6px 12px;
+            background: rgba(34, 211, 238, 0.06);
+            border-radius: 6px;
+            border: 1px solid rgba(34, 211, 238, 0.12);
+            margin: 0.4rem 0;
+        }
+
+        /* ─── TWO / THREE COL ─── */
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        .three-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 1rem;
+        }
+        @media(max-width: 680px) {
+            .two-col,
+            .three-col {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* ─── BARS (sorting) ─── */
+        .bar-wrap {
+            display: flex;
+            gap: 8px;
+            align-items: flex-end;
+            justify-content: center;
+            padding: 12px 0;
+            min-height: 150px;
+            flex-wrap: wrap;
+        }
+        .bar {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+        .bar-body {
+            width: 36px;
+            border-radius: 4px 4px 0 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px;
+            font-weight: 600;
+            color: #0d0f14;
+            transition: height 0.3s ease, background 0.3s;
+            min-height: 20px;
+            padding: 2px 0;
+        }
+        .bar-lbl {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 8.5px;
+            color: var(--text3);
+        }
+
+        /* ─── INPUT GRID ─── */
+        .input-grid {
+            display: grid;
+            gap: 4px;
+            margin: 4px 0;
+        }
+
+        /* ─── TERMINAL ─── */
+        .terminal {
+            background: #080a0f;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.9rem;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 12.5px;
+            color: #a3e635;
+            min-height: 60px;
+            white-space: pre-wrap;
+            line-height: 1.65;
+        }
+        [data-theme="light"] .terminal {
+            background: #1a1d2e;
+        }
+        .terminal .prompt {
+            color: var(--text3);
+        }
+
+        /* ─── SCROLLBAR ─── */
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--bg4);
+            border-radius: 3px;
+        }
+
+        /* ─── RESPONSIVE TWEAKS ─── */
+        @media(max-width: 600px) {
+            .hero {
+                padding: 1.2rem 1rem;
+            }
+            .main {
+                padding: 1rem 0.8rem;
+            }
+            .card {
+                padding: 1rem;
+            }
+            .arr-box {
+                width: 40px;
+                height: 36px;
+                font-size: 11px;
+            }
+            .mat-box {
+                width: 38px;
+                height: 34px;
+                font-size: 11px;
+            }
+            .controls {
+                gap: 4px;
+            }
+            .btn {
+                font-size: 12px;
+                padding: 4px 10px;
+            }
+            .nav-btn {
+                font-size: 11px;
+                padding: 8px 10px;
+            }
+            .flat-cell {
+                padding: 4px 6px;
+                font-size: 9px;
+                min-width: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- ====== HUB NAVIGATION ====== -->
+    <nav style="position:sticky;top:0;z-index:1000;background:rgba(20,20,35,0.92);backdrop-filter:blur(10px);padding:10px 16px;display:flex;align-items:center;justify-content:center;gap:18px;flex-wrap:wrap;font-family:'Inter',sans-serif;font-size:0.85rem;border-bottom:1px solid rgba(255,255,255,0.08);">
+        <a href="../03-perceptron-learning/index.html" style="color:#4285F4;font-weight:600;text-decoration:none;">← Perceptron Learning</a>
+        <a href="../../index.html" style="color:#fff;font-weight:700;text-decoration:none;padding:4px 12px;border:1px solid rgba(255,255,255,0.25);border-radius:20px;">🏠 Hub Home</a>
+    </nav>
+
+    <div class="hero">
+        <div class="hero-inner">
+            <div>
+                <div class="hero-tag">✦ ANN Module 03 · Widrow & Hoff, 1960</div>
+                <h1>ADALINE & MADALINE<br><span>Learning on the Net Input, Not the Output</span></h1>
+                <p>The Adaptive Linear Neuron and its multi-unit successor — the first networks trained by true gradient descent, years before backpropagation.</p>
+            </div>
+            <div class="hero-controls">
+                <button class="theme-toggle" onclick="toggleTheme()" id="theme-btn">
+                    <span class="toggle-icon" id="theme-icon">🌙</span>
+                    <span id="theme-label">Dark Mode</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <nav class="nav-bar">
+        <div class="nav-inner">
+            <button class="nav-btn active" onclick="showSection('concept',this)">💡 Recap & History</button>
+            <button class="nav-btn" onclick="showSection('adaline',this)">🔷 ADALINE Model</button>
+            <button class="nav-btn" onclick="showSection('lms',this)">📉 LMS / Delta Rule</button>
+            <button class="nav-btn" onclick="showSection('trainer',this)">🎯 ADALINE Trainer Lab</button>
+            <button class="nav-btn" onclick="showSection('madaline',this)">🔶 MADALINE Model</button>
+            <button class="nav-btn" onclick="showSection('compare',this)">⚖️ Comparison</button>
+            <button class="nav-btn" onclick="showSection('python',this)">🐍 Python Example</button>
+        </div>
+    </nav>
+
+    <div class="main">
+
+        <!-- ═══════════════════════ RECAP & HISTORY ═══════════════════════ -->
+        <div class="section active" id="sec-concept">
+            <div class="section-title">From Perceptron to ADALINE</div>
+            <div class="section-sub">In 1960, Bernard Widrow and Ted Hoff (Stanford) introduced the ADAptive LINear Element — the same year as, but independently of, later perceptron refinements — solving a subtle but crucial flaw in the original perceptron learning rule.</div>
+
+            <div class="card">
+                <div class="card-title">The Key Idea <span class="badge badge-blue">1960</span></div>
+                <p>The Perceptron Rule computes its error using the <em>thresholded</em> output: δ = target − ŷ, where ŷ ∈ {0,1}. This throws away information — two very different net inputs (say, net=0.01 and net=50) both produce ŷ=1 and hence <em>zero</em> learning signal once correctly classified.</p>
+                <p>ADALINE's insight: compute the error using the <strong>raw net input</strong> (before thresholding) instead. This makes the error a smooth, continuous, differentiable function of the weights — enabling true gradient descent.</p>
+                <div class="concept-box">📌 The activation function used <em>during training</em> is the identity (linear) function on the net input. A threshold is applied only afterward, at prediction time, to produce a binary class label.</div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">Why It Matters Historically <span class="badge badge-purple">LINEAGE</span></div>
+                <p>ADALINE's Least-Mean-Squares (LMS) learning rule is mathematically identical in spirit to the <strong>Delta Rule</strong> used inside every layer of modern backpropagation. MADALINE (Many ADALINEs), introduced shortly after, was arguably the first practical multi-layer neural network ever deployed — used for decades in real-world adaptive filters and echo cancellation in telephone lines.</p>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════ ADALINE MODEL ═══════════════════════ -->
+        <div class="section" id="sec-adaline">
+            <div class="section-title">The ADALINE Model</div>
+            <div class="section-sub">Structurally similar to the perceptron, but with a critical difference in what gets compared to the target during training.</div>
+
+            <div class="card">
+                <div class="card-title">Architecture <span class="badge badge-blue">DEFINITION</span></div>
+                <div class="formula">net = Σᵢ wᵢxᵢ + b &nbsp;&nbsp;&nbsp; (training compares net to target) &nbsp;&nbsp;&nbsp; ŷ = sign(net) &nbsp;(used only at test time)</div>
+                <div class="viz-area">
+                    <div class="viz-label">DIAGRAM — ADALINE UNIT</div>
+                    <svg width="100%" height="230" viewBox="0 0 620 230" style="overflow:visible;">
+                        <circle cx="45" cy="50" r="15" fill="none" stroke="var(--accent)" stroke-width="2"/><text x="45" y="54" text-anchor="middle" font-family="var(--mono)" font-size="10" fill="var(--accent)">x₁</text>
+                        <circle cx="45" cy="100" r="15" fill="none" stroke="var(--accent)" stroke-width="2"/><text x="45" y="104" text-anchor="middle" font-family="var(--mono)" font-size="10" fill="var(--accent)">x₂</text>
+                        <text x="45" y="135" text-anchor="middle" font-family="var(--mono)" font-size="11" fill="var(--text3)">⋮</text>
+                        <circle cx="45" cy="165" r="15" fill="none" stroke="var(--accent)" stroke-width="2"/><text x="45" y="169" text-anchor="middle" font-family="var(--mono)" font-size="10" fill="var(--accent)">xₙ</text>
+                        <text x="45" y="25" text-anchor="middle" font-family="var(--mono)" font-size="9" fill="var(--amber)">bias x₀=+1</text>
+
+                        <line x1="60" y1="50" x2="175" y2="100" stroke="var(--accent)" stroke-width="1.5"/>
+                        <line x1="60" y1="100" x2="175" y2="105" stroke="var(--accent)" stroke-width="1.5"/>
+                        <line x1="60" y1="165" x2="175" y2="115" stroke="var(--accent)" stroke-width="1.5"/>
+                        <text x="105" y="65" font-family="var(--mono)" font-size="9" fill="var(--text3)">w₁</text>
+                        <text x="105" y="95" font-family="var(--mono)" font-size="9" fill="var(--text3)">w₂</text>
+                        <text x="105" y="150" font-family="var(--mono)" font-size="9" fill="var(--text3)">wₙ</text>
+
+                        <circle cx="200" cy="108" r="30" fill="none" stroke="var(--border2)" stroke-width="1.5"/>
+                        <text x="200" y="113" text-anchor="middle" font-family="var(--mono)" font-size="13" fill="var(--text)">Σ</text>
+
+                        <line x1="230" y1="108" x2="290" y2="108" stroke="var(--text3)" stroke-width="1.5" marker-end="url(#arrowAd)"/>
+                        <defs><marker id="arrowAd" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="var(--text3)"/></marker></defs>
+                        <text x="260" y="98" text-anchor="middle" font-family="var(--mono)" font-size="9" fill="var(--text3)">net</text>
+
+                        <!-- linear activation (training path) -->
+                        <rect x="290" y="60" width="90" height="40" rx="8" fill="none" stroke="var(--green)" stroke-width="1.5"/>
+                        <text x="335" y="84" text-anchor="middle" font-family="var(--mono)" font-size="9" fill="var(--green)">identity (train)</text>
+                        <line x1="380" y1="80" x2="440" y2="80" stroke="var(--green)" stroke-width="1.5" marker-end="url(#arrowAd)"/>
+                        <circle cx="465" cy="80" r="15" fill="none" stroke="var(--green)" stroke-width="2"/>
+                        <text x="465" y="84" text-anchor="middle" font-family="var(--mono)" font-size="9" fill="var(--green)">net</text>
+                        <line x1="465" y1="95" x2="465" y2="150" stroke="var(--green)" stroke-width="1.5" stroke-dasharray="3,2"/>
+                        <text x="500" y="70" font-family="var(--mono)" font-size="9" fill="var(--green)">compared to target t</text>
+                        <text x="500" y="83" font-family="var(--mono)" font-size="9" fill="var(--green)">→ error e = t − net</text>
+                        <text x="500" y="96" font-family="var(--mono)" font-size="9" fill="var(--green)">→ drives Δw (LMS rule)</text>
+
+                        <!-- sign activation (test path) -->
+                        <rect x="290" y="140" width="90" height="40" rx="8" fill="none" stroke="var(--amber)" stroke-width="1.5"/>
+                        <text x="335" y="164" text-anchor="middle" font-family="var(--mono)" font-size="9" fill="var(--amber)">sign(·) (test)</text>
+                        <line x1="380" y1="160" x2="440" y2="160" stroke="var(--amber)" stroke-width="1.5" marker-end="url(#arrowAd)"/>
+                        <circle cx="465" cy="160" r="15" fill="none" stroke="var(--amber)" stroke-width="2"/>
+                        <text x="465" y="164" text-anchor="middle" font-family="var(--mono)" font-size="10" fill="var(--amber)">ŷ</text>
+                        <line x1="230" y1="108" x2="335" y2="140" stroke="var(--border2)" stroke-width="1" stroke-dasharray="2,2"/>
+
+                        <text x="335" y="205" text-anchor="middle" font-family="var(--mono)" font-size="9" fill="var(--text3)">training uses the GREEN path · inference uses the AMBER path</text>
+                    </svg>
+                </div>
+                <div class="concept-box">📌 This train-on-linear / predict-with-threshold split is the single most important structural difference from the perceptron, and it's what makes LMS a true gradient-descent method.</div>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════ LMS / DELTA RULE ═══════════════════════ -->
+        <div class="section" id="sec-lms">
+            <div class="section-title">The Least-Mean-Squares (LMS) / Delta Rule</div>
+            <div class="section-sub">Derived directly from gradient descent on a squared-error cost function — the same derivation that underlies backpropagation.</div>
+
+            <div class="card">
+                <div class="card-title">Cost Function <span class="badge badge-blue">OBJECTIVE</span></div>
+                <p>For one training example, define the instantaneous squared error between the target and the <em>net input</em> (not the thresholded output):</p>
+                <div class="formula">E = ½ (t − net)² &nbsp;&nbsp;&nbsp; where &nbsp; net = Σᵢ wᵢxᵢ + b</div>
+                <p>Summed over all N training examples, the total cost is E_total = Σₙ ½(tₙ − netₙ)² — a smooth, convex bowl-shaped function of the weights (since net is linear in w).</p>
+            </div>
+
+            <div class="card">
+                <div class="card-title">Gradient Descent Derivation <span class="badge badge-purple">CALCULUS</span></div>
+                <div class="code-block"><span class="cmt">// Differentiate E with respect to a single weight w_i</span>
+∂E/∂w_i = ∂E/∂net · ∂net/∂w_i
+        = −(t − net) · x_i
+        = −e · x_i          <span class="cmt">// where e = (t − net)</span>
+
+<span class="cmt">// Gradient descent: move w opposite the gradient</span>
+Δw_i = −η · ∂E/∂w_i = η · e · x_i
+
+<span class="cmt">// Bias updates the same way, with x_0 = 1</span>
+Δb = η · e</div>
+                <div class="formula">w_new = w_old + η·(t − net)·x &nbsp;&nbsp;&nbsp; b_new = b_old + η·(t − net)</div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">Perceptron Rule vs. Delta Rule <span class="badge badge-amber">THE CRUCIAL DIFFERENCE</span></div>
+                <table style="width:100%;border-collapse:collapse;font-size:0.82rem;">
+                    <tr style="border-bottom:1px solid var(--border2);color:var(--text3);font-family:var(--mono);font-size:10px;text-transform:uppercase;"><td style="padding:6px 4px;">Property</td><td style="padding:6px 4px;">Perceptron Rule</td><td style="padding:6px 4px;">Delta / LMS Rule</td></tr>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:6px 4px;">Error uses</td><td style="padding:6px 4px;">Thresholded output ŷ ∈ {0,1}</td><td style="padding:6px 4px;">Raw net input (continuous)</td></tr>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:6px 4px;">Updates when</td><td style="padding:6px 4px;">Only on misclassification</td><td style="padding:6px 4px;">Every example (error rarely exactly 0)</td></tr>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:6px 4px;">Cost surface</td><td style="padding:6px 4px;">Not well-defined / discontinuous</td><td style="padding:6px 4px;">Smooth convex quadratic bowl</td></tr>
+                    <tr><td style="padding:6px 4px;">Guarantee</td><td style="padding:6px 4px;">Converges only if linearly separable</td><td style="padding:6px 4px;">Converges to minimum-MSE solution regardless</td></tr>
+                </table>
+                <div class="concept-box amber">📌 Even on non-separable data, LMS still converges — to the weights that <em>minimize total squared error</em>, even if that solution misclassifies some points. This graceful degradation is a major practical advantage.</div>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════ ADALINE TRAINER LAB ═══════════════════════ -->
+        <div class="section" id="sec-trainer">
+            <div class="section-title">Interactive Lab — Train an ADALINE with the LMS Rule</div>
+            <div class="section-sub">Step through delta-rule updates on the AND truth table (using bipolar ±1 targets, the classical ADALINE convention) and watch the mean-squared error fall smoothly toward zero — not jump discretely like the perceptron trainer.</div>
+
+            <div class="card">
+                <div class="card-title">Bipolar AND Truth Table <span class="badge badge-blue">TARGET (±1)</span></div>
+                <table style="width:100%;border-collapse:collapse;font-family:var(--mono);font-size:12px;">
+                    <tr style="border-bottom:1px solid var(--border2);color:var(--text3);"><td style="padding:4px 8px;">x₁</td><td style="padding:4px 8px;">x₂</td><td style="padding:4px 8px;">t</td></tr>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:4px 8px;">−1</td><td style="padding:4px 8px;">−1</td><td style="padding:4px 8px;">−1</td></tr>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:4px 8px;">−1</td><td style="padding:4px 8px;">1</td><td style="padding:4px 8px;">−1</td></tr>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:4px 8px;">1</td><td style="padding:4px 8px;">−1</td><td style="padding:4px 8px;">−1</td></tr>
+                    <tr><td style="padding:4px 8px;">1</td><td style="padding:4px 8px;">1</td><td style="padding:4px 8px;">1</td></tr>
+                </table>
+                <div class="concept-box">📌 ADALINE traditionally uses bipolar (±1) rather than binary (0/1) coding — it keeps the net input symmetric around zero and tends to train faster.</div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">Trainer <span class="badge badge-teal">LIVE</span></div>
+                <div class="controls">
+                    <label style="font-family:var(--mono);font-size:11px;color:var(--text3);">Learning rate η:
+                        <input type="text" id="ad-lr" value="0.1" style="width:60px;margin-left:6px;" oninput="adReset()">
+                    </label>
+                    <button class="btn primary" onclick="adStep()">▶ Step</button>
+                    <button class="btn success" onclick="adRunEpoch()">⏩ Run 1 Epoch</button>
+                    <button class="btn" onclick="adReset()">⟲ Reset</button>
+                </div>
+
+                <div class="viz-area">
+                    <div class="viz-label">CURRENT STATE</div>
+                    <div id="ad-state" style="font-family:var(--mono);font-size:13px;line-height:2;color:var(--text2);"></div>
+                </div>
+                <div id="ad-info" class="info-line"></div>
+
+                <div class="viz-area">
+                    <div class="viz-label">MEAN SQUARED ERROR OVER EPOCHS</div>
+                    <svg id="ad-mse-svg" width="100%" height="160" viewBox="0 0 560 160" style="overflow:visible;"></svg>
+                </div>
+
+                <div class="viz-area">
+                    <div class="viz-label">TRAINING LOG</div>
+                    <div id="ad-log" class="terminal"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════ MADALINE MODEL ═══════════════════════ -->
+        <div class="section" id="sec-madaline">
+            <div class="section-title">MADALINE — Many ADALINEs</div>
+            <div class="section-sub">A layer of ADALINE units feeding a fixed or trainable combination rule — the first practical multi-layer network, capable of solving non-linearly-separable problems like XOR.</div>
+
+            <div class="card">
+                <div class="card-title">Architecture <span class="badge badge-blue">STRUCTURE</span></div>
+                <p>MADALINE stacks several ADALINE units in a hidden layer, each producing a bipolar output (via sign), which then feed a combination/output unit — classically a fixed logic function (AND / OR / MAJORITY vote).</p>
+                <div class="viz-area">
+                    <div class="viz-label">DIAGRAM — MADALINE (2 HIDDEN ADALINES + MAJORITY OUTPUT)</div>
+                    <svg width="100%" height="230" viewBox="0 0 600 230" style="overflow:visible;">
+                        <circle cx="40" cy="70" r="14" fill="none" stroke="var(--accent)" stroke-width="2"/><text x="40" y="74" text-anchor="middle" font-family="var(--mono)" font-size="10" fill="var(--accent)">x₁</text>
+                        <circle cx="40" cy="150" r="14" fill="none" stroke="var(--accent)" stroke-width="2"/><text x="40" y="154" text-anchor="middle" font-family="var(--mono)" font-size="10" fill="var(--accent)">x₂</text>
+
+                        <line x1="54" y1="70" x2="170" y2="55" stroke="var(--accent)" stroke-width="1.5"/>
+                        <line x1="54" y1="70" x2="170" y2="165" stroke="var(--accent)" stroke-width="1.5"/>
+                        <line x1="54" y1="150" x2="170" y2="55" stroke="var(--accent)" stroke-width="1.5"/>
+                        <line x1="54" y1="150" x2="170" y2="165" stroke="var(--accent)" stroke-width="1.5"/>
+
+                        <circle cx="195" cy="55" r="26" fill="none" stroke="var(--green)" stroke-width="2"/>
+                        <text x="195" y="51" text-anchor="middle" font-family="var(--mono)" font-size="9" fill="var(--green)">ADALINE</text>
+                        <text x="195" y="64" text-anchor="middle" font-family="var(--mono)" font-size="8" fill="var(--text3)">z₁=sign(net₁)</text>
+
+                        <circle cx="195" cy="165" r="26" fill="none" stroke="var(--green)" stroke-width="2"/>
+                        <text x="195" y="161" text-anchor="middle" font-family="var(--mono)" font-size="9" fill="var(--green)">ADALINE</text>
+                        <text x="195" y="174" text-anchor="middle" font-family="var(--mono)" font-size="8" fill="var(--text3)">z₂=sign(net₂)</text>
+
+                        <line x1="221" y1="55" x2="360" y2="105" stroke="var(--green)" stroke-width="1.5" marker-end="url(#arrowMd)"/>
+                        <defs><marker id="arrowMd" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="var(--text3)"/></marker></defs>
+                        <line x1="221" y1="165" x2="360" y2="115" stroke="var(--green)" stroke-width="1.5" marker-end="url(#arrowMd)"/>
+
+                        <circle cx="390" cy="110" r="28" fill="none" stroke="var(--amber)" stroke-width="2"/>
+                        <text x="390" y="106" text-anchor="middle" font-family="var(--mono)" font-size="9" fill="var(--amber)">MAJORITY</text>
+                        <text x="390" y="118" text-anchor="middle" font-family="var(--mono)" font-size="8" fill="var(--text3)">(or fixed AND/OR)</text>
+
+                        <line x1="418" y1="110" x2="470" y2="110" stroke="var(--text3)" stroke-width="1.5" marker-end="url(#arrowMd)"/>
+                        <circle cx="490" cy="110" r="16" fill="none" stroke="var(--amber)" stroke-width="2"/>
+                        <text x="490" y="114" text-anchor="middle" font-family="var(--mono)" font-size="10" fill="var(--amber)">ŷ</text>
+
+                        <text x="195" y="205" text-anchor="middle" font-family="var(--mono)" font-size="9" fill="var(--text3)">hidden ADALINE layer</text>
+                        <text x="440" y="205" text-anchor="middle" font-family="var(--mono)" font-size="9" fill="var(--text3)">fixed combination layer</text>
+                    </svg>
+                </div>
+            </div>
+
+            <div class="two-col">
+                <div class="card">
+                    <div class="card-title">MADALINE I (1960s) <span class="badge badge-purple">ORIGINAL</span></div>
+                    <p>Hidden ADALINE units are each trained independently with the LMS rule against pre-assigned targets; the output combination logic (AND/OR/MAJORITY) has <strong>fixed, untrained</strong> weights. This sidesteps the "credit assignment problem" — nobody yet knew how to propagate error backward through a hidden layer.</p>
+                </div>
+                <div class="card">
+                    <div class="card-title">MADALINE II / MRII (1980s) <span class="badge badge-teal">TRAINABLE HIDDEN LAYER</span></div>
+                    <p>The MRII (Madaline Rule II) algorithm trains hidden-layer weights too, using a "minimal disturbance" heuristic: for each pattern, find the hidden unit whose net input is closest to zero (i.e., least confident), flip its output, and see if that reduces the overall error — adjust that unit's weights if so. A precursor to true backprop-trained hidden layers.</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">Solving XOR with MADALINE <span class="badge badge-red">CLASSIC RESULT</span></div>
+                <p>Two hidden ADALINE units can each learn a different linear boundary; combined via majority vote / OR of one AND / etc., MADALINE recovers the same non-linear XOR decision region that a single-layer ADALINE (or perceptron) provably cannot reach.</p>
+                <table style="width:100%;border-collapse:collapse;font-family:var(--mono);font-size:12px;">
+                    <tr style="border-bottom:1px solid var(--border2);color:var(--text3);"><td style="padding:4px 8px;">x₁</td><td style="padding:4px 8px;">x₂</td><td style="padding:4px 8px;">z₁ (Adaline 1)</td><td style="padding:4px 8px;">z₂ (Adaline 2)</td><td style="padding:4px 8px;">ŷ = XOR</td></tr>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:4px 8px;">−1</td><td style="padding:4px 8px;">−1</td><td style="padding:4px 8px;">−1</td><td style="padding:4px 8px;">−1</td><td style="padding:4px 8px;">−1</td></tr>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:4px 8px;">−1</td><td style="padding:4px 8px;">1</td><td style="padding:4px 8px;">1</td><td style="padding:4px 8px;">−1</td><td style="padding:4px 8px;">1</td></tr>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:4px 8px;">1</td><td style="padding:4px 8px;">−1</td><td style="padding:4px 8px;">1</td><td style="padding:4px 8px;">−1</td><td style="padding:4px 8px;">1</td></tr>
+                    <tr><td style="padding:4px 8px;">1</td><td style="padding:4px 8px;">1</td><td style="padding:4px 8px;">−1</td><td style="padding:4px 8px;">1</td><td style="padding:4px 8px;">−1</td></tr>
+                </table>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════ COMPARISON ═══════════════════════ -->
+        <div class="section" id="sec-compare">
+            <div class="section-title">Perceptron vs. ADALINE vs. MADALINE</div>
+
+            <div class="card">
+                <div class="card-title">Side-by-Side Comparison <span class="badge badge-purple">SUMMARY TABLE</span></div>
+                <table style="width:100%;border-collapse:collapse;font-size:0.82rem;">
+                    <tr style="border-bottom:1px solid var(--border2);color:var(--text3);font-family:var(--mono);font-size:10px;text-transform:uppercase;"><td style="padding:6px 4px;">Property</td><td style="padding:6px 4px;">Perceptron</td><td style="padding:6px 4px;">ADALINE</td><td style="padding:6px 4px;">MADALINE</td></tr>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:6px 4px;">Layers</td><td style="padding:6px 4px;">Single</td><td style="padding:6px 4px;">Single</td><td style="padding:6px 4px;">Multiple (hidden + output)</td></tr>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:6px 4px;">Learning rule</td><td style="padding:6px 4px;">Perceptron rule (on ŷ)</td><td style="padding:6px 4px;">LMS / Delta rule (on net)</td><td style="padding:6px 4px;">LMS per unit (I) or MRII (II)</td></tr>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:6px 4px;">Error signal</td><td style="padding:6px 4px;">Discrete</td><td style="padding:6px 4px;">Continuous</td><td style="padding:6px 4px;">Continuous per unit</td></tr>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:6px 4px;">Can solve XOR?</td><td style="padding:6px 4px;">✗ No</td><td style="padding:6px 4px;">✗ No</td><td style="padding:6px 4px;">✓ Yes</td></tr>
+                    <tr><td style="padding:6px 4px;">Historical role</td><td style="padding:6px 4px;">First learning neuron (1958)</td><td style="padding:6px 4px;">First gradient-descent neuron (1960)</td><td style="padding:6px 4px;">First practical multi-layer net</td></tr>
+                </table>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════ PYTHON EXAMPLE ═══════════════════════ -->
+        <div class="section" id="sec-python">
+            <div class="section-title">Python Example — ADALINE with the LMS Rule</div>
+
+            <div class="card">
+                <div class="card-title">adaline.py <span class="badge badge-green">RUNNABLE</span></div>
+                <div class="code-block"><span class="kw">import</span> numpy <span class="kw">as</span> np
+
+<span class="cmt"># bipolar AND</span>
+X = np.array([[-1,-1],[-1,1],[1,-1],[1,1]])
+t = np.array([-1,-1,-1,1])
+
+w = np.zeros(2)
+b = <span class="num">0.0</span>
+eta = <span class="num">0.1</span>
+
+<span class="kw">for</span> epoch <span class="kw">in</span> <span class="fn">range</span>(<span class="num">50</span>):
+    mse = <span class="num">0.0</span>
+    <span class="kw">for</span> xi, target <span class="kw">in</span> <span class="fn">zip</span>(X, t):
+        net = np.dot(w, xi) + b       <span class="cmt"># linear, NOT thresholded</span>
+        error = target - net
+        w += eta * error * xi          <span class="cmt"># delta / LMS rule</span>
+        b += eta * error
+        mse += error ** <span class="num">2</span>
+    mse /= <span class="fn">len</span>(X)
+    <span class="fn">print</span>(<span class="str">f"epoch {epoch}: w={w}, b={b:.3f}, mse={mse:.4f}"</span>)
+    <span class="kw">if</span> mse < <span class="num">1e-4</span>:
+        <span class="kw">break</span>
+
+<span class="cmt"># at test time, threshold with sign()</span>
+<span class="kw">def</span> <span class="fn">predict</span>(x):
+    <span class="kw">return</span> <span class="num">1</span> <span class="kw">if</span> (np.dot(w, x) + b) >= <span class="num">0</span> <span class="kw">else</span> -<span class="num">1</span></div>
+                <div class="concept-box green">📌 Notice: the loop computes error against <code>net</code>, not against a thresholded prediction. The threshold (sign) only appears in the separate <code>predict()</code> function used after training.</div>
+            </div>
+        </div>
+
+    </div>
+    <!-- end .main -->
+
+    <script>
+        // ════════════════════════════════════
+        //  NAVIGATION
+        // ════════════════════════════════════
+        function showSection(id, btn) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            const el = document.getElementById('sec-' + id);
+            if (el) el.classList.add('active');
+            if (btn) btn.classList.add('active');
+            if (id === 'trainer') adDraw();
+        }
+
+        // ════════════════════════════════════
+        //  THEME TOGGLE
+        // ════════════════════════════════════
+        function toggleTheme() {
+            const root = document.documentElement;
+            const current = root.getAttribute('data-theme');
+            const next = current === 'dark' ? 'light' : 'dark';
+            root.setAttribute('data-theme', next);
+            const icon = document.getElementById('theme-icon');
+            const label = document.getElementById('theme-label');
+            if (icon) icon.textContent = next === 'dark' ? '🌙' : '☀️';
+            if (label) label.textContent = next === 'dark' ? 'Dark Mode' : 'Light Mode';
+            try { localStorage.setItem('ann-theme', next); } catch (e) {}
+            adDraw();
+        }
+        (function () {
+            try {
+                const saved = localStorage.getItem('ann-theme');
+                if (saved) {
+                    document.documentElement.setAttribute('data-theme', saved);
+                    window.addEventListener('DOMContentLoaded', () => {
+                        const icon = document.getElementById('theme-icon');
+                        const label = document.getElementById('theme-label');
+                        if (icon) icon.textContent = saved === 'dark' ? '🌙' : '☀️';
+                        if (label) label.textContent = saved === 'dark' ? 'Dark Mode' : 'Light Mode';
+                    });
+                }
+            } catch (e) {}
+        })();
+
+        // ════════════════════════════════════
+        //  ADALINE LMS TRAINER (bipolar AND)
+        // ════════════════════════════════════
+        const AD_X = [[-1,-1],[-1,1],[1,-1],[1,1]];
+        const AD_T = [-1,-1,-1,1];
+        let ad = { w: [0,0], b: 0, idx: 0, epoch: 0, log: [], mseHistory: [] };
+
+        function adReset() {
+            ad = { w: [0,0], b: 0, idx: 0, epoch: 0, log: [], mseHistory: [] };
+            adLog('Reset. w=[0,0], b=0');
+            adRender();
+        }
+
+        function adLog(msg) {
+            ad.log.push(msg);
+            if (ad.log.length > 40) ad.log.shift();
+            const el = document.getElementById('ad-log');
+            if (el) { el.textContent = ad.log.join('\n'); el.scrollTop = el.scrollHeight; }
+        }
+
+        function adCurrentMSE() {
+            let sum = 0;
+            AD_X.forEach((xi, i) => {
+                const net = ad.w[0]*xi[0] + ad.w[1]*xi[1] + ad.b;
+                sum += (AD_T[i] - net) ** 2;
+            });
+            return sum / AD_X.length;
+        }
+
+        function adStep() {
+            const eta = parseFloat(document.getElementById('ad-lr').value) || 0.1;
+            const xi = AD_X[ad.idx];
+            const target = AD_T[ad.idx];
+            const net = ad.w[0]*xi[0] + ad.w[1]*xi[1] + ad.b;
+            const error = target - net;
+            ad.w[0] += eta * error * xi[0];
+            ad.w[1] += eta * error * xi[1];
+            ad.b += eta * error;
+            adLog(`x=[${xi}] t=${target} net=${net.toFixed(3)} e=${error.toFixed(3)} → w=[${ad.w[0].toFixed(3)},${ad.w[1].toFixed(3)}] b=${ad.b.toFixed(3)}`);
+            ad.idx = (ad.idx + 1) % AD_X.length;
+            if (ad.idx === 0) {
+                ad.epoch++;
+                ad.mseHistory.push(adCurrentMSE());
+                if (ad.mseHistory.length > 60) ad.mseHistory.shift();
+            }
+            adRender();
+        }
+
+        function adRunEpoch() {
+            for (let i = 0; i < AD_X.length; i++) adStep();
+        }
+
+        function adRender() {
+            const xi = AD_X[ad.idx];
+            const net = ad.w[0]*xi[0] + ad.w[1]*xi[1] + ad.b;
+            document.getElementById('ad-state').innerHTML =
+                `Epoch: ${ad.epoch} &nbsp; Next sample: x=[${xi}]<br>` +
+                `w = [${ad.w[0].toFixed(3)}, ${ad.w[1].toFixed(3)}] &nbsp; b = ${ad.b.toFixed(3)}<br>` +
+                `net = ${net.toFixed(3)} &nbsp; current MSE = ${adCurrentMSE().toFixed(4)}`;
+            const mse = adCurrentMSE();
+            const info = document.getElementById('ad-info');
+            const converged = mse < 0.01;
+            info.textContent = converged ? '✓ Converged — MSE below 0.01, weights stable.' : 'Training in progress — MSE falling smoothly (unlike the perceptron\'s discrete jumps).';
+            info.className = 'info-line ' + (converged ? 'green' : 'amber');
+            adDraw();
+        }
+
+        function adDraw() {
+            const svg = document.getElementById('ad-mse-svg');
+            if (!svg) return;
+            const w = 560, h = 160, padL = 40, padR = 15, padT = 15, padB = 25;
+            const style = getComputedStyle(document.documentElement);
+            const accent = style.getPropertyValue('--accent').trim();
+            const text3 = style.getPropertyValue('--text3').trim();
+            const green = style.getPropertyValue('--green').trim();
+
+            const hist = ad.mseHistory.length ? ad.mseHistory : [adCurrentMSE()];
+            const maxMse = Math.max(0.5, ...hist);
+            const toX = (i) => padL + (hist.length <= 1 ? 0 : (i / (hist.length - 1)) * (w - padL - padR));
+            const toY = (v) => (h - padB) - (v / maxMse) * (h - padT - padB);
+
+            let els = `<line x1="${padL}" y1="${h-padB}" x2="${w-padR}" y2="${h-padB}" stroke="${text3}" stroke-width="1"/>
+                       <line x1="${padL}" y1="${padT}" x2="${padL}" y2="${h-padB}" stroke="${text3}" stroke-width="1"/>
+                       <text x="4" y="${padT+4}" font-family="IBM Plex Mono, monospace" font-size="9" fill="${text3}">${maxMse.toFixed(2)}</text>
+                       <text x="4" y="${h-padB+4}" font-family="IBM Plex Mono, monospace" font-size="9" fill="${text3}">0</text>
+                       <text x="${w/2}" y="${h-4}" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="${text3}">epoch</text>`;
+
+            if (hist.length > 1) {
+                let path = '';
+                hist.forEach((v, i) => { path += (i === 0 ? 'M' : 'L') + toX(i) + ',' + toY(v) + ' '; });
+                els += `<path d="${path}" fill="none" stroke="${green}" stroke-width="2.5"/>`;
+                hist.forEach((v, i) => { els += `<circle cx="${toX(i)}" cy="${toY(v)}" r="3" fill="${green}"/>`; });
+            } else {
+                els += `<circle cx="${toX(0)}" cy="${toY(hist[0])}" r="4" fill="${accent}"/>`;
+            }
+
+            svg.innerHTML = els;
+        }
+
+        adReset();
+    </script>
+</body>
+</html>

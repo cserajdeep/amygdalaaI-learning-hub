@@ -923,6 +923,7 @@
     <nav style="position:sticky;top:0;z-index:1000;background:rgba(20,20,35,0.92);backdrop-filter:blur(10px);padding:10px 16px;display:flex;align-items:center;justify-content:center;gap:18px;flex-wrap:wrap;font-family:'Inter',sans-serif;font-size:0.85rem;border-bottom:1px solid rgba(255,255,255,0.08);">
         <a href="../02-activation-functions/index.html" style="color:#4285F4;font-weight:600;text-decoration:none;">← Activation Functions</a>
         <a href="../../index.html" style="color:#fff;font-weight:700;text-decoration:none;padding:4px 12px;border:1px solid rgba(255,255,255,0.25);border-radius:20px;">🏠 Hub Home</a>
+        <a href="../04-adaline-madaline/index.html" style="color:#4285F4;font-weight:600;text-decoration:none;">Next: ADALINE & MADALINE →</a>
     </nav>
 
     <div class="hero">
@@ -944,8 +945,12 @@
     <nav class="nav-bar">
         <div class="nav-inner">
             <button class="nav-btn active" onclick="showSection('concept',this)">💡 Recap</button>
+            <button class="nav-btn" onclick="showSection('single',this)">1️⃣ Single-Input Perceptron</button>
             <button class="nav-btn" onclick="showSection('models',this)">🏗️ ANN Models</button>
             <button class="nav-btn" onclick="showSection('rule',this)">📏 Learning Rule</button>
+            <button class="nav-btn" onclick="showSection('types',this)">🧬 Learning Algorithm Types</button>
+            <button class="nav-btn" onclick="showSection('demerits',this)">⚠️ Demerits</button>
+            <button class="nav-btn" onclick="showSection('mlp',this)">🔀 MLP Data Flow (Animated)</button>
             <button class="nav-btn" onclick="showSection('trainer',this)">🎯 OR Trainer Lab</button>
             <button class="nav-btn" onclick="showSection('python',this)">🐍 Python Example</button>
         </div>
@@ -1045,7 +1050,63 @@
             </div>
         </div>
 
-        <!-- ═══════════════════════ ANN MODELS / BACKPROP ═══════════════════════ -->
+        <!-- ═══════════════════════ SINGLE-INPUT PERCEPTRON ═══════════════════════ -->
+        <div class="section" id="sec-single">
+            <div class="section-title">The Single-Input Perceptron — Base Case</div>
+            <div class="section-sub">Before generalizing to m inputs, it's worth working through the simplest possible perceptron rigorously: one input, one weight, one bias.</div>
+
+            <div class="card">
+                <div class="card-title">Definition <span class="badge badge-blue">m = 1</span></div>
+                <p>For a single scalar input x with weight w and bias b, the perceptron computes a net input and applies the hard threshold (Heaviside) activation:</p>
+                <div class="formula">net = w·x + b &nbsp;&nbsp;&nbsp; ŷ = f(net) = 1 if net ≥ 0, else 0</div>
+                <div class="viz-area">
+                    <div class="viz-label">DIAGRAM — SINGLE-INPUT, SINGLE-OUTPUT NEURON</div>
+                    <svg width="100%" height="150" viewBox="0 0 480 150" style="overflow:visible;">
+                        <circle cx="50" cy="75" r="16" fill="none" stroke="var(--accent)" stroke-width="2"/>
+                        <text x="50" y="79" text-anchor="middle" font-family="var(--mono)" font-size="10" fill="var(--accent)">x</text>
+                        <line x1="66" y1="75" x2="160" y2="75" stroke="var(--accent)" stroke-width="1.5"/>
+                        <text x="112" y="65" text-anchor="middle" font-family="var(--mono)" font-size="9" fill="var(--text3)">w</text>
+                        <text x="185" y="30" text-anchor="middle" font-family="var(--mono)" font-size="9" fill="var(--amber)">b</text>
+                        <line x1="185" y1="36" x2="185" y2="60" stroke="var(--amber)" stroke-width="1.5"/>
+                        <circle cx="185" cy="75" r="26" fill="none" stroke="var(--border2)" stroke-width="1.5"/>
+                        <text x="185" y="80" text-anchor="middle" font-family="var(--mono)" font-size="12" fill="var(--text)">net</text>
+                        <line x1="211" y1="75" x2="270" y2="75" stroke="var(--text3)" stroke-width="1.5" marker-end="url(#arrowSi)"/>
+                        <defs><marker id="arrowSi" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="var(--text3)"/></marker></defs>
+                        <rect x="270" y="50" width="80" height="50" rx="8" fill="none" stroke="var(--green)" stroke-width="1.5"/>
+                        <text x="310" y="80" text-anchor="middle" font-family="var(--mono)" font-size="10" fill="var(--green)">f(net)</text>
+                        <line x1="350" y1="75" x2="400" y2="75" stroke="var(--text3)" stroke-width="1.5" marker-end="url(#arrowSi)"/>
+                        <circle cx="418" cy="75" r="16" fill="none" stroke="var(--amber)" stroke-width="2"/>
+                        <text x="418" y="79" text-anchor="middle" font-family="var(--mono)" font-size="10" fill="var(--amber)">ŷ</text>
+                    </svg>
+                </div>
+                <div class="concept-box">📌 Example (from lecture notes): weight w=5, bias b=−3, input x=1 → net = 5×1−3 = 2. With bipolar sigmoid (s=0.5): f(2) = 1/(1+e^(−0.5×2)) ≈ 0.731.</div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">Geometric Interpretation <span class="badge badge-purple">1-D DECISION BOUNDARY</span></div>
+                <p>In m-dimensional input space, w·x + b = 0 defines an (m−1)-dimensional hyperplane separating the two classes. For m=1, that hyperplane collapses to a single <strong>point</strong> on the number line: x = −b/w. Everything to one side of that point classifies as 1, the other side as 0.</p>
+                <div class="viz-area">
+                    <div class="viz-label">DECISION POINT ON THE NUMBER LINE (w=5, b=−3 → boundary at x=0.6)</div>
+                    <svg width="100%" height="90" viewBox="0 0 480 90" style="overflow:visible;">
+                        <line x1="20" y1="45" x2="460" y2="45" stroke="var(--text3)" stroke-width="1.5"/>
+                        <line x1="20" y1="38" x2="20" y2="52" stroke="var(--text3)" stroke-width="1.5"/>
+                        <text x="20" y="70" text-anchor="middle" font-family="var(--mono)" font-size="9" fill="var(--text3)">−2</text>
+                        <line x1="460" y1="38" x2="460" y2="52" stroke="var(--text3)" stroke-width="1.5"/>
+                        <text x="460" y="70" text-anchor="middle" font-family="var(--mono)" font-size="9" fill="var(--text3)">2</text>
+                        <line x1="240" y1="20" x2="240" y2="70" stroke="var(--red)" stroke-width="2"/>
+                        <text x="240" y="15" text-anchor="middle" font-family="var(--mono)" font-size="9" fill="var(--red)">x=0.6 (boundary)</text>
+                        <text x="130" y="40" text-anchor="middle" font-family="var(--mono)" font-size="10" fill="var(--text3)">ŷ=0</text>
+                        <text x="350" y="40" text-anchor="middle" font-family="var(--mono)" font-size="10" fill="var(--green)">ŷ=1</text>
+                    </svg>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">Why It Matters <span class="badge badge-teal">FOUNDATION</span></div>
+                <p>The single-input case is the atomic unit of every larger network: an m-input perceptron is just m single-input perceptrons whose scalar products are summed before one shared activation. Understanding the 1-D decision point makes the m-dimensional hyperplane (Learning Rule section) far more intuitive — it is the exact same object, just embedded in higher dimensions.</p>
+            </div>
+        </div>
+
         <div class="section" id="sec-models">
             <div class="section-title">ANN Working Models & Backpropagation</div>
 
@@ -1102,7 +1163,123 @@
             </div>
         </div>
 
-        <!-- ═══════════════════════ OR TRAINER LAB ═══════════════════════ -->
+        <!-- ═══════════════════════ LEARNING ALGORITHM TYPES ═══════════════════════ -->
+        <div class="section" id="sec-types">
+            <div class="section-title">Types of Learning Algorithms in ANNs</div>
+            <div class="section-sub">The Perceptron Learning Rule is just one instance of a broader taxonomy — how a network is allowed to see (or not see) the "right answer" during training defines the learning paradigm.</div>
+
+            <div class="two-col">
+                <div class="card">
+                    <div class="card-title">1. Supervised Learning <span class="badge badge-blue">HAS LABELS</span></div>
+                    <p>Every training example (x, y_target) includes a known correct output. The network compares its prediction to the target and adjusts weights to reduce the error.</p>
+                    <div class="formula">error = y_target − y &nbsp;→&nbsp; adjust weights</div>
+                    <p><strong>Examples:</strong></p>
+                    <p>• <strong>Perceptron Rule</strong> — discrete error δ=(target−output), updates only on misclassification.<br>
+                    • <strong>Delta Rule / LMS (Widrow–Hoff)</strong> — uses the continuous net input (before activation) to compute error, enabling gradient descent even when the output is linear (see ADALINE, Module 03).<br>
+                    • <strong>Backpropagation</strong> — generalizes the delta rule to multi-layer networks by propagating the output error backward through hidden layers via the chain rule.</p>
+                </div>
+                <div class="card">
+                    <div class="card-title">2. Unsupervised Learning <span class="badge badge-purple">NO LABELS</span></div>
+                    <p>No target output is provided — the network discovers structure (clusters, associations, compressed representations) purely from the statistics of the input data.</p>
+                    <p><strong>Examples:</strong></p>
+                    <p>• <strong>Hebbian Learning</strong> (1949) — "neurons that fire together, wire together": Δw = η·x·y, strengthening co-active connections without any external teacher.<br>
+                    • <strong>Competitive Learning / Self-Organizing Maps (SOM)</strong> — neurons compete for the right to respond to an input; the winner's weights move toward the input.<br>
+                    • <strong>Autoencoders</strong> — learn to reconstruct their own input through a compressed bottleneck.</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">3. Reinforcement Learning <span class="badge badge-amber">DELAYED REWARD</span></div>
+                <p>No labeled examples at all — an agent takes actions in an environment and receives a scalar <strong>reward</strong> signal, often delayed. It learns a policy that maximizes cumulative reward through trial and error, rather than directly minimizing a labeled error.</p>
+                <div class="concept-box amber">📌 Unlike supervised learning (told the exact correct answer every step) or unsupervised learning (told nothing), reinforcement learning is told only "how well it did," and must discover which of its actions were responsible.</div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">Where the Perceptron Rule Fits <span class="badge badge-teal">SUMMARY</span></div>
+                <table style="width:100%;border-collapse:collapse;font-size:0.82rem;">
+                    <tr style="border-bottom:1px solid var(--border2);color:var(--text3);font-family:var(--mono);font-size:10px;text-transform:uppercase;"><td style="padding:6px 4px;">Algorithm</td><td style="padding:6px 4px;">Paradigm</td><td style="padding:6px 4px;">Error signal used</td><td style="padding:6px 4px;">Update rule</td></tr>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:6px 4px;">Perceptron Rule</td><td style="padding:6px 4px;">Supervised</td><td style="padding:6px 4px;">Discrete: (target − thresholded output)</td><td style="padding:6px 4px;font-family:var(--mono);">w += η·δ·x</td></tr>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:6px 4px;">Delta Rule (LMS)</td><td style="padding:6px 4px;">Supervised</td><td style="padding:6px 4px;">Continuous: (target − net input)</td><td style="padding:6px 4px;font-family:var(--mono);">w += η·(t−net)·x</td></tr>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:6px 4px;">Backpropagation</td><td style="padding:6px 4px;">Supervised</td><td style="padding:6px 4px;">Chain-ruled gradient of loss</td><td style="padding:6px 4px;font-family:var(--mono);">w −= η·∂E/∂w</td></tr>
+                    <tr><td style="padding:6px 4px;">Hebbian</td><td style="padding:6px 4px;">Unsupervised</td><td style="padding:6px 4px;">None — correlation only</td><td style="padding:6px 4px;font-family:var(--mono);">w += η·x·y</td></tr>
+                </table>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════ DEMERITS ═══════════════════════ -->
+        <div class="section" id="sec-demerits">
+            <div class="section-title">Demerits & Limitations of the (Single-Layer) Perceptron</div>
+            <div class="section-sub">Minsky & Papert's 1969 book "Perceptrons" formally proved several structural limits — findings that stalled neural network research for over a decade until the multi-layer perceptron + backpropagation revival of the 1980s.</div>
+
+            <div class="card">
+                <div class="card-title">1. Linear Separability Constraint <span class="badge badge-red">FUNDAMENTAL</span></div>
+                <p>A single-layer perceptron can only correctly classify data that is <strong>linearly separable</strong> — separable by one straight line (2D), plane (3D), or hyperplane (n-D). XOR is the canonical counter-example: no single line separates its two classes.</p>
+                <div class="formula">XOR(x₁,x₂) = 1 ⟺ exactly one of x₁,x₂ is 1 — the two "1" points sit diagonally opposite, unreachable by any single line.</div>
+            </div>
+
+            <div class="two-col">
+                <div class="card">
+                    <div class="card-title">2. Convergence Only If Separable <span class="badge badge-amber">⚠️</span></div>
+                    <p>The Perceptron Convergence Theorem guarantees the learning rule finds a separating hyperplane <em>in finite steps</em> — but only if one exists. On non-separable data, the weights will oscillate forever and never settle.</p>
+                </div>
+                <div class="card">
+                    <div class="card-title">3. Sensitivity to Feature Scaling <span class="badge badge-amber">⚠️</span></div>
+                    <p>Because updates are proportional to the raw input x, features on very different numeric scales can make training slow or unstable — unscaled inputs can dominate the weight updates disproportionately.</p>
+                </div>
+                <div class="card">
+                    <div class="card-title">4. Hard, Non-Differentiable Activation <span class="badge badge-amber">⚠️</span></div>
+                    <p>The step function has zero gradient almost everywhere, so it cannot be used inside a gradient-descent/backpropagation pipeline — this is precisely why hidden-layer networks moved to smooth sigmoid/tanh/ReLU activations.</p>
+                </div>
+                <div class="card">
+                    <div class="card-title">5. No Probabilistic Output <span class="badge badge-amber">⚠️</span></div>
+                    <p>The output is a hard 0/1 with no notion of confidence — there is no way to say "70% sure this is class 1," which limits its usefulness compared to sigmoid/softmax outputs.</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">The Resolution <span class="badge badge-green">✓</span></div>
+                <p>Every one of these limitations is addressed by moving to a <strong>multi-layer perceptron</strong> (hidden layers recover non-linear separability), a <strong>smooth activation function</strong> (enables gradient-based learning via backpropagation), and <strong>normalized inputs</strong> (stabilizes training). See the animated data-flow visualization below.</p>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════ MLP ANIMATED DATA FLOW ═══════════════════════ -->
+        <div class="section" id="sec-mlp">
+            <div class="section-title">Multi-Layer Perceptron — Animated Forward Pass</div>
+            <div class="section-sub">Watch a real forward pass propagate step by step through an input layer, one hidden layer, and an output layer — with the exact arithmetic shown at each stage.</div>
+
+            <div class="card">
+                <div class="card-title">Network: 2 Inputs → 3 Hidden (sigmoid) → 1 Output (sigmoid) <span class="badge badge-teal">LIVE ANIMATION</span></div>
+                <div class="controls">
+                    <label style="font-family:var(--mono);font-size:11px;color:var(--text3);">Input x₁:
+                        <input type="text" id="mlp-x1" value="0.8" style="width:55px;margin-left:6px;">
+                    </label>
+                    <label style="font-family:var(--mono);font-size:11px;color:var(--text3);">Input x₂:
+                        <input type="text" id="mlp-x2" value="0.3" style="width:55px;margin-left:6px;">
+                    </label>
+                    <button class="btn primary" onclick="mlpAnimate()">▶ Animate Forward Pass</button>
+                    <button class="btn" onclick="mlpReset()">⟲ Reset</button>
+                </div>
+
+                <div class="viz-area">
+                    <div class="viz-label">NETWORK DIAGRAM — DATA FLOWS LEFT TO RIGHT</div>
+                    <svg id="mlp-svg" width="100%" height="280" viewBox="0 0 620 280" style="overflow:visible;"></svg>
+                </div>
+
+                <div class="viz-area">
+                    <div class="viz-label">STEP-BY-STEP MATH (updates live as the animation plays)</div>
+                    <div id="mlp-math" style="font-family:var(--mono);font-size:12.5px;line-height:1.9;color:var(--text2);white-space:pre-wrap;">Click "Animate Forward Pass" to begin.</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">Reading the Animation <span class="badge badge-purple">WHAT'S HAPPENING</span></div>
+                <p>1. <strong>Input layer</strong> lights up first — x₁ and x₂ enter unchanged.<br>
+                2. <strong>Each hidden neuron</strong> computes its own weighted sum of both inputs plus its own bias, then squashes it through the sigmoid — nodes glow green as their value is computed.<br>
+                3. <strong>The output neuron</strong> waits for all three hidden activations, computes its own weighted sum + bias, applies sigmoid, and produces the final ŷ.<br>
+                4. This left-to-right sweep is exactly the <strong>forward pass</strong> — the same computation that, run in reverse with error gradients, becomes backpropagation.</p>
+            </div>
+        </div>
+
         <div class="section" id="sec-trainer">
             <div class="section-title">Interactive Lab — Train an OR Perceptron</div>
             <div class="section-sub">Step through the Perceptron Learning Rule epoch by epoch on the OR truth table, and watch the weights converge to a linear decision boundary.</div>
@@ -1202,6 +1379,7 @@ eta = <span class="num">0.1</span>
             if (el) el.classList.add('active');
             if (btn) btn.classList.add('active');
             if (id === 'trainer') ptDraw();
+            if (id === 'mlp' && typeof mlpDrawBase === 'function') mlpDrawBase();
         }
 
         // ════════════════════════════════════
@@ -1218,6 +1396,7 @@ eta = <span class="num">0.1</span>
             if (label) label.textContent = next === 'dark' ? 'Dark Mode' : 'Light Mode';
             try { localStorage.setItem('ann-theme', next); } catch (e) {}
             ptDraw();
+            if (typeof mlpDrawBase === 'function') mlpDrawBase();
         }
         (function () {
             try {
@@ -1326,6 +1505,169 @@ eta = <span class="num">0.1</span>
         }
 
         ptReset();
+
+        // ════════════════════════════════════
+        //  MLP ANIMATED FORWARD PASS
+        // ════════════════════════════════════
+        const MLP_W1 = [ [0.35, -0.62], [0.48, 0.55], [-0.40, 0.28] ]; // hidden weights [h][x1,x2]
+        const MLP_B1 = [0.10, -0.20, 0.05];                            // hidden biases
+        const MLP_W2 = [0.70, -0.55, 0.90];                            // output weights [h1,h2,h3]
+        const MLP_B2 = -0.15;                                          // output bias
+
+        const MLP_NODE_POS = {
+            x1: [40, 90], x2: [40, 190],
+            h1: [280, 50], h2: [280, 140], h3: [280, 230],
+            out: [540, 140]
+        };
+
+        function sigmoidMlp(z) { return 1 / (1 + Math.exp(-z)); }
+
+        function mlpDrawBase(activeSet, valueLabels) {
+            const svg = document.getElementById('mlp-svg');
+            if (!svg) return;
+            const style = getComputedStyle(document.documentElement);
+            const accent = style.getPropertyValue('--accent').trim();
+            const green = style.getPropertyValue('--green').trim();
+            const amber = style.getPropertyValue('--amber').trim();
+            const text3 = style.getPropertyValue('--text3').trim();
+            const border2 = style.getPropertyValue('--border2').trim();
+            activeSet = activeSet || {};
+            valueLabels = valueLabels || {};
+
+            const nodeColor = (name, defaultColor) => activeSet[name] ? green : defaultColor;
+
+            let els = '';
+            // edges: input -> hidden
+            ['x1', 'x2'].forEach(xi => {
+                ['h1', 'h2', 'h3'].forEach(hi => {
+                    const [x1, y1] = MLP_NODE_POS[xi], [x2, y2] = MLP_NODE_POS[hi];
+                    const isActive = activeSet['edge_' + xi + '_' + hi];
+                    els += `<line x1="${x1+16}" y1="${y1}" x2="${x2-20}" y2="${y2}" stroke="${isActive ? accent : border2}" stroke-width="${isActive ? 2 : 1}" opacity="${isActive ? 1 : 0.35}"/>`;
+                });
+            });
+            // edges: hidden -> output
+            ['h1', 'h2', 'h3'].forEach(hi => {
+                const [x1, y1] = MLP_NODE_POS[hi], [x2, y2] = MLP_NODE_POS['out'];
+                const isActive = activeSet['edge_' + hi + '_out'];
+                els += `<line x1="${x1+20}" y1="${y1}" x2="${x2-18}" y2="${y2}" stroke="${isActive ? green : border2}" stroke-width="${isActive ? 2 : 1}" opacity="${isActive ? 1 : 0.35}"/>`;
+            });
+
+            // input nodes
+            ['x1', 'x2'].forEach(xi => {
+                const [x, y] = MLP_NODE_POS[xi];
+                els += `<circle cx="${x}" cy="${y}" r="18" fill="none" stroke="${nodeColor(xi, accent)}" stroke-width="2.5"/>
+                        <text x="${x}" y="${y+4}" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="${nodeColor(xi, accent)}">${xi}</text>`;
+                if (valueLabels[xi] !== undefined) els += `<text x="${x}" y="${y+35}" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="${green}">${valueLabels[xi]}</text>`;
+            });
+            // hidden nodes
+            ['h1', 'h2', 'h3'].forEach(hi => {
+                const [x, y] = MLP_NODE_POS[hi];
+                els += `<circle cx="${x}" cy="${y}" r="20" fill="none" stroke="${nodeColor(hi, text3)}" stroke-width="2.5"/>
+                        <text x="${x}" y="${y+4}" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="${nodeColor(hi, text3)}">${hi}</text>`;
+                if (valueLabels[hi] !== undefined) els += `<text x="${x}" y="${y+38}" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="${green}">${valueLabels[hi]}</text>`;
+            });
+            // output node
+            {
+                const [x, y] = MLP_NODE_POS.out;
+                els += `<circle cx="${x}" cy="${y}" r="22" fill="none" stroke="${nodeColor('out', amber)}" stroke-width="2.5"/>
+                        <text x="${x}" y="${y+4}" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="${nodeColor('out', amber)}">ŷ</text>`;
+                if (valueLabels.out !== undefined) els += `<text x="${x}" y="${y+40}" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="${amber}">${valueLabels.out}</text>`;
+            }
+
+            els += `<text x="40" y="20" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="${text3}">INPUT</text>
+                    <text x="280" y="20" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="${text3}">HIDDEN (sigmoid)</text>
+                    <text x="540" y="20" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="${text3}">OUTPUT (sigmoid)</text>`;
+
+            svg.innerHTML = els;
+        }
+
+        function mlpReset() {
+            document.getElementById('mlp-math').textContent = 'Click "Animate Forward Pass" to begin.';
+            mlpDrawBase();
+        }
+
+        function mlpAnimate() {
+            const x1 = parseFloat(document.getElementById('mlp-x1').value) || 0;
+            const x2 = parseFloat(document.getElementById('mlp-x2').value) || 0;
+            const mathEl = document.getElementById('mlp-math');
+            let steps = [];
+            let active = {};
+
+            // pre-compute hidden and output values
+            const hNet = MLP_W1.map((w, i) => w[0]*x1 + w[1]*x2 + MLP_B1[i]);
+            const hAct = hNet.map(sigmoidMlp);
+            const oNet = MLP_W2[0]*hAct[0] + MLP_W2[1]*hAct[1] + MLP_W2[2]*hAct[2] + MLP_B2;
+            const oAct = sigmoidMlp(oNet);
+
+            const timeline = [];
+
+            // Step 0: inputs light up
+            timeline.push(() => {
+                active = { x1: true, x2: true };
+                mlpDrawBase(active, { x1: x1.toFixed(2), x2: x2.toFixed(2) });
+                mathEl.textContent = `INPUT LAYER\n  x₁ = ${x1.toFixed(3)}\n  x₂ = ${x2.toFixed(3)}`;
+            });
+
+            // Steps: each hidden neuron
+            ['h1', 'h2', 'h3'].forEach((hi, i) => {
+                timeline.push(() => {
+                    active = { x1: true, x2: true, ['edge_x1_' + hi]: true, ['edge_x2_' + hi]: true, [hi]: true };
+                    const vals = { x1: x1.toFixed(2), x2: x2.toFixed(2) };
+                    for (let j = 0; j < i; j++) vals['h' + (j+1)] = hAct[j].toFixed(3);
+                    mlpDrawBase(active, vals);
+                    mathEl.textContent =
+                        `HIDDEN NEURON ${hi.toUpperCase()}\n` +
+                        `  net_${hi} = (${MLP_W1[i][0]})×${x1.toFixed(2)} + (${MLP_W1[i][1]})×${x2.toFixed(2)} + (${MLP_B1[i]})\n` +
+                        `           = ${hNet[i].toFixed(4)}\n` +
+                        `  ${hi} = sigmoid(net_${hi}) = 1/(1+e^(−${hNet[i].toFixed(3)})) = ${hAct[i].toFixed(4)}`;
+                });
+            });
+
+            // Step: output neuron
+            timeline.push(() => {
+                active = { x1: true, x2: true, h1: true, h2: true, h3: true, out: true,
+                    edge_h1_out: true, edge_h2_out: true, edge_h3_out: true };
+                mlpDrawBase(active, {
+                    x1: x1.toFixed(2), x2: x2.toFixed(2),
+                    h1: hAct[0].toFixed(3), h2: hAct[1].toFixed(3), h3: hAct[2].toFixed(3)
+                });
+                mathEl.textContent =
+                    `OUTPUT NEURON\n` +
+                    `  net_out = (${MLP_W2[0]})×${hAct[0].toFixed(3)} + (${MLP_W2[1]})×${hAct[1].toFixed(3)} + (${MLP_W2[2]})×${hAct[2].toFixed(3)} + (${MLP_B2})\n` +
+                    `          = ${oNet.toFixed(4)}\n` +
+                    `  ŷ = sigmoid(net_out) = ${oAct.toFixed(4)}`;
+            });
+
+            // Final: full summary
+            timeline.push(() => {
+                active = { x1: true, x2: true, h1: true, h2: true, h3: true, out: true,
+                    edge_x1_h1: true, edge_x2_h1: true, edge_x1_h2: true, edge_x2_h2: true, edge_x1_h3: true, edge_x2_h3: true,
+                    edge_h1_out: true, edge_h2_out: true, edge_h3_out: true };
+                mlpDrawBase(active, {
+                    x1: x1.toFixed(2), x2: x2.toFixed(2),
+                    h1: hAct[0].toFixed(3), h2: hAct[1].toFixed(3), h3: hAct[2].toFixed(3),
+                    out: oAct.toFixed(4)
+                });
+                mathEl.textContent =
+                    `✓ FORWARD PASS COMPLETE\n\n` +
+                    `  x = [${x1.toFixed(2)}, ${x2.toFixed(2)}]\n` +
+                    `  h = [${hAct.map(v=>v.toFixed(3)).join(', ')}]\n` +
+                    `  ŷ = ${oAct.toFixed(4)}\n\n` +
+                    `This same left-to-right sweep, run with a labeled target and gradients\n` +
+                    `propagated right-to-left, is exactly backpropagation.`;
+            });
+
+            let idx = 0;
+            function playNext() {
+                if (idx >= timeline.length) return;
+                timeline[idx]();
+                idx++;
+                if (idx < timeline.length) setTimeout(playNext, 950);
+            }
+            playNext();
+        }
+
+        mlpReset();
     </script>
 </body>
 </html>
