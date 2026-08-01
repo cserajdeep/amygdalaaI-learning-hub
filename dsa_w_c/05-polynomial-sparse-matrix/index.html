@@ -1,0 +1,1704 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Polynomial & Sparse Matrix (Array Representation)</title>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700;9..144,900&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        /* ─── THEME TOKENS ─── */
+        :root[data-theme="dark"] {
+            --bg: #0c0e14;
+            --bg2: #13161f;
+            --bg3: #1a1e2b;
+            --bg4: #222637;
+            --surface: #1c2030;
+            --border: rgba(255, 255, 255, 0.07);
+            --border2: rgba(255, 255, 255, 0.13);
+            --text: #e8eaf2;
+            --text2: #9ba5c0;
+            --text3: #5a6280;
+            --accent: #4f8ef7;
+            --accent2: #7c5ff5;
+            --green: #34d399;
+            --amber: #fbbf24;
+            --red: #f87171;
+            --teal: #22d3ee;
+            --pink: #f472b6;
+            --orange: #fb923c;
+            --shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
+            --card-bg: #1c2030;
+            --mono: 'IBM Plex Mono', monospace;
+        }
+        :root[data-theme="light"] {
+            --bg: #f6f7fb;
+            --bg2: #ffffff;
+            --bg3: #eef0f7;
+            --bg4: #e2e5f0;
+            --surface: #ffffff;
+            --border: rgba(0, 0, 0, 0.08);
+            --border2: rgba(0, 0, 0, 0.14);
+            --text: #1a1d2e;
+            --text2: #4a5170;
+            --text3: #8b93b0;
+            --accent: #2563eb;
+            --accent2: #7c3aed;
+            --green: #059669;
+            --amber: #d97706;
+            --red: #dc2626;
+            --teal: #0891b2;
+            --pink: #db2777;
+            --orange: #ea580c;
+            --shadow: 0 4px 24px rgba(0, 0, 0, 0.10);
+            --card-bg: #ffffff;
+            --mono: 'IBM Plex Mono', monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        /* ─── HERO ─── */
+        .hero {
+            background: var(--bg2);
+            border-bottom: 1px solid var(--border);
+            padding: 2rem 2rem 1.6rem;
+            position: relative;
+            overflow: hidden;
+        }
+        [data-theme="dark"] .hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse 60% 80% at 80% 50%, rgba(79, 142, 247, 0.07) 0%, transparent 70%),
+                radial-gradient(ellipse 40% 60% at 10% 20%, rgba(124, 95, 245, 0.05) 0%, transparent 60%);
+            pointer-events: none;
+        }
+        .hero-inner {
+            max-width: 1100px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            flex-wrap: wrap;
+            position: relative;
+            z-index: 1;
+        }
+        .hero-tag {
+            display: inline-block;
+            background: rgba(79, 142, 247, 0.12);
+            border: 1px solid rgba(79, 142, 247, 0.3);
+            color: var(--accent);
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px;
+            padding: 4px 12px;
+            border-radius: 100px;
+            letter-spacing: 0.08em;
+            margin-bottom: 0.6rem;
+        }
+        .hero h1 {
+            font-family: 'Fraunces', serif;
+            font-size: clamp(1.7rem, 4vw, 2.6rem);
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 0.4rem;
+            color: var(--text);
+        }
+        .hero h1 span {
+            color: var(--accent);
+        }
+        .hero p {
+            color: var(--text2);
+            font-size: 0.92rem;
+            max-width: 520px;
+            line-height: 1.6;
+        }
+        .hero-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-shrink: 0;
+        }
+
+        .theme-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--bg3);
+            border: 1px solid var(--border2);
+            border-radius: 100px;
+            padding: 6px 16px;
+            cursor: pointer;
+            font-size: 13px;
+            color: var(--text2);
+            font-family: 'DM Sans', sans-serif;
+            transition: all 0.2s;
+        }
+        .theme-toggle:hover {
+            border-color: var(--accent);
+            color: var(--text);
+        }
+        .toggle-icon {
+            font-size: 16px;
+        }
+
+        /* ─── NAV ─── */
+        .nav-bar {
+            background: var(--bg2);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            overflow-x: auto;
+            scrollbar-width: none;
+        }
+        .nav-bar::-webkit-scrollbar {
+            display: none;
+        }
+        .nav-inner {
+            max-width: 1100px;
+            margin: 0 auto;
+            display: flex;
+            padding: 0 1.2rem;
+        }
+        .nav-btn {
+            font-family: 'DM Sans', sans-serif;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text3);
+            background: none;
+            border: none;
+            border-bottom: 2px solid transparent;
+            padding: 12px 14px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: color 0.2s, border-color 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .nav-btn:hover {
+            color: var(--text);
+        }
+        .nav-btn.active {
+            color: var(--accent);
+            border-bottom-color: var(--accent);
+        }
+
+        /* ─── LAYOUT ─── */
+        .main {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 1.8rem 1.4rem;
+        }
+        .section {
+            display: none;
+        }
+        .section.active {
+            display: block;
+            animation: fadeUp 0.3s ease;
+        }
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .section-head {
+            margin-bottom: 1.8rem;
+        }
+        .section-title {
+            font-family: 'Fraunces', serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.3rem;
+            color: var(--text);
+        }
+        .section-sub {
+            color: var(--text2);
+            font-size: 0.9rem;
+            line-height: 1.65;
+        }
+
+        /* ─── CARDS ─── */
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 1.2rem 1.4rem;
+            margin-bottom: 1.2rem;
+            box-shadow: var(--shadow);
+        }
+        .card-title {
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.97rem;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 100px;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+        }
+        .badge-blue {
+            background: rgba(79, 142, 247, 0.15);
+            color: var(--accent);
+            border: 1px solid rgba(79, 142, 247, 0.25);
+        }
+        .badge-green {
+            background: rgba(52, 211, 153, 0.12);
+            color: var(--green);
+            border: 1px solid rgba(52, 211, 153, 0.2);
+        }
+        .badge-amber {
+            background: rgba(251, 191, 36, 0.12);
+            color: var(--amber);
+            border: 1px solid rgba(251, 191, 36, 0.2);
+        }
+        .badge-red {
+            background: rgba(248, 113, 113, 0.12);
+            color: var(--red);
+            border: 1px solid rgba(248, 113, 113, 0.2);
+        }
+        .badge-teal {
+            background: rgba(34, 211, 238, 0.12);
+            color: var(--teal);
+            border: 1px solid rgba(34, 211, 238, 0.2);
+        }
+        .badge-purple {
+            background: rgba(124, 95, 245, 0.12);
+            color: var(--accent2);
+            border: 1px solid rgba(124, 95, 245, 0.2);
+        }
+        .badge-orange {
+            background: rgba(251, 146, 60, 0.12);
+            color: var(--orange);
+            border: 1px solid rgba(251, 146, 60, 0.2);
+        }
+        .badge-pink {
+            background: rgba(244, 114, 182, 0.12);
+            color: var(--pink);
+            border: 1px solid rgba(244, 114, 182, 0.2);
+        }
+
+        .card p {
+            color: var(--text2);
+            font-size: 0.875rem;
+            line-height: 1.7;
+            margin-bottom: 0.6rem;
+        }
+        .card p:last-child {
+            margin-bottom: 0;
+        }
+
+        /* ─── CODE BLOCKS ─── */
+        .code-block {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.9rem 1.2rem;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 12.5px;
+            line-height: 1.75;
+            color: var(--text);
+            overflow-x: auto;
+            margin: 0.6rem 0;
+            position: relative;
+        }
+        [data-theme="light"] .code-block {
+            background: #f0f2fa;
+        }
+        .kw {
+            color: #c084fc;
+        }
+        .fn {
+            color: #60a5fa;
+        }
+        .str {
+            color: #86efac;
+        }
+        .num {
+            color: #fb923c;
+        }
+        .cmt {
+            color: var(--text3);
+            font-style: italic;
+        }
+        .ty {
+            color: #67e8f9;
+        }
+        .op {
+            color: #fcd34d;
+        }
+        .pp {
+            color: #f9a8d4;
+        }
+        [data-theme="light"] .kw {
+            color: #7c3aed;
+        }
+        [data-theme="light"] .fn {
+            color: #1d4ed8;
+        }
+        [data-theme="light"] .str {
+            color: #15803d;
+        }
+        [data-theme="light"] .num {
+            color: #c2410c;
+        }
+        [data-theme="light"] .ty {
+            color: #0891b2;
+        }
+        [data-theme="light"] .op {
+            color: #92400e;
+        }
+        [data-theme="light"] .pp {
+            color: #db2777;
+        }
+
+        /* ─── VIZ AREA ─── */
+        .viz-area {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1rem;
+            margin: 0.6rem 0;
+            min-height: 70px;
+        }
+        [data-theme="light"] .viz-area {
+            background: #f0f2fa;
+        }
+        .viz-label {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 10px;
+            color: var(--text3);
+            margin-bottom: 0.6rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        /* ─── CONTROLS ─── */
+        .controls {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin: 0.6rem 0;
+            align-items: center;
+        }
+        .btn {
+            font-family: 'DM Sans', sans-serif;
+            font-size: 13px;
+            font-weight: 500;
+            padding: 6px 14px;
+            border-radius: 8px;
+            border: 1px solid var(--border2);
+            background: var(--bg3);
+            color: var(--text2);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn:hover {
+            background: var(--bg4);
+            color: var(--text);
+        }
+        .btn.primary {
+            background: rgba(79, 142, 247, 0.15);
+            color: var(--accent);
+            border-color: rgba(79, 142, 247, 0.3);
+        }
+        .btn.primary:hover {
+            background: rgba(79, 142, 247, 0.28);
+        }
+        .btn.danger {
+            background: rgba(248, 113, 113, 0.12);
+            color: var(--red);
+            border-color: rgba(248, 113, 113, 0.25);
+        }
+        .btn.danger:hover {
+            background: rgba(248, 113, 113, 0.22);
+        }
+        .btn.success {
+            background: rgba(52, 211, 153, 0.12);
+            color: var(--green);
+            border-color: rgba(52, 211, 153, 0.25);
+        }
+        .btn.success:hover {
+            background: rgba(52, 211, 153, 0.22);
+        }
+        .btn.amber {
+            background: rgba(251, 191, 36, 0.12);
+            color: var(--amber);
+            border-color: rgba(251, 191, 36, 0.25);
+        }
+        .btn.amber:hover {
+            background: rgba(251, 191, 36, 0.22);
+        }
+        .btn.green {
+            background: rgba(52, 211, 153, 0.12);
+            color: var(--green);
+            border-color: rgba(52, 211, 153, 0.25);
+        }
+        .btn.green:hover {
+            background: rgba(52, 211, 153, 0.22);
+        }
+        .btn.red {
+            background: rgba(248, 113, 113, 0.12);
+            color: var(--red);
+            border-color: rgba(248, 113, 113, 0.25);
+        }
+        .btn.red:hover {
+            background: rgba(248, 113, 113, 0.22);
+        }
+
+        input[type="range"] {
+            accent-color: var(--accent);
+            width: 100%;
+        }
+        input[type="text"],
+        input[type="number"],
+        select {
+            background: var(--bg3);
+            border: 1px solid var(--border2);
+            border-radius: 6px;
+            color: var(--text);
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 12px;
+            padding: 6px 10px;
+            outline: none;
+        }
+        input[type="text"]:focus,
+        input[type="number"]:focus,
+        select:focus {
+            border-color: var(--accent);
+        }
+        select option {
+            background: var(--bg3);
+        }
+
+        /* ─── 1D ARRAY CELLS ─── */
+        .arr-wrap {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            align-items: flex-end;
+            padding: 6px 0;
+        }
+        .arr-cell {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+        }
+        .arr-box {
+            width: 52px;
+            height: 44px;
+            background: var(--bg3);
+            border: 1.5px solid var(--border2);
+            border-radius: 7px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text);
+            transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .arr-box.hi {
+            background: rgba(79, 142, 247, 0.18);
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+        .arr-box.found {
+            background: rgba(52, 211, 153, 0.18);
+            border-color: var(--green);
+            color: var(--green);
+        }
+        .arr-box.scan {
+            background: rgba(251, 191, 36, 0.15);
+            border-color: var(--amber);
+            color: var(--amber);
+        }
+        .arr-box.teal {
+            background: rgba(34, 211, 238, 0.15);
+            border-color: var(--teal);
+            color: var(--teal);
+        }
+        .arr-box.red {
+            background: rgba(248, 113, 113, 0.15);
+            border-color: var(--red);
+            color: var(--red);
+        }
+        .arr-box.amber {
+            background: rgba(251, 191, 36, 0.15);
+            border-color: var(--amber);
+            color: var(--amber);
+        }
+        .arr-box.purple {
+            background: rgba(124, 95, 245, 0.15);
+            border-color: var(--accent2);
+            color: var(--accent2);
+        }
+        .arr-box.green {
+            background: rgba(52, 211, 153, 0.15);
+            border-color: var(--green);
+            color: var(--green);
+        }
+        .arr-box.blue {
+            background: rgba(79, 142, 247, 0.15);
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .arr-lbl {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 9.5px;
+            color: var(--text3);
+        }
+        .arr-addr {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 8.5px;
+            color: var(--text3);
+            opacity: 0.7;
+        }
+
+        /* ─── 2D MATRIX CELLS ─── */
+        .matrix-row {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 4px;
+            flex-wrap: wrap;
+        }
+        .mat-cell {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+        }
+        .mat-box {
+            width: 48px;
+            height: 40px;
+            background: var(--bg3);
+            border: 1.5px solid var(--border2);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text);
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .mat-box.hi {
+            background: rgba(79, 142, 247, 0.18);
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+        .mat-box.found {
+            background: rgba(52, 211, 153, 0.18);
+            border-color: var(--green);
+            color: var(--green);
+        }
+        .mat-box.scan {
+            background: rgba(251, 191, 36, 0.15);
+            border-color: var(--amber);
+            color: var(--amber);
+        }
+        .mat-box.teal {
+            background: rgba(34, 211, 238, 0.15);
+            border-color: var(--teal);
+            color: var(--teal);
+        }
+        .mat-box.red {
+            background: rgba(248, 113, 113, 0.15);
+            border-color: var(--red);
+            color: var(--red);
+        }
+        .mat-box.amber {
+            background: rgba(251, 191, 36, 0.15);
+            border-color: var(--amber);
+            color: var(--amber);
+        }
+        .mat-box.purple {
+            background: rgba(124, 95, 245, 0.15);
+            border-color: var(--accent2);
+            color: var(--accent2);
+        }
+        .mat-box.green {
+            background: rgba(52, 211, 153, 0.15);
+            border-color: var(--green);
+            color: var(--green);
+        }
+        .mat-box.blue {
+            background: rgba(79, 142, 247, 0.15);
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .mat-lbl {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 8.5px;
+            color: var(--text3);
+        }
+
+        /* ─── FLAT MEMORY STRIP ─── */
+        .flat-strip {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 3px;
+            padding: 4px 0;
+        }
+        .flat-cell {
+            background: var(--bg3);
+            border: 1px solid var(--border2);
+            border-radius: 4px;
+            padding: 6px 10px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px;
+            color: var(--text2);
+            transition: all 0.3s;
+            min-width: 32px;
+            text-align: center;
+        }
+        .flat-cell.hi {
+            background: rgba(79, 142, 247, 0.18);
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        /* ─── INFO LINE ─── */
+        .info-line {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 12px;
+            color: var(--text2);
+            padding: 6px 12px;
+            background: var(--bg);
+            border-left: 3px solid var(--accent);
+            border-radius: 0 6px 6px 0;
+            margin: 0.4rem 0;
+            transition: border-color 0.3s, background 0.3s;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        [data-theme="light"] .info-line {
+            background: #f0f2fa;
+        }
+        .info-line.green {
+            border-left-color: var(--green);
+        }
+        .info-line.amber {
+            border-left-color: var(--amber);
+        }
+        .info-line.red {
+            border-left-color: var(--red);
+        }
+        .info-line.teal {
+            border-left-color: var(--teal);
+        }
+
+        /* ─── SUB TABS ─── */
+        .sub-tabs {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+            margin-bottom: 0.8rem;
+        }
+        .sub-tab {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px;
+            padding: 4px 12px;
+            border-radius: 100px;
+            border: 1px solid var(--border);
+            background: var(--bg2);
+            color: var(--text3);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .sub-tab:hover {
+            border-color: var(--border2);
+            color: var(--text2);
+        }
+        .sub-tab.active {
+            background: rgba(79, 142, 247, 0.12);
+            border-color: rgba(79, 142, 247, 0.35);
+            color: var(--accent);
+        }
+
+        /* ─── CONCEPT BOX ─── */
+        .concept-box {
+            background: rgba(79, 142, 247, 0.06);
+            border: 1px solid rgba(79, 142, 247, 0.12);
+            border-radius: 8px;
+            padding: 0.7rem 1rem;
+            font-size: 13px;
+            line-height: 1.8;
+            color: var(--text2);
+            margin: 0.5rem 0;
+        }
+        .concept-box.green {
+            background: rgba(52, 211, 153, 0.06);
+            border-color: rgba(52, 211, 153, 0.12);
+        }
+        .concept-box.amber {
+            background: rgba(251, 191, 36, 0.06);
+            border-color: rgba(251, 191, 36, 0.12);
+        }
+        .concept-box strong {
+            color: var(--text);
+        }
+
+        /* ─── FORMULA ─── */
+        .formula {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 12px;
+            color: var(--teal);
+            padding: 6px 12px;
+            background: rgba(34, 211, 238, 0.06);
+            border-radius: 6px;
+            border: 1px solid rgba(34, 211, 238, 0.12);
+            margin: 0.4rem 0;
+        }
+
+        /* ─── TWO / THREE COL ─── */
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        .three-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 1rem;
+        }
+        @media(max-width: 680px) {
+            .two-col,
+            .three-col {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* ─── BARS (sorting) ─── */
+        .bar-wrap {
+            display: flex;
+            gap: 8px;
+            align-items: flex-end;
+            justify-content: center;
+            padding: 12px 0;
+            min-height: 150px;
+            flex-wrap: wrap;
+        }
+        .bar {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+        .bar-body {
+            width: 36px;
+            border-radius: 4px 4px 0 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px;
+            font-weight: 600;
+            color: #0d0f14;
+            transition: height 0.3s ease, background 0.3s;
+            min-height: 20px;
+            padding: 2px 0;
+        }
+        .bar-lbl {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 8.5px;
+            color: var(--text3);
+        }
+
+        /* ─── INPUT GRID ─── */
+        .input-grid {
+            display: grid;
+            gap: 4px;
+            margin: 4px 0;
+        }
+
+        /* ─── TERMINAL ─── */
+        .terminal {
+            background: #080a0f;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.9rem;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 12.5px;
+            color: #a3e635;
+            min-height: 60px;
+            white-space: pre-wrap;
+            line-height: 1.65;
+        }
+        [data-theme="light"] .terminal {
+            background: #1a1d2e;
+        }
+        .terminal .prompt {
+            color: var(--text3);
+        }
+
+        /* ─── SCROLLBAR ─── */
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--bg4);
+            border-radius: 3px;
+        }
+
+        /* ─── RESPONSIVE TWEAKS ─── */
+        @media(max-width: 600px) {
+            .hero {
+                padding: 1.2rem 1rem;
+            }
+            .main {
+                padding: 1rem 0.8rem;
+            }
+            .card {
+                padding: 1rem;
+            }
+            .arr-box {
+                width: 40px;
+                height: 36px;
+                font-size: 11px;
+            }
+            .mat-box {
+                width: 38px;
+                height: 34px;
+                font-size: 11px;
+            }
+            .controls {
+                gap: 4px;
+            }
+            .btn {
+                font-size: 12px;
+                padding: 4px 10px;
+            }
+            .nav-btn {
+                font-size: 11px;
+                padding: 8px 10px;
+            }
+            .flat-cell {
+                padding: 4px 6px;
+                font-size: 9px;
+                min-width: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- ====== HUB NAVIGATION ====== -->
+    <nav style="position:sticky;top:0;z-index:1000;background:rgba(20,20,35,0.92);backdrop-filter:blur(10px);padding:10px 16px;display:flex;align-items:center;justify-content:center;gap:18px;flex-wrap:wrap;font-family:'Inter',sans-serif;font-size:0.85rem;border-bottom:1px solid rgba(255,255,255,0.08);">
+        <a href="../04-intro-to-ds/index.html" style="color:#4285F4;font-weight:600;text-decoration:none;">← Intro to Data Structures</a>
+        <a href="../../index.html" style="color:#fff;font-weight:700;text-decoration:none;padding:4px 12px;border:1px solid rgba(255,255,255,0.25);border-radius:20px;">🏠 Hub Home</a>
+        
+    </nav>
+
+
+    <div class="hero">
+        <div class="hero-inner">
+            <div>
+                <div class="hero-tag">✦ Powered by AmygdalaAI India</div>
+                <h1>Polynomial & Sparse Matrix<br><span>Array Representation, Fully Animated</span></h1>
+                <p>Represent polynomials as coefficient arrays and add/subtract/multiply them step by step. Then compress sparse matrices into triplet arrays and animate triplet addition, subtraction, and the classic triplet multiplication algorithm.</p>
+            </div>
+            <div class="hero-controls">
+                <button class="theme-toggle" onclick="toggleTheme()" id="theme-btn">
+                    <span class="toggle-icon" id="theme-icon">🌙</span>
+                    <span id="theme-label">Dark Mode</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <nav class="nav-bar">
+        <div class="nav-inner">
+            <button class="nav-btn active" onclick="showSection('polyrep',this)">🔢 Polynomial Rep.</button>
+            <button class="nav-btn" onclick="showSection('polyops',this)">➕ Poly Add/Sub/Mul</button>
+            <button class="nav-btn" onclick="showSection('sparserep',this)">🕳️ Sparse → Triplet</button>
+            <button class="nav-btn" onclick="showSection('tripletops',this)">🔗 Triplet Add/Sub</button>
+            <button class="nav-btn" onclick="showSection('tripletmul',this)">✖️ Triplet Multiply</button>
+        </div>
+    </nav>
+
+    <div class="main">
+        <!-- ═══════════════════════════════ POLYNOMIAL REPRESENTATION ═══════════════════════════════ -->
+        <div class="section active" id="sec-polyrep">
+            <div class="section-title">Polynomial Representation Using Arrays</div>
+            <div class="section-sub">A polynomial P(x) = a₀ + a₁x + a₂x² + ... + aₙxⁿ can be stored as a simple array where <strong>the array index IS the exponent</strong> and the value at that index is the coefficient.</div>
+
+            <div class="card">
+                <div class="card-title">The Core Idea <span class="badge badge-blue">CONCEPT</span></div>
+                <p>Example: P(x) = 5 + 0x + 3x² + 0x³ + x⁴ is stored as:</p>
+                <div class="code-block">
+                    <span class="cmt">// coeff[i] = coefficient of x^i</span>
+                    <span class="ty">int</span> coeff[<span class="num">5</span>] = {<span class="num">5</span>, <span class="num">0</span>, <span class="num">3</span>, <span class="num">0</span>, <span class="num">1</span>};
+                    <span class="cmt">// degree = size - 1 = 4</span>
+                </div>
+                <div class="viz-area">
+                    <div class="viz-label">coeff[] — index = exponent</div>
+                    <div class="matrix-row" id="polyrep-demo"></div>
+                </div>
+                <div class="concept-box">
+                    ✅ <strong>Pros:</strong> O(1) access to any term's coefficient by exponent; simple addition/subtraction (just add index-wise).<br>
+                    ⚠️ <strong>Cons:</strong> Wastes space for sparse polynomials — e.g. x¹⁰⁰⁰ + 1 needs an array of 1001 slots to store just 2 non-zero terms. (That's exactly why the sparse/triplet technique later in this module exists!)
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">Reading The Array Back As a Polynomial <span class="badge badge-green">TRY IT</span></div>
+                <div class="controls">
+                    <label style="font-family:var(--mono);font-size:13px;color:var(--text2)">Coefficients (index 0 = constant term), comma-separated:</label>
+                </div>
+                <div class="controls">
+                    <input type="text" id="pr-input" value="5, 0, 3, 0, 1" style="width:260px;">
+                    <button class="btn primary" onclick="renderPolyRepDemo()">Parse &amp; Show</button>
+                </div>
+                <div id="pr-output" class="info-line" style="display:none;"></div>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════════════ POLY ADD/SUB/MUL ═══════════════════════════════ -->
+        <div class="section" id="sec-polyops">
+            <div class="section-title">Polynomial Addition, Subtraction &amp; Multiplication</div>
+            <div class="section-sub">Enter two coefficient arrays (index 0 = constant term). Pick an operation and animate it term by term.</div>
+
+            <div class="card">
+                <div class="card-title">Polynomial Calculator <span class="badge badge-amber">ANIMATE</span></div>
+                <div class="controls">
+                    <label style="font-family:var(--mono);font-size:12px;color:var(--text2)">A coeffs:</label>
+                    <input type="text" id="pa-a" value="4, 3, 0, 2" style="width:180px;">
+                    <label style="font-family:var(--mono);font-size:12px;color:var(--text2)">B coeffs:</label>
+                    <input type="text" id="pa-b" value="1, -2, 5" style="width:180px;">
+                    <button class="btn" onclick="randomizePoly()">🎲 Randomize</button>
+                </div>
+                <div class="controls">
+                    <button class="btn primary" onclick="animatePolyOp('add')">▶ Animate Add (A + B)</button>
+                    <button class="btn primary" onclick="animatePolyOp('sub')">▶ Animate Subtract (A − B)</button>
+                    <button class="btn primary" onclick="animatePolyOp('mul')">▶ Animate Multiply (A × B)</button>
+                    <button class="btn" onclick="resetPolyOp()">Reset</button>
+                </div>
+                <div class="viz-area">
+                    <div><div class="viz-label" id="pa-a-lbl">A(x)</div><div class="matrix-row" id="pa-a-viz"></div></div>
+                    <div><div class="viz-label" id="pa-b-lbl">B(x)</div><div class="matrix-row" id="pa-b-viz"></div></div>
+                    <div><div class="viz-label" id="pa-c-lbl">Result</div><div class="matrix-row" id="pa-c-viz"></div></div>
+                </div>
+                <div id="pa-info" class="info-line" style="display:none;white-space:normal;"></div>
+                <div id="pa-expr" class="info-line teal" style="display:none;white-space:normal;"></div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">How Each Operation Works <span class="badge badge-purple">REFERENCE</span></div>
+                <div class="three-col">
+                    <div class="concept-box">
+                        <strong>Addition — O(max(m,n))</strong><br>
+                        Pad the shorter array with zeros, then <code>C[i] = A[i] + B[i]</code> for every index i.
+                    </div>
+                    <div class="concept-box green">
+                        <strong>Subtraction — O(max(m,n))</strong><br>
+                        Same idea: <code>C[i] = A[i] − B[i]</code> for every index i.
+                    </div>
+                    <div class="concept-box amber">
+                        <strong>Multiplication — O(m×n)</strong><br>
+                        Every term of A multiplies every term of B; exponents add. <code>C[i+j] += A[i] × B[j]</code> for all i, j — this is a convolution.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════════════ SPARSE → TRIPLET ═══════════════════════════════ -->
+        <div class="section" id="sec-sparserep">
+            <div class="section-title">Sparse Matrix → Triplet Representation</div>
+            <div class="section-sub">A sparse matrix has mostly zero elements. Storing every cell wastes memory — instead we store only the non-zero ones as <code>(row, col, value)</code> triplets.</div>
+
+            <div class="card">
+                <div class="card-title">Why Triplets? <span class="badge badge-blue">CONCEPT</span></div>
+                <div class="concept-box">
+                    A dense N×N matrix always uses N² cells of memory, even if 95% are zero.<br><br>
+                    The <strong>triplet (3-tuple) form</strong> stores a header <code>(rows, cols, nonZeroCount)</code> followed by one row per non-zero element: <code>(row, col, value)</code>. If a matrix is sparse enough, this uses far less memory than the dense grid.
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">Build a Sparse Matrix &amp; Convert <span class="badge badge-amber">ANIMATE</span></div>
+                <div class="controls">
+                    <label style="font-family:var(--mono);font-size:12px;color:var(--text2)">Rows:</label>
+                    <input type="number" id="sp-rows" value="4" min="2" max="6" style="width:55px;">
+                    <label style="font-family:var(--mono);font-size:12px;color:var(--text2)">Cols:</label>
+                    <input type="number" id="sp-cols" value="5" min="2" max="6" style="width:55px;">
+                    <label style="font-family:var(--mono);font-size:12px;color:var(--text2)">Sparsity %:</label>
+                    <input type="number" id="sp-sparsity" value="75" min="40" max="90" style="width:55px;">
+                    <button class="btn primary" onclick="generateSparse()">🎲 Generate Sparse Matrix</button>
+                    <button class="btn primary" onclick="animateSparseToTriplet()">▶ Animate Convert to Triplet</button>
+                </div>
+                <div class="viz-area">
+                    <div style="display:flex;gap:2rem;flex-wrap:wrap;align-items:flex-start;">
+                        <div>
+                            <div class="viz-label">Dense Matrix</div>
+                            <div id="sp-matrix-viz"></div>
+                        </div>
+                        <div>
+                            <div class="viz-label">Triplet Table</div>
+                            <div style="overflow-x:auto;">
+                            <table style="border-collapse:collapse;font-size:12.5px;min-width:220px;">
+                                <thead><tr style="border-bottom:1.5px solid var(--border2);">
+                                    <th style="text-align:left;padding:5px 10px;font-family:var(--mono);font-size:10.5px;color:var(--text);">row</th>
+                                    <th style="text-align:left;padding:5px 10px;font-family:var(--mono);font-size:10.5px;color:var(--text);">col</th>
+                                    <th style="text-align:left;padding:5px 10px;font-family:var(--mono);font-size:10.5px;color:var(--text);">value</th>
+                                </tr></thead>
+                                <tbody id="sp-triplet-body"></tbody>
+                            </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="sp-info" class="info-line" style="display:none;white-space:normal;"></div>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════════════ TRIPLET ADD/SUB ═══════════════════════════════ -->
+        <div class="section" id="sec-tripletops">
+            <div class="section-title">Triplet Addition &amp; Subtraction</div>
+            <div class="section-sub">Two sparse matrices of the <strong>same dimensions</strong> can be added/subtracted by merging their triplet lists in row-major order, combining entries that share the same (row, col).</div>
+
+            <div class="card">
+                <div class="card-title">Generate Two Same-Size Sparse Matrices <span class="badge badge-amber">ANIMATE</span></div>
+                <div class="controls">
+                    <label style="font-family:var(--mono);font-size:12px;color:var(--text2)">Size N×N:</label>
+                    <input type="number" id="tp-n" value="4" min="2" max="5" style="width:55px;">
+                    <button class="btn primary" onclick="generateTripletAB()">🎲 Randomize A &amp; B</button>
+                    <button class="btn primary" onclick="animateTripletMerge('add')">▶ Animate Add</button>
+                    <button class="btn primary" onclick="animateTripletMerge('sub')">▶ Animate Subtract</button>
+                </div>
+                <div class="viz-area">
+                    <div style="display:flex;gap:1.6rem;flex-wrap:wrap;align-items:flex-start;">
+                        <div>
+                            <div class="viz-label">Matrix A</div>
+                            <div id="tp-a-matrix"></div>
+                        </div>
+                        <div>
+                            <div class="viz-label">Matrix B</div>
+                            <div id="tp-b-matrix"></div>
+                        </div>
+                        <div>
+                            <div class="viz-label" id="tp-result-lbl">Result Triplets</div>
+                            <div style="overflow-x:auto;">
+                            <table style="border-collapse:collapse;font-size:12.5px;min-width:200px;">
+                                <thead><tr style="border-bottom:1.5px solid var(--border2);">
+                                    <th style="text-align:left;padding:5px 10px;font-family:var(--mono);font-size:10.5px;color:var(--text);">row</th>
+                                    <th style="text-align:left;padding:5px 10px;font-family:var(--mono);font-size:10.5px;color:var(--text);">col</th>
+                                    <th style="text-align:left;padding:5px 10px;font-family:var(--mono);font-size:10.5px;color:var(--text);">value</th>
+                                </tr></thead>
+                                <tbody id="tp-result-body"></tbody>
+                            </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="tp-info" class="info-line" style="display:none;white-space:normal;"></div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">The Merge Algorithm <span class="badge badge-purple">REFERENCE</span></div>
+                <div class="code-block">
+                    <span class="cmt">// Both triplet lists are already sorted row-major.</span>
+                    <span class="cmt">// Walk both like a merge in Merge Sort:</span>
+                    <span class="kw">while</span> (i &lt; A.count &amp;&amp; j &lt; B.count) {
+                        <span class="kw">if</span> (A[i].row==B[j].row &amp;&amp; A[i].col==B[j].col) {
+                            <span class="fn">emit</span>(row, col, A[i].val <span class="num">±</span> B[j].val); i++; j++;
+                        } <span class="kw">else if</span> ( (A[i].row,A[i].col) &lt; (B[j].row,B[j].col) ) {
+                            <span class="fn">emit</span>(A[i].row, A[i].col, A[i].val); i++;
+                        } <span class="kw">else</span> {
+                            <span class="fn">emit</span>(B[j].row, B[j].col, <span class="num">±</span>B[j].val); j++;
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════════════ TRIPLET MULTIPLY ═══════════════════════════════ -->
+        <div class="section" id="sec-tripletmul">
+            <div class="section-title">Triplet Multiplication</div>
+            <div class="section-sub">For every non-zero A[i][j], find every non-zero B[j][k] (matching on A's column = B's row) and accumulate A[i][j] × B[j][k] into result[i][k]. Uses the same A and B generated in the previous tab.</div>
+
+            <div class="card">
+                <div class="card-title">Animate Triplet × Triplet Multiplication <span class="badge badge-amber">ANIMATE</span></div>
+                <p class="info-line" style="display:block;">💡 Go to the <strong>Triplet Add/Sub</strong> tab first and click "Randomize A &amp; B" if you haven't yet — this tab reuses those same matrices.</p>
+                <div class="controls">
+                    <button class="btn primary" onclick="animateTripletMultiply()">▶ Animate Multiply (A × B)</button>
+                    <button class="btn" onclick="resetTripletMultiply()">Reset</button>
+                </div>
+                <div class="viz-area">
+                    <div style="display:flex;gap:1.6rem;flex-wrap:wrap;align-items:flex-start;">
+                        <div>
+                            <div class="viz-label">A triplets</div>
+                            <div style="overflow-x:auto;">
+                            <table style="border-collapse:collapse;font-size:12px;min-width:170px;">
+                                <thead><tr style="border-bottom:1.5px solid var(--border2);">
+                                    <th style="text-align:left;padding:4px 8px;font-family:var(--mono);font-size:10px;color:var(--text);">row</th>
+                                    <th style="text-align:left;padding:4px 8px;font-family:var(--mono);font-size:10px;color:var(--text);">col</th>
+                                    <th style="text-align:left;padding:4px 8px;font-family:var(--mono);font-size:10px;color:var(--text);">val</th>
+                                </tr></thead>
+                                <tbody id="tm-a-body"></tbody>
+                            </table>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="viz-label">B triplets</div>
+                            <div style="overflow-x:auto;">
+                            <table style="border-collapse:collapse;font-size:12px;min-width:170px;">
+                                <thead><tr style="border-bottom:1.5px solid var(--border2);">
+                                    <th style="text-align:left;padding:4px 8px;font-family:var(--mono);font-size:10px;color:var(--text);">row</th>
+                                    <th style="text-align:left;padding:4px 8px;font-family:var(--mono);font-size:10px;color:var(--text);">col</th>
+                                    <th style="text-align:left;padding:4px 8px;font-family:var(--mono);font-size:10px;color:var(--text);">val</th>
+                                </tr></thead>
+                                <tbody id="tm-b-body"></tbody>
+                            </table>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="viz-label">Result C = A × B (triplets)</div>
+                            <div style="overflow-x:auto;">
+                            <table style="border-collapse:collapse;font-size:12px;min-width:170px;">
+                                <thead><tr style="border-bottom:1.5px solid var(--border2);">
+                                    <th style="text-align:left;padding:4px 8px;font-family:var(--mono);font-size:10px;color:var(--text);">row</th>
+                                    <th style="text-align:left;padding:4px 8px;font-family:var(--mono);font-size:10px;color:var(--text);">col</th>
+                                    <th style="text-align:left;padding:4px 8px;font-family:var(--mono);font-size:10px;color:var(--text);">val</th>
+                                </tr></thead>
+                                <tbody id="tm-c-body"></tbody>
+                            </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="tm-info" class="info-line" style="display:none;white-space:normal;"></div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">Why Match on A.col == B.row? <span class="badge badge-purple">CONCEPT</span></div>
+                <div class="concept-box">
+                    Standard matrix multiplication rule: C[i][k] = Σⱼ A[i][j] × B[j][k].<br>
+                    A non-zero A[i][j] can only contribute to the result if there's a matching non-zero B[j][k] — i.e. B's <em>row</em> equals A's <em>column</em> j. This is why the algorithm scans A's triplets, and for each one, scans B's triplets looking for <code>B.row == A.col</code>, instead of touching every cell of a dense grid.
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <!-- end .main -->
+
+    <script>
+        // ════════════════════════════════════
+        //  NAVIGATION
+        // ════════════════════════════════════
+        function showSection(id, btn) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            const el = document.getElementById('sec-' + id);
+            if (el) el.classList.add('active');
+            if (btn) btn.classList.add('active');
+        }
+
+        // ════════════════════════════════════
+        //  THEME TOGGLE (fixed)
+        // ════════════════════════════════════
+        function toggleTheme() {
+            const root = document.documentElement;
+            const current = root.getAttribute('data-theme');
+            const next = current === 'dark' ? 'light' : 'dark';
+            root.setAttribute('data-theme', next);
+            const icon = document.getElementById('theme-icon');
+            const label = document.getElementById('theme-label');
+            if (icon) icon.textContent = next === 'dark' ? '🌙' : '☀️';
+            if (label) label.textContent = next === 'dark' ? 'Dark Mode' : 'Light Mode';
+            try { localStorage.setItem('arrays-theme', next); } catch (e) {}
+        }
+
+        // Restore saved theme
+        (function() {
+            try {
+                const saved = localStorage.getItem('arrays-theme');
+                if (saved) {
+                    document.documentElement.setAttribute('data-theme', saved);
+                    const icon = document.getElementById('theme-icon');
+                    const label = document.getElementById('theme-label');
+                    if (icon) icon.textContent = saved === 'dark' ? '🌙' : '☀️';
+                    if (label) label.textContent = saved === 'dark' ? 'Dark Mode' : 'Light Mode';
+                }
+            } catch (e) {}
+        })();
+
+        // ════════════════════════════════════
+        //  SHARED HELPERS
+        // ════════════════════════════════════
+        function makeArrBox(val, label, cls) {
+            const wrap = document.createElement('div');
+            wrap.style.cssText = 'display:inline-flex;flex-direction:column;align-items:center;margin:3px;';
+            const box = document.createElement('div');
+            box.className = 'arr-box' + (cls ? ' ' + cls : '');
+            box.textContent = val;
+            const lbl = document.createElement('div');
+            lbl.style.cssText = 'font-family:var(--mono);font-size:9.5px;color:var(--text3);margin-top:3px;';
+            lbl.textContent = label;
+            wrap.appendChild(box);
+            wrap.appendChild(lbl);
+            return { wrap, box };
+        }
+
+        function parseCoeffArray(str) {
+            return str.split(',').map(s => {
+                const v = parseFloat(s.trim());
+                return isNaN(v) ? 0 : v;
+            });
+        }
+
+        function polyToTermsStr(arr) {
+            const terms = [];
+            for (let i = arr.length - 1; i >= 0; i--) {
+                const c = arr[i];
+                if (c === 0) continue;
+                if (i === 0) terms.push(`${c}`);
+                else if (i === 1) terms.push(`${c}x`);
+                else terms.push(`${c}x^${i}`);
+            }
+            return terms.length ? terms.join(' + ').replace(/\+ -/g, '− ') : '0';
+        }
+
+        // ════════════════════════════════════
+        //  POLYNOMIAL REPRESENTATION DEMO
+        // ════════════════════════════════════
+        function renderPolyRepDemo() {
+            const arr = parseCoeffArray(document.getElementById('pr-input').value);
+            const viz = document.getElementById('polyrep-demo');
+            viz.innerHTML = '';
+            arr.forEach((c, i) => {
+                const { wrap } = makeArrBox(c, `x^${i}`);
+                viz.appendChild(wrap);
+            });
+            const out = document.getElementById('pr-output');
+            out.style.display = 'block';
+            out.innerHTML = `P(x) = ${polyToTermsStr(arr)} &nbsp;|&nbsp; degree = ${arr.length - 1} &nbsp;|&nbsp; array size = ${arr.length}`;
+        }
+        setTimeout(renderPolyRepDemo, 30);
+
+        // ════════════════════════════════════
+        //  POLYNOMIAL ADD / SUB / MULTIPLY (animated)
+        // ════════════════════════════════════
+        let paRunning = false;
+
+        function renderPolyArr(id, arr, hiIdx) {
+            const el = document.getElementById(id);
+            el.innerHTML = '';
+            arr.forEach((c, i) => {
+                const { wrap } = makeArrBox(c, `x^${i}`, i === hiIdx ? 'hi' : '');
+                el.appendChild(wrap);
+            });
+        }
+
+        function initPolyOp() {
+            const A = parseCoeffArray(document.getElementById('pa-a').value);
+            const B = parseCoeffArray(document.getElementById('pa-b').value);
+            renderPolyArr('pa-a-viz', A, -1);
+            renderPolyArr('pa-b-viz', B, -1);
+            document.getElementById('pa-c-viz').innerHTML = '';
+            document.getElementById('pa-a-lbl').textContent = `A(x) = ${polyToTermsStr(A)}`;
+            document.getElementById('pa-b-lbl').textContent = `B(x) = ${polyToTermsStr(B)}`;
+            document.getElementById('pa-c-lbl').textContent = 'Result';
+            document.getElementById('pa-info').style.display = 'none';
+            document.getElementById('pa-expr').style.display = 'none';
+        }
+        setTimeout(initPolyOp, 30);
+
+        function randomizePoly() {
+            const lenA = Math.floor(Math.random() * 3) + 3;
+            const lenB = Math.floor(Math.random() * 3) + 2;
+            const rnd = () => Math.floor(Math.random() * 11) - 5;
+            document.getElementById('pa-a').value = Array.from({ length: lenA }, rnd).join(', ');
+            document.getElementById('pa-b').value = Array.from({ length: lenB }, rnd).join(', ');
+            initPolyOp();
+        }
+
+        function animatePolyOp(op) {
+            if (paRunning) return;
+            paRunning = true;
+            const A = parseCoeffArray(document.getElementById('pa-a').value);
+            const B = parseCoeffArray(document.getElementById('pa-b').value);
+            renderPolyArr('pa-a-viz', A, -1);
+            renderPolyArr('pa-b-viz', B, -1);
+            const info = document.getElementById('pa-info');
+            const expr = document.getElementById('pa-expr');
+            info.style.display = 'block';
+            expr.style.display = 'block';
+
+            if (op === 'add' || op === 'sub') {
+                const n = Math.max(A.length, B.length);
+                const C = Array(n).fill(0);
+                document.getElementById('pa-c-lbl').textContent = op === 'add' ? 'A(x) + B(x)' : 'A(x) − B(x)';
+                let i = 0;
+                document.getElementById('pa-c-viz').innerHTML = '';
+
+                function step() {
+                    if (i >= n) { paRunning = false;
+                        info.className = 'info-line green';
+                        info.textContent = `✓ Done! Result has ${n} terms (index 0..${n-1}).`;
+                        expr.textContent = `Result(x) = ${polyToTermsStr(C)}`;
+                        return; }
+                    const av = A[i] || 0,
+                        bv = B[i] || 0;
+                    const cv = op === 'add' ? av + bv : av - bv;
+                    C[i] = cv;
+                    renderPolyArr('pa-a-viz', A, i);
+                    renderPolyArr('pa-b-viz', B, i);
+                    renderPolyArr('pa-c-viz', C.slice(0, i + 1), i);
+                    info.className = 'info-line';
+                    info.textContent = `C[${i}] = A[${i}] ${op === 'add' ? '+' : '−'} B[${i}] = ${av} ${op === 'add' ? '+' : '−'} ${bv} = ${cv}`;
+                    i++;
+                    setTimeout(step, 600);
+                }
+                step();
+            } else if (op === 'mul') {
+                const n = A.length + B.length - 1;
+                const C = Array(n).fill(0);
+                document.getElementById('pa-c-lbl').textContent = 'A(x) × B(x)';
+                document.getElementById('pa-c-viz').innerHTML = '';
+                const steps = [];
+                for (let i = 0; i < A.length; i++)
+                    for (let j = 0; j < B.length; j++) steps.push({ i, j });
+                let si = 0;
+
+                function step() {
+                    if (si >= steps.length) { paRunning = false;
+                        info.className = 'info-line green';
+                        info.textContent = `✓ Multiplication complete! ${A.length}×${B.length} = ${steps.length} term-pairs combined into ${n} result terms.`;
+                        expr.textContent = `Result(x) = ${polyToTermsStr(C)}`;
+                        return; }
+                    const { i, j } = steps[si];
+                    const contrib = A[i] * B[j];
+                    C[i + j] += contrib;
+                    renderPolyArr('pa-a-viz', A, i);
+                    renderPolyArr('pa-b-viz', B, j);
+                    renderPolyArr('pa-c-viz', C, i + j);
+                    info.className = 'info-line';
+                    info.textContent =
+                        `A[${i}]·x^${i} × B[${j}]·x^${j} = ${A[i]}×${B[j]} = ${contrib}  →  add to C[${i+j}] (x^${i+j})  |  C[${i+j}] = ${C[i+j]}`;
+                    si++;
+                    setTimeout(step, 450);
+                }
+                step();
+            }
+        }
+
+        function resetPolyOp() { paRunning = false;
+            initPolyOp(); }
+
+        // ════════════════════════════════════
+        //  SPARSE MATRIX → TRIPLET
+        // ════════════════════════════════════
+        let spMatrix = [],
+            spRunning = false,
+            spCells = [];
+
+        function makeSparseMatrix(rows, cols, sparsityPct) {
+            const m = Array.from({ length: rows }, () => Array(cols).fill(0));
+            for (let i = 0; i < rows; i++)
+                for (let j = 0; j < cols; j++) {
+                    if (Math.random() * 100 > sparsityPct) m[i][j] = Math.floor(Math.random() * 19) - 9 || 1;
+                }
+            return m;
+        }
+
+        function generateSparse() {
+            const rows = parseInt(document.getElementById('sp-rows').value) || 4;
+            const cols = parseInt(document.getElementById('sp-cols').value) || 5;
+            const sparsity = parseInt(document.getElementById('sp-sparsity').value) || 75;
+            spMatrix = makeSparseMatrix(rows, cols, sparsity);
+            renderSparseMatrix(-1, -1);
+            document.getElementById('sp-triplet-body').innerHTML = '';
+            const info = document.getElementById('sp-info');
+            info.style.display = 'block';
+            info.className = 'info-line';
+            const nz = spMatrix.flat().filter(v => v !== 0).length;
+            info.textContent = `Generated ${rows}×${cols} matrix with ${nz} non-zero of ${rows*cols} cells (${(100*nz/(rows*cols)).toFixed(0)}% filled). Click "Animate Convert to Triplet".`;
+        }
+
+        function renderSparseMatrix(hiI, hiJ) {
+            const viz = document.getElementById('sp-matrix-viz');
+            viz.innerHTML = '';
+            spCells = [];
+            spMatrix.forEach((row, i) => {
+                const rowEl = document.createElement('div');
+                rowEl.className = 'matrix-row';
+                const cellRow = [];
+                row.forEach((v, j) => {
+                    const cls = (i === hiI && j === hiJ) ? (v !== 0 ? 'green' : 'red') : (v !== 0 ? 'blue' : '');
+                    const { box } = makeArrBox(v, '', cls);
+                    rowEl.appendChild(box.parentElement);
+                    cellRow.push(box);
+                });
+                viz.appendChild(rowEl);
+                spCells.push(cellRow);
+            });
+        }
+
+        function animateSparseToTriplet() {
+            if (!spMatrix.length) generateSparse();
+            if (spRunning) return;
+            spRunning = true;
+            const tbody = document.getElementById('sp-triplet-body');
+            tbody.innerHTML = '';
+            const info = document.getElementById('sp-info');
+            info.style.display = 'block';
+            const rows = spMatrix.length,
+                cols = spMatrix[0].length;
+            const coords = [];
+            for (let i = 0; i < rows; i++)
+                for (let j = 0; j < cols; j++) coords.push([i, j]);
+            let ci = 0,
+                found = 0;
+
+            function step() {
+                if (ci >= coords.length) { spRunning = false;
+                    renderSparseMatrix(-1, -1);
+                    info.className = 'info-line green';
+                    info.textContent = `✓ Conversion complete. Triplet form: header (${rows}, ${cols}, ${found}) + ${found} data rows — vs ${rows*cols} cells in the dense form.`;
+                    return; }
+                const [i, j] = coords[ci];
+                renderSparseMatrix(i, j);
+                const v = spMatrix[i][j];
+                info.className = 'info-line';
+                if (v !== 0) {
+                    found++;
+                    const tr = document.createElement('tr');
+                    tr.style.borderBottom = '1px solid var(--border)';
+                    tr.innerHTML = `<td style="padding:4px 10px;font-family:var(--mono);color:var(--green);">${i}</td><td style="padding:4px 10px;font-family:var(--mono);color:var(--green);">${j}</td><td style="padding:4px 10px;font-family:var(--mono);color:var(--text);">${v}</td>`;
+                    tbody.appendChild(tr);
+                    info.textContent = `Scanning [${i}][${j}] = ${v} → non-zero! Added triplet (${i}, ${j}, ${v}).`;
+                } else {
+                    info.textContent = `Scanning [${i}][${j}] = 0 → skip.`;
+                }
+                ci++;
+                setTimeout(step, 130);
+            }
+            step();
+        }
+        setTimeout(generateSparse, 30);
+
+        // ════════════════════════════════════
+        //  TRIPLET ADD / SUBTRACT
+        // ════════════════════════════════════
+        let tpA = [],
+            tpB = [],
+            tpN = 4,
+            tpRunning = false;
+
+        function matrixToTriplets(m) {
+            const t = [];
+            for (let i = 0; i < m.length; i++)
+                for (let j = 0; j < m[0].length; j++)
+                    if (m[i][j] !== 0) t.push({ row: i, col: j, val: m[i][j] });
+            return t;
+        }
+
+        function renderTpMatrix(id, m) {
+            const el = document.getElementById(id);
+            el.innerHTML = '';
+            m.forEach(row => {
+                const rowEl = document.createElement('div');
+                rowEl.className = 'matrix-row';
+                row.forEach(v => {
+                    const { box } = makeArrBox(v, '', v !== 0 ? 'blue' : '');
+                    rowEl.appendChild(box.parentElement);
+                });
+                el.appendChild(rowEl);
+            });
+        }
+
+        function generateTripletAB() {
+            tpN = parseInt(document.getElementById('tp-n').value) || 4;
+            tpA = makeSparseMatrix(tpN, tpN, 72);
+            tpB = makeSparseMatrix(tpN, tpN, 72);
+            renderTpMatrix('tp-a-matrix', tpA);
+            renderTpMatrix('tp-b-matrix', tpB);
+            document.getElementById('tp-result-body').innerHTML = '';
+            document.getElementById('tp-result-lbl').textContent = 'Result Triplets';
+            const info = document.getElementById('tp-info');
+            info.style.display = 'block';
+            info.className = 'info-line';
+            info.textContent = `Generated two ${tpN}×${tpN} sparse matrices A and B (${matrixToTriplets(tpA).length} and ${matrixToTriplets(tpB).length} non-zero terms). Click Animate Add or Subtract.`;
+        }
+        setTimeout(generateTripletAB, 30);
+
+        function animateTripletMerge(op) {
+            if (!tpA.length) generateTripletAB();
+            if (tpRunning) return;
+            tpRunning = true;
+            const tA = matrixToTriplets(tpA).sort((a, b) => a.row - b.row || a.col - b.col);
+            const tB = matrixToTriplets(tpB).sort((a, b) => a.row - b.row || a.col - b.col);
+            const tbody = document.getElementById('tp-result-body');
+            tbody.innerHTML = '';
+            document.getElementById('tp-result-lbl').textContent = op === 'add' ? 'A + B (Result Triplets)' : 'A − B (Result Triplets)';
+            const info = document.getElementById('tp-info');
+            info.style.display = 'block';
+
+            let i = 0,
+                j = 0;
+
+            function key(t) { return t.row * 1000 + t.col; }
+
+            function addRow(row, col, val) {
+                if (val === 0) return;
+                const tr = document.createElement('tr');
+                tr.style.borderBottom = '1px solid var(--border)';
+                tr.innerHTML = `<td style="padding:4px 10px;font-family:var(--mono);color:var(--green);">${row}</td><td style="padding:4px 10px;font-family:var(--mono);color:var(--green);">${col}</td><td style="padding:4px 10px;font-family:var(--mono);color:var(--text);">${val}</td>`;
+                tbody.appendChild(tr);
+            }
+
+            function step() {
+                if (i >= tA.length && j >= tB.length) { tpRunning = false;
+                    info.className = 'info-line green';
+                    info.textContent = `✓ Merge complete. Walked A (${tA.length} triplets) and B (${tB.length} triplets) once each — O(nnzA + nnzB) instead of touching all ${tpN*tpN} cells.`;
+                    return; }
+                info.className = 'info-line';
+                if (i < tA.length && (j >= tB.length || key(tA[i]) < key(tB[j]))) {
+                    addRow(tA[i].row, tA[i].col, tA[i].val);
+                    info.textContent = `A[${tA[i].row}][${tA[i].col}] = ${tA[i].val} has no match in B at this position → carry over as-is.`;
+                    i++;
+                } else if (j < tB.length && (i >= tA.length || key(tB[j]) < key(tA[i]))) {
+                    const v = op === 'add' ? tB[j].val : -tB[j].val;
+                    addRow(tB[j].row, tB[j].col, v);
+                    info.textContent = `B[${tB[j].row}][${tB[j].col}] = ${tB[j].val} has no match in A → carry over as ${op === 'add' ? '' : 'negated '}${v}.`;
+                    j++;
+                } else {
+                    const v = op === 'add' ? tA[i].val + tB[j].val : tA[i].val - tB[j].val;
+                    addRow(tA[i].row, tA[i].col, v);
+                    info.textContent = `Match at (${tA[i].row},${tA[i].col}): A=${tA[i].val}, B=${tB[j].val} → ${op === 'add' ? 'sum' : 'difference'} = ${v}${v === 0 ? ' (dropped, result is zero)' : ''}.`;
+                    i++;
+                    j++;
+                }
+                setTimeout(step, 550);
+            }
+            step();
+        }
+
+        // ════════════════════════════════════
+        //  TRIPLET MULTIPLICATION
+        // ════════════════════════════════════
+        let tmRunning = false;
+
+        function renderTripletTable(bodyId, triplets) {
+            const tbody = document.getElementById(bodyId);
+            tbody.innerHTML = triplets.map(t => `
+                <tr style="border-bottom:1px solid var(--border);">
+                    <td style="padding:3px 8px;font-family:var(--mono);color:var(--text2);">${t.row}</td>
+                    <td style="padding:3px 8px;font-family:var(--mono);color:var(--text2);">${t.col}</td>
+                    <td style="padding:3px 8px;font-family:var(--mono);color:var(--text);">${t.val}</td>
+                </tr>`).join('');
+        }
+
+        function animateTripletMultiply() {
+            if (!tpA.length || !tpB.length) { alert('Generate A & B in the "Triplet Add/Sub" tab first!'); return; }
+            if (tmRunning) return;
+            tmRunning = true;
+            const tA = matrixToTriplets(tpA).sort((a, b) => a.row - b.row || a.col - b.col);
+            const tB = matrixToTriplets(tpB).sort((a, b) => a.row - b.row || a.col - b.col);
+            renderTripletTable('tm-a-body', tA);
+            renderTripletTable('tm-b-body', tB);
+            document.getElementById('tm-c-body').innerHTML = '';
+            const info = document.getElementById('tm-info');
+            info.style.display = 'block';
+
+            // build list of (a,b) pairs where a.col === b.row
+            const pairs = [];
+            tA.forEach(a => tB.forEach(b => { if (a.col === b.row) pairs.push({ a, b }); }));
+
+            const resultMap = {};
+            let pi = 0;
+
+            function highlightRows(aIdx, bIdx) {
+                [...document.getElementById('tm-a-body').children].forEach((tr, k) => tr.style.background = k === aIdx ? 'rgba(52,211,153,0.15)' : '');
+                [...document.getElementById('tm-b-body').children].forEach((tr, k) => tr.style.background = k === bIdx ? 'rgba(52,211,153,0.15)' : '');
+            }
+
+            function renderResult() {
+                const list = Object.keys(resultMap).map(k => {
+                    const [row, col] = k.split('_').map(Number);
+                    return { row, col, val: resultMap[k] };
+                }).sort((x, y) => x.row - y.row || x.col - y.col);
+                renderTripletTable('tm-c-body', list);
+                return list;
+            }
+
+            function step() {
+                if (pi >= pairs.length) { tmRunning = false;
+                    highlightRows(-1, -1);
+                    const finalList = Object.keys(resultMap).map(k => {
+                        const [row, col] = k.split('_').map(Number);
+                        return { row, col, val: resultMap[k] };
+                    }).filter(t => t.val !== 0).sort((x, y) => x.row - y.row || x.col - y.col);
+                    renderTripletTable('tm-c-body', finalList);
+                    info.className = 'info-line green';
+                    info.textContent = `✓ Multiplication complete! Checked ${pairs.length} matching (A.col == B.row) pairs out of ${tA.length}×${tB.length} possible → produced ${finalList.length} non-zero result terms.`;
+                    return; }
+                const { a, b } = pairs[pi];
+                const key = a.row + '_' + b.col;
+                resultMap[key] = (resultMap[key] || 0) + a.val * b.val;
+                const aIdx = tA.indexOf(a),
+                    bIdx = tB.indexOf(b);
+                highlightRows(aIdx, bIdx);
+                renderResult();
+                info.className = 'info-line';
+                info.textContent = `A[${a.row}][${a.col}]=${a.val} × B[${b.row}][${b.col}]=${b.val} = ${a.val*b.val}  →  add to C[${a.row}][${b.col}]  |  running total = ${resultMap[key]}`;
+                pi++;
+                setTimeout(step, 500);
+            }
+            if (pairs.length === 0) {
+                tmRunning = false;
+                info.className = 'info-line amber';
+                info.textContent = `No matching (A.col == B.row) pairs found for this random A/B — result is the zero matrix. Try "Randomize A & B" again in the previous tab.`;
+                return;
+            }
+            step();
+        }
+
+        function resetTripletMultiply() {
+            tmRunning = false;
+            document.getElementById('tm-a-body').innerHTML = '';
+            document.getElementById('tm-b-body').innerHTML = '';
+            document.getElementById('tm-c-body').innerHTML = '';
+            document.getElementById('tm-info').style.display = 'none';
+        }
+
+    </script>
+</body>
+</html>
